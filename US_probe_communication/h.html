@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<head>
+
+</head>
+
+<body>
+
+    <input id = "command"></input>
+    <button id = "submit">submit</button>  
+
+    <script>
+        const ws = new WebSocket("ws://localhost:4100")
+
+        let a = null
+
+        document.getElementById("submit").addEventListener("click", () =>{
+            
+            a = document.getElementById("command").value
+            a = '{"Command" : "'+ a + '"}'
+
+            ws.send(a)
+
+            console.log(a)
+
+        })
+
+        ws.addEventListener("open", () => {
+            console.log('LOL')
+
+            let jackyDir = "C:\\Users\\Jacky\\Desktop\\ScolioService(x64)\\ser\\";
+            let michaelDir = "C:\\Users\\leeka\\Documents\\Codes\\ScolioService(x64)\\ser\\";
+            
+            let uvfFileName = "PPOLYUBMEREC0100183120200929000.uvf";
+            let rootDir = michaelDir;
+            let filenamePath = rootDir + uvfFileName;
+
+            ws.send(JSON.stringify({     
+                Command : "Us_Config" ,
+                US_module : 2,  ///US_DEVICE_UVF = 1, US_DEVICE_PALM = 2, US_DEVICE_TERASON = 3
+                Posture_module : 1, //POSTURE_SENSOR_UVF = 1 ,POSTURE_SENSOR_TRAKSTAR =2,POSTURE_SENSOR_REALSENSE =3
+                US_module_config: "",
+                Posture_module_config: ".\\test.uvf"
+            }))
+        })
+
+        ws.onmessage = async function(e) {
+            let image = e.data.slice(129)
+ 
+            let buf = new Uint8Array(await image.arrayBuffer());
+
+            const canvas = document.getElementById("myCanvas")
+
+            let ctx = canvas.getContext("2d");
+            let imgData = ctx.createImageData(640, 480);
+
+
+            for (let i = 0; i < imgData.data.length; i += 4) {
+                let j = i / 4;
+                imgData.data[i + 0] = buf[j];
+                imgData.data[i + 1] = buf[j];
+                imgData.data[i + 2] = buf[j];
+                imgData.data[i + 3] = 255;
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+            
+        }
+
+    </script>
+    <div>
+        <button id = "q1">Query device license</button>  
+    </div> 
+
+    <script>
+        document.getElementById("q1").addEventListener("click", () => {
+            document.getElementById("command").value = "Query device license"
+        })
+    </script>
+
+    <div class = "#">
+        <div class= "row">
+            <img id = "upload-img" />
+        </div>
+    </div>
+
+    <script>
+        const imgDOM = document.getElementById("upload-img")
+
+        function handleFiles(){
+            const fileList = this.files;
+            console.log(fileList);
+        }
+        
+    </script>
+
+<script>
+
+
+</script>
+
+<canvas id="myCanvas" width="1024" height="1024" style="border:1px solid #864545"></canvas>
+
+
+</body>

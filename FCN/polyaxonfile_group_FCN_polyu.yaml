@@ -1,0 +1,52 @@
+---
+version: 1
+
+kind: group
+
+framework: pytorch
+
+tags: [examples]
+
+hptuning:
+  matrix:
+    batch_size:
+      values: [64]
+    lr:
+      values: [0.0001]
+#    normalization:
+#      values: [True]
+
+#    update_weights:
+#      values: [False]
+
+
+build:
+  image: pytorch/pytorch:1.1.0-cuda10.0-cudnn7.5-runtime
+  build_steps:
+    - pip install -r requirements.txt
+
+environment:
+
+  resources:
+    cpu:
+      requests: 3
+      limits: 8
+    memory:
+      requests: 1024
+      limits: 4098
+    gpu:
+      requests: 1
+      limits: 1
+
+declarations:
+#  batch_size_train: 64
+  update_weights: True
+
+
+run:
+  cmd: python -u run_train_polyu.py  --batch_size={{ batch_size}} \
+                                     --update_weights={{ update_weights }}\
+                                     --lr={{ lr }}
+
+
+

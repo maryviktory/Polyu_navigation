@@ -1,0 +1,14 @@
+torch
+torchvision==0.4.0
+rhea==0.4.5
+polyaxon-client==0.4.4
+pandas
+tensorboard
+future
+EasyDict==1.7
+opencv-python==3.4.1.15
+Cython
+scipy
+pyyaml
+json_tricks
+scikit-image
