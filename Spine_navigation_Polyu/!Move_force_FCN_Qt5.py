@@ -18,7 +18,7 @@ import utils as utils
 import websocket
 import json
 import logging
-# from Threads_FCNpy import FCN_Thread, Stop_Threads,Get_Image
+# from Threads_FCNpy.py import FCN_Thread, Stop_Threads,Get_Image
 # import mss
 # import mss.tools
 
