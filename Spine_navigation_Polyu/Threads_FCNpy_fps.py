@@ -4,7 +4,7 @@ from PIL import  Image
 import numpy as np
 import cv2
 import torch
-import torchvision
+# import torchvision
 import FCN.sp_utils as utils
 import logging
 import keyboard
@@ -12,11 +12,15 @@ import os
 import sys
 import time
 from threading import Thread
+import pandas as pd
 from multiprocessing import Process
 import multiprocessing
 from Spine_navigation_Polyu.utils.config_robot_GUI import config
 from Spine_navigation_Polyu.utils.functions import run_FCN_streamed_image,save_video, AverageMeter
 #https://techtutorialsx.com/2018/11/08/python-websocket-client-sending-binary-content/
+
+
+
 
 message = config.IMAGE.JSON_WS
 json_mylist = json.dumps(message, separators=(',', ':'))
@@ -106,6 +110,7 @@ class FCN_Thread(Thread):
         probability = np.zeros(0)
         X = np.zeros(0)
         Y = np.zeros(0)
+
         num= 0
         patient = "US_probe"
         time_inference = AverageMeter()
@@ -116,8 +121,11 @@ class FCN_Thread(Thread):
             model = utils.model_pose_resnet.get_pose_net(config.IMAGE.Windows_MODEL_FILE, is_train=False)
             logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
             model.load_state_dict(
-                torch.load(config.IMAGE.Windows_MODEL_FILE, map_location=torch.device('cpu'))['model_state_dict'])
+                torch.load(config.IMAGE.Windows_MODEL_FILE, map_location=device)['model_state_dict']) #map_location=torch.device('cpu')
             model.eval()  # Super important for testing! Otherwise the result would be random
+            if torch.cuda.is_available():
+                model.cuda()
+
             # logger.info("Setting model to eval. It is important for testing")
         else:
             print("Model is not defined")
@@ -133,6 +141,7 @@ class FCN_Thread(Thread):
                     self.image_flag = True
                     # print("frame num of received image in FCN thread", self.get_image.frame_num)
                     start_time = time.time()
+
                     inputs,pred,probability, X, Y, frame_probability = run_FCN_streamed_image(self.get_image.image,model, device, probability,X,Y,logger,config)
                     # print("x",X)
                     if config.IMAGE.VIDEO == True:
@@ -156,13 +165,15 @@ class FCN_Thread(Thread):
                     fps_im = self.num / time_thread
                     print("fps FCN thread {}, average time per cycle {}".format(fps_im, 1 / fps_im))
                     print("NUM FCN ", self.num, n)
-
+                    # print(X)
                     if config.IMAGE.SAVE_NPZ_FILE:
-                        while os.path.exists("FCNthread_output%s.xml" % num):
+                        while os.path.exists("FCNthread_output%s.npz" % num):
                             num = num+ 1
-                        np.savez(os.path.join(config.IMAGE.SAVE_PATH, "FCNthread_output%s.xml" % num),
+                        np.savez(os.path.join(config.IMAGE.SAVE_PATH, "FCNthread_output%s.npz" % num),
                                  probability=probability, x=X, y=Y)
 
+                        pd_frame = pd.DataFrame({"frame_probability":probability, "X":X, "Y":Y})
+                        pd_frame.to_csv(os.path.join(config.IMAGE.SAVE_PATH, "FCNthread_output%s.csv" % num))
                     # out.release()
                     # ws.close()
                     # os._exit(0)
