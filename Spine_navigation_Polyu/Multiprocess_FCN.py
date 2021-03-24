@@ -22,8 +22,7 @@ from torch.multiprocessing import Process
 import keyboard
 from PIL import Image
 
-message = config.IMAGE.JSON_WS
-json_mylist = json.dumps(message, separators=(',', ':'))
+
 
 
 logger = logging.getLogger()
@@ -34,7 +33,7 @@ logger.info("STARTING TEST")
 class FCN_Thread(Process):
     '''Run FCN pre-trained model on online streamed images
     calculate the coordinate'''
-    def __init__(self,threads_stopper,q_im):
+    def __init__(self,q_im,threads_stopper,q_im_inputs,q_im_pred,q_frame_probability,q_num,v_num,start_send_image):
         Process.__init__(self)
 
         self.result_im = np.zeros(0)
@@ -44,6 +43,12 @@ class FCN_Thread(Process):
 
         self.threads_stopper = threads_stopper
         self.q_image = q_im
+        self.q_im_inputs = q_im_inputs
+        self.q_im_pred = q_im_pred
+        self.q_frame_probability = q_frame_probability
+        self.q_num = q_num
+        self.v_num = v_num
+        self.start_send_image = start_send_image
 
 
     def initialization(self):
@@ -59,6 +64,7 @@ class FCN_Thread(Process):
                 config.IMAGE.Windows_MODEL_FILE = config.IMAGE.Windows_MODEL_FILE_PHANTOM
             self.model = utils.model_pose_resnet.get_pose_net(config.IMAGE.Windows_MODEL_FILE, is_train=False)
             logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
+            print('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
             self.model.load_state_dict(
                 torch.load(config.IMAGE.Windows_MODEL_FILE, map_location=self.device)[
                     'model_state_dict'])  # map_location=torch.device('cpu')
@@ -72,44 +78,17 @@ class FCN_Thread(Process):
             print("Model is not defined")
             model = []
 
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')  # "DIVX" 'XVID'
-        print(fourcc)  # fourcc tag 0x44495658/'XVID' codec_id 000C
-        self.out = cv2.VideoWriter(os.path.join(config.IMAGE.SAVE_PATH, 'output_original.avi'), fourcc, 5.0,
-                              (1280, 480))  # for images of size 480*640
+        # fourcc = cv2.VideoWriter_fourcc(*'XVID')  # "DIVX" 'XVID'
+        # print(fourcc)  # fourcc tag 0x44495658/'XVID' codec_id 000C
+        # self.out = cv2.VideoWriter(os.path.join(config.IMAGE.SAVE_PATH, 'output_original.avi'), fourcc, 5.0,
+        #                       (1280, 480))  # for images of size 480*640
 
-        return self.device, self.model, self.out
+        return self.device, self.model
 
 
     def run(self):
 
-        self.device, self.model,self.out = self.initialization()
-
-        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # # device = "cpu"
-        # print(device)
-        # # a = torch.cuda.FloatTensor(10000)
-        # # print("Allocated:", round(torch.cuda.memory_allocated(0) / 10243, 1), "GB")
-        # print(torch.cuda.get_device_name(0))
-        #
-        # if config.IMAGE.Windows == True:
-        #     if config.IMAGE.subject_mode == "phantom":
-        #         config.IMAGE.Windows_MODEL_FILE = config.IMAGE.Windows_MODEL_FILE_PHANTOM
-        #     model = utils.model_pose_resnet.get_pose_net(config.IMAGE.Windows_MODEL_FILE, is_train=False)
-        #     logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
-        #     model.load_state_dict(
-        #         torch.load(config.IMAGE.Windows_MODEL_FILE, map_location=device)[
-        #             'model_state_dict'])  # map_location=torch.device('cpu')
-        #
-        #     model.eval()  # Super important for testing! Otherwise the result would be random
-        #
-        #     model.to(device)
-        #
-        #     print("Model on cuda: ", next(model.parameters()).is_cuda)
-        #     # logger.info("Setting model to eval. It is important for testing")
-        # else:
-        #     print("Model is not defined")
-        #     model = []
-
+        self.device, self.model = self.initialization()
 
           # to stop all threads at the same time
         probability = np.zeros(0)
@@ -122,28 +101,37 @@ class FCN_Thread(Process):
         time_start = time.time()
         n = 0
 
-        # test_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
-        # for patient in ["US_probe_output"]:  # Empty_frames
-        #     test_dir_patient = os.path.join(test_dir, patient, "Images")
-        #     test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
-
         with torch.no_grad():
             while True:
 
-                # print("frame num of received image in FCN thread", self.get_image.frame_num)
                 start_time = time.time()
                 # input_data = Image.open(data)
                 # print(input_data)
                 # print("from FCN",self.q_image.get())
-                inputs,pred,pobability,X,Y,frame_probability = run_FCN_streamed_image(self.q_image.get(),self.model,self.device,probability,X,Y,logger,config)
+                image_from_probe = self.q_image.get()
+                inputs,pred,pobability,X,Y,frame_probability = run_FCN_streamed_image(image_from_probe,self.model,self.device,probability,X,Y,logger,config)
                 # self.q_image.put(input_data) #should be after image usage, otherwise it affects it
-                # print("x",X)
+                cv2.imshow("Raw",np.array(image_from_probe))
+                cv2.waitKey(1)
+
+                if bool(self.start_send_image.value)== True:
+                    # print((np.array(inputs).reshape(-1)).size)
+
+                    self.q_im_inputs[:] = np.array(inputs).flatten()
+
+                    self.q_num.put(self.num)
+                    self.q_im_pred[:] = pred[0][0]
+
+                    self.q_frame_probability.value = frame_probability
+                    self.v_num.value = self.num
+                    # print("numbers FCN: ", self.num )
+
                 time_one = time.time() - start_time
                 time_inference.update(time_one)
 
-                if config.IMAGE.VIDEO == True:
-                    self.result_im = save_video(self.out, inputs, pred, frame_probability, patient, config, target=None,
-                                                labels=None)
+                # if config.IMAGE.VIDEO == True:
+                #     self.result_im = save_video(self.out, inputs, pred, frame_probability, patient, config, target=None,
+                #                                 labels=None)
 
                 n = n+1
                 self.num = self.num + 1
@@ -162,7 +150,7 @@ class FCN_Thread(Process):
                     time_thread = time.time() - time_start
                     fps_im = self.num / time_thread
                     print("fps FCN thread {}, average time per cycle {}".format(fps_im, 1 / fps_im))
-                    print("NUM FCN ", self.num, n)
+                    # print("NUM FCN ", self.num, n)
                     if config.IMAGE.SAVE_NPZ_FILE:
                         while os.path.exists("FCNthread_output%s.npz" % num):
                             num = num+ 1
@@ -171,7 +159,7 @@ class FCN_Thread(Process):
                         print(len(probability),len(X),len(Y))
                         pd_frame = pd.DataFrame({"frame_probability":frame_probability, "X":X, "Y":Y})
                         pd_frame.to_csv(os.path.join(config.IMAGE.SAVE_PATH, "FCNthread_output%s.csv" % num))
-                    self.out.release()
+                    # self.out.release()
                     print("out released")
 
 
@@ -252,6 +240,8 @@ class Shadow_Image(Process):
 
 
 def get_image_fun(q_im,threads_stopper):
+    message = config.IMAGE.JSON_WS
+    json_mylist = json.dumps(message, separators=(',', ':'))
     ws = websocket.WebSocket()
     ws.connect("ws://localhost:4100")
     ws.send(json_mylist)
@@ -277,7 +267,7 @@ def get_image_fun(q_im,threads_stopper):
             # print("received")
             if image.size:
                 q_im.put(image)
-                image = image
+                # image = image
                 # self.frame_num = self.frame_num + 1
             image_display = np.array(image)
 
@@ -290,6 +280,7 @@ def get_image_fun(q_im,threads_stopper):
         if bool(threads_stopper.value) == True:
             # out.release()
             print("Get image stopped")
+            break
 
 
 if __name__ == '__main__':
@@ -306,7 +297,7 @@ if __name__ == '__main__':
     # q_im = 0
     # device, model = initialization()
 
-    FCN = FCN_Thread(thread_stopper_bool,q_im)
+    FCN = FCN_Thread(q_im,thread_stopper_bool)
     shadow = Shadow_Image(thread_stopper_bool,q_im)
 
 
