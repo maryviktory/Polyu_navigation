@@ -47,8 +47,9 @@ def main():
     ax = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
 
-    for i,patient in enumerate(["Kelly","Maria","Timothy"]):  # test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
-        for sweeps in ["sweep20002"]:
+    for sweeps in ["sweep20002"]:
+        for i,patient in enumerate(["Kelly","Maria"]):  #,"Timothy"
+
             print("process {} patient".format(patient))
             patient_dir = os.path.join(test_dir, patient,sweeps)
 
@@ -59,14 +60,15 @@ def main():
 
 
             ax.set(xlim=(0, 640), ylim=(0, len(probability_label)))
+            ax2.set(xlim=(0, 640), ylim=(0, len(probability_label)))
 
             plot_path(ax,ax2,probability_label, x_array, y_array,color_ext[i],patient)
 
-    ax.set_xlabel(' X coordinate')
-    ax.set_ylabel(' step')
-    # ax.legend()
-    ax2.legend()
-    ax.set_title('sweep20002')
+        ax.set_xlabel(' X coordinate')
+        ax.set_ylabel(' step')
+        # ax.legend()
+        ax2.legend()
+        ax.set_title(sweeps)
     plt.show()
 
 def plot_path(ax,ax2,probability, X, Y,color_ext,title) :

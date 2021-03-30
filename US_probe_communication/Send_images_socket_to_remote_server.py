@@ -168,13 +168,16 @@ class Stop_Thread(Process):
 
 if __name__ == '__main__':
     try:
-        # p = Process(target = Client_US_frames(ws,out),args=())
-        p = Get_Image_Class()
-        # p2 = Stop_Thread()
+        p = Process(target = Client_US_frames(ws,out),args=())
+        # p = Get_Image_Class()
+        p2 = Stop_Thread()
 
         p.daemon = True
+        p2.daemon = True
+        p2.start()
         p.start()
         p.join()
+        p2.join()
         # Client_US_frames(ws,out)
 
     except KeyboardInterrupt:
