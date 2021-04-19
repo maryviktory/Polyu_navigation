@@ -1,5 +1,5 @@
-import FCN.sp_utils as utils
-from FCN.sp_utils.config import config
+import FCN_multiclass.sp_utils as utils
+from FCN_multiclass.sp_utils.config import config
 import logging
 import os
 import torch
@@ -14,7 +14,7 @@ import pandas as pd
 import os
 import keyboard
 import time
-from FCN.sp_utils.run_test_without_labels import run_test_without_labels
+from FCN_multiclass.sp_utils.run_test_without_labels import run_test_without_labels
 
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter(config.TEST.save_dir + 'output_original_.avi', fourcc, 3.0,
@@ -124,7 +124,7 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
 
             inputs, labels = inputs.to(device), labels.to(device)
 
-            logps = model.forward(inputs)
+            logps,multiclass = model.forward(inputs)
 
             batch_loss = criterion(logps, labels.float())
             val_loss += batch_loss.item()
@@ -452,7 +452,7 @@ def main():
 
             model.to(device)
 
-            for patient in ["sweep018_super_short"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
+            for patient in ["test"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
                 patient_dir = os.path.join(test_dir,patient)
                 test_dataloader = utils.load_test_data(patient_dir, '', config)
                 val_acc = run_val(model, test_dataloader, device, criterion,logger,config,patient)

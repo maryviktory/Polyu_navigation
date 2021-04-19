@@ -1,9 +1,11 @@
 import torchvision
+from torchvision import transforms
 import torch
 from FCN_multiclass.sp_utils.Loader_dataset import DatasetPlane, Dataset_Multiclass_heatmaps
 import os
 import numpy as np
 from scipy.signal import butter, filtfilt
+from PIL import Image
 
 import math
 import random
@@ -213,6 +215,311 @@ def get_max_preds(batch_heatmaps):
     preds *= pred_mask
     # print("preds, maxval ",preds,maxvals)
     return preds, maxvals
+
+
+def confusion_matrix(num_classes, test_dir, model):
+    transformation = transforms.Compose([transforms.Resize(224),
+                                         transforms.ToTensor(),
+                                         transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                              std=[0.229, 0.224, 0.225])])
+    if num_classes == 3:
+
+        gap_list = os.listdir(os.path.join(test_dir, "Gap"))
+        non_gap_list = os.listdir(os.path.join(test_dir, "NonGap"))
+
+        gap_list = [os.path.join(test_dir, "Gap", item) for item in gap_list]
+        non_gap_list = [os.path.join(test_dir, "NonGap", item) for item in non_gap_list]
+
+        sacrum_list = os.listdir(os.path.join(test_dir, "Sacrum"))
+        sacrum_list = [os.path.join(test_dir, "Sacrum", item) for item in sacrum_list]
+
+        n_correct = 0
+        n_total = 0
+        n_gap_gap = 0
+        n_gap_sp = 0
+        n_gap_sacrum = 0
+        n_sp_sp = 0
+        n_sp_gap = 0
+        n_sp_sacrum = 0
+        n_sacrum_sacrum = 0
+        n_sacrum_gap = 0
+        n_sacrum_sp = 0
+
+        for i, test_db in enumerate([gap_list, non_gap_list,sacrum_list]):
+            for data in test_db:
+                input_data = Image.open(data).convert(mode="RGB")
+                if input_data is None:
+                    return input_data
+                tensor_image = transformation(input_data).unsqueeze_(0)
+                image_batch, _ = list2batch([tensor_image], None)
+
+                out = model.run_inference(image_batch)
+                prob = torch.sigmoid(out).numpy()
+                # print(prob)
+                # print('prob',prob)
+                # print('i',i)
+
+                prob_vertebra = prob[0, 1]
+                prob_gap = prob[0, 0]
+                prob_sacrum = prob[0, 2]
+                # print(prob_gap)
+                # print(prob)
+
+                # print('prob vert',prob_vertebra)
+                # if round(prob_vertebra) == i:
+                #     # n_correct += 1
+                #     # print("correct")
+
+                ###truepositive
+                if round(prob_vertebra)== 1 and i == 1:
+                    n_sp_sp +=1
+
+                ###truenegative
+                if round(prob_gap)== 1 and i == 0:
+                    n_gap_gap +=1
+
+                #sacrum
+                if round(prob_sacrum)== 1 and i == 2:
+                    n_sacrum_sacrum +=1
+
+                #true spinous, false gap
+                if round(prob_gap)== 1 and i == 1:
+                    n_sp_gap +=1
+
+                # true sacrum, false gap
+                if round(prob_gap) == 1 and i == 2:
+                    n_sacrum_gap += 1
+
+                #true gap, false spinous
+                if round(prob_vertebra)== 1 and i == 0:
+                    n_gap_sp+=1
+
+                # true sacrum, false spinous
+                if round(prob_vertebra) == 1 and i == 2:
+                    n_sacrum_sp+= 1
+
+                # true gap, false sacrum
+                if round(prob_sacrum) == 1 and i == 0:
+                    n_gap_sacrum+= 1
+
+                # true spinous, false sacrum
+                if round(prob_sacrum) == 1 and i == 1:
+                    n_sp_sacrum += 1
+
+
+                n_total += 1
+
+        n_correct = n_gap_gap+n_sp_sp+n_sacrum_sacrum
+
+        # if polyaxon == "True":
+        #     logger.info('correct {} ({})'.format(n_correct, n_correct/n_total))
+        #     logger.info("true gap predicted spinous {} ({})".format( n_gap_sp,n_gap_sp/n_total))
+        #     logger.info("true gap predicted sacrum {} ({})".format(n_gap_sacrum, n_gap_sacrum / n_total))
+        #     logger.info("true spinous predicted gap {} ({})".format( n_sp_gap, n_sp_gap / n_total))
+        #     logger.info("true spinous predicted sacrum {} ({})".format(n_sp_sacrum, n_sp_sacrum / n_total))
+        #     logger.info("true sacrum predicted gap {} ({})".format(n_sacrum_gap, n_sacrum_gap / n_total))
+        #     logger.info("true sacrum predicted spinous {} ({})".format(n_sacrum_sp, n_sacrum_sp / n_total))
+        #     logger.info('total {}'.format(n_total))
+        # else:
+        print('correct',n_correct, n_correct/n_total)
+        print("true gap predicted spinous", n_gap_sp,n_gap_sp/n_total)
+        print("true gap predicted sacrum", n_gap_sacrum, n_gap_sacrum / n_total)
+        print("true spinous predicted gap", n_sp_gap, n_sp_gap / n_total)
+        print("true spinous predicted sacrum", n_sp_sacrum, n_sp_sacrum / n_total)
+        print("true sacrum predicted gap", n_sacrum_gap, n_sacrum_gap / n_total)
+        print("true sacrum predicted spinous", n_sacrum_sp, n_sacrum_sp / n_total)
+        print('total',n_total)
+
+    if num_classes == 4:
+        gap_list = os.listdir(os.path.join(test_dir, "Gap"))
+        gap_list = [os.path.join(test_dir, "Gap", item) for item in gap_list]
+
+        # non_gap_list = os.listdir(os.path.join(test_dir, "NonGap"))
+        # non_gap_list = [os.path.join(test_dir, "NonGap", item) for item in non_gap_list]
+
+        sacrum_list = os.listdir(os.path.join(test_dir, "Sacrum"))
+        sacrum_list = [os.path.join(test_dir, "Sacrum", item) for item in sacrum_list]
+
+        lumbar_list = os.listdir(os.path.join(test_dir, "Lumbar"))
+        lumbar_list = [os.path.join(test_dir, "Lumbar", item) for item in lumbar_list]
+
+        thoracic_list = os.listdir(os.path.join(test_dir, "Thoracic"))
+        thoracic_list = [os.path.join(test_dir, "Thoracic", item) for item in thoracic_list]
+
+
+        n_correct = 0
+        n_total = 0
+        n_gap_gap = 0
+        n_gap_sacrum = 0
+        n_gap_lumbar = 0
+        n_gap_thoracic = 0
+
+        n_sacrum_sacrum = 0
+        n_sacrum_gap = 0
+        n_sacrum_lumbar = 0
+        n_sacrum_thoracic = 0
+
+        n_lumbar_lumbar = 0
+        n_lumbar_gap = 0
+        n_lumbar_thoracic = 0
+        n_lumbar_sacrum = 0
+
+        n_thoracic_thoracic = 0
+        n_thoracic_gap = 0
+        n_thoracic_sacrum = 0
+        n_thoracic_lumbar = 0
+
+        for i, test_db in enumerate([gap_list, lumbar_list, sacrum_list, thoracic_list]):
+            for data in test_db:
+                input_data = Image.open(data).convert(mode="RGB")
+                if input_data is None:
+                    return input_data
+                tensor_image = transformation(input_data).unsqueeze_(0)
+                image_batch, _ = list2batch([tensor_image], None)
+
+                out = model.run_inference(image_batch)
+                prob = torch.sigmoid(out).numpy()
+                # print(prob)
+                # print('prob',prob)
+                # print('i',i)
+
+                prob_gap = prob[0, 0]
+                prob_lumbar = prob[0, 1]
+                prob_sacrum = prob[0, 2]
+                prob_thoracic = prob[0,3]
+                # print(prob_gap)
+                # print(prob)
+
+                # print('prob vert',prob_vertebra)
+                # if round(prob_vertebra) == i:
+                #     # n_correct += 1
+                #     # print("correct")
+
+                ###truepositive
+                if round(prob_lumbar) == 1 and i == 1:
+                    n_lumbar_lumbar += 1
+
+                ###truenegative
+                if round(prob_gap) == 1 and i == 0:
+                    n_gap_gap += 1
+
+                # sacrum
+                if round(prob_sacrum) == 1 and i == 2:
+                    n_sacrum_sacrum += 1
+
+                if round(prob_thoracic) == 1 and i == 3:
+                    n_thoracic_thoracic += 1
+
+                # true spinous, false gap
+                if round(prob_gap) == 1 and i == 1:
+                    n_lumbar_gap += 1
+
+                # true sacrum, false gap
+                if round(prob_gap) == 1 and i == 2:
+                    n_sacrum_gap += 1
+
+                # true gap, false spinous
+                if round(prob_lumbar) == 1 and i == 0:
+                    n_gap_lumbar += 1
+
+                # true sacrum, false spinous
+                if round(prob_lumbar) == 1 and i == 2:
+                    n_sacrum_lumbar += 1
+
+                # true gap, false sacrum
+                if round(prob_sacrum) == 1 and i == 0:
+                    n_gap_sacrum += 1
+
+                # true spinous, false sacrum
+                if round(prob_sacrum) == 1 and i == 1:
+                    n_lumbar_sacrum += 1
+
+                if round(prob_thoracic) == 1 and i == 0:
+                    n_gap_thoracic += 1
+
+                if round(prob_thoracic) == 1 and i == 1:
+                    n_lumbar_thoracic += 1
+
+                if round(prob_thoracic) == 1 and i == 2:
+                    n_sacrum_thoracic += 1
+
+                if round(prob_gap) == 1 and i == 3:
+                    n_thoracic_gap += 1
+
+                if round(prob_lumbar) == 1 and i == 3:
+                    n_thoracic_lumbar += 1
+
+                if round(prob_sacrum) == 1 and i == 3:
+                    n_thoracic_sacrum += 1
+
+                n_total += 1
+
+        n_correct = n_gap_gap + n_lumbar_lumbar + n_sacrum_sacrum +n_thoracic_thoracic
+
+        # if polyaxon == "True":
+        #     logger.info('correct {} ({})'.format(n_correct, n_correct / n_total))
+        #     logger.info("true gap predicted lumbar {} ({})".format(n_gap_lumbar, n_gap_lumbar / n_total))
+        #     logger.info("true gap predicted sacrum {} ({})".format(n_gap_sacrum, n_gap_sacrum / n_total))
+        #     logger.info("true gap predicted thoracic {} ({})".format(n_gap_thoracic, n_gap_thoracic / n_total))
+        #
+        #     logger.info("true lumbar predicted gap {} ({})".format(n_lumbar_gap, n_lumbar_gap / n_total))
+        #     logger.info("true lumbar predicted sacrum {} ({})".format(n_lumbar_sacrum, n_lumbar_sacrum / n_total))
+        #     logger.info("true lumbar predicted thoracic {} ({})".format(n_lumbar_thoracic, n_lumbar_thoracic / n_total))
+        #
+        #     logger.info("true sacrum predicted gap {} ({})".format(n_sacrum_gap, n_sacrum_gap / n_total))
+        #     logger.info("true sacrum predicted lumbar {} ({})".format(n_sacrum_lumbar, n_sacrum_lumbar / n_total))
+        #     logger.info("true sacrum predicted thoracic {} ({})".format(n_sacrum_thoracic, n_sacrum_thoracic / n_total))
+        #
+        #     logger.info("true thoracic predicted gap {} ({})".format(n_thoracic_gap, n_thoracic_gap / n_total))
+        #     logger.info("true thoracic predicted lumbar {} ({})".format(n_thoracic_lumbar, n_thoracic_lumbar / n_total))
+        #     logger.info("true thoracic predicted sacrum {} ({})".format(n_thoracic_sacrum, n_thoracic_sacrum / n_total))
+        #
+        #     logger.info('total {}'.format(n_total))
+        # else:
+        print('correct {} ({})'.format(n_correct, n_correct / n_total))
+        print("true gap predicted lumbar {} ({})".format(n_gap_lumbar, n_gap_lumbar / n_total))
+        print("true gap predicted sacrum {} ({})".format(n_gap_sacrum, n_gap_sacrum / n_total))
+        print("true gap predicted thoracic {} ({})".format(n_gap_thoracic, n_gap_thoracic / n_total))
+
+        print("true lumbar predicted gap {} ({})".format(n_lumbar_gap, n_lumbar_gap / n_total))
+        print("true lumbar predicted sacrum {} ({})".format(n_lumbar_sacrum, n_lumbar_sacrum / n_total))
+        print("true lumbar predicted thoracic {} ({})".format(n_lumbar_thoracic, n_lumbar_thoracic / n_total))
+
+        print("true sacrum predicted gap {} ({})".format(n_sacrum_gap, n_sacrum_gap / n_total))
+        print("true sacrum predicted lumbar {} ({})".format(n_sacrum_lumbar, n_sacrum_lumbar / n_total))
+        print("true sacrum predicted thoracic {} ({})".format(n_sacrum_thoracic, n_sacrum_thoracic / n_total))
+
+        print("true thoracic predicted gap {} ({})".format(n_thoracic_gap, n_thoracic_gap / n_total))
+        print("true thoracic predicted lumbar {} ({})".format(n_thoracic_lumbar, n_thoracic_lumbar / n_total))
+        print("true thoracic predicted sacrum {} ({})".format(n_thoracic_sacrum, n_thoracic_sacrum / n_total))
+
+        print('total', n_total)
+
+
+def list2batch(tensor_list, label_list):
+
+    if label_list is not None and len(label_list) == 0:
+        label_list = None
+    if label_list is not None:
+        assert len(tensor_list) == len(label_list), "Number of labels files do not match number of images files"
+
+    tensor_batch = torch.FloatTensor()
+    torch.cat(tensor_list, out=tensor_batch)
+
+    if label_list is None:
+        return tensor_batch, None
+
+    if type(label_list[0]) is torch.Tensor:
+        label_batch = torch.FloatTensor()
+        torch.cat(label_list, out=label_batch)
+
+    else:
+        label_batch = torch.FloatTensor(label_list)
+
+    return tensor_batch, label_batch
+
+
+
 
 #
 # def get_final_preds(config, batch_heatmaps, center, scale):
