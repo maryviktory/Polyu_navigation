@@ -11,8 +11,9 @@ from torch.utils.tensorboard import SummaryWriter
 from torch import nn
 import torchvision as tv
 from torch.optim import lr_scheduler
+import time
 
-def run_val(model, valloader, device, criterion, writer, epoch, config):
+def run_val(model, valloader, device, criterion, writer, epoch, config,logger):
     val_loss = 0
     acc = utils.AverageMeter()
     model.eval()
@@ -21,7 +22,7 @@ def run_val(model, valloader, device, criterion, writer, epoch, config):
     num = 0
     with torch.no_grad():
         for i, (inputs, labels,class_id) in enumerate(valloader):
-            inputs, labels = inputs.to(device), labels.to(device)
+            inputs, labels, class_id = inputs.to(device), labels.to(device), class_id.to(device)
             num_images = inputs.size()[0]
             logps,multiclass = model.forward(inputs)
             # multiclass = torch.sigmoid(multiclass).numpy()
@@ -73,8 +74,8 @@ def run_val(model, valloader, device, criterion, writer, epoch, config):
 
         epoch_loss = running_loss / num
         epoch_acc_classification = running_corrects.double() / num
-        print("Classification Validation Accuracy {} epoch: {}, loss: {} ").format(epoch, epoch_acc_classification,
-                                                                              epoch_loss)
+        logger.info("Classification Validation Accuracy {} epoch: {}, loss: {} ".format(epoch, epoch_acc_classification,
+                                                                              epoch_loss))
 
     return acc.avg
 
@@ -102,8 +103,8 @@ def main(config):
         logger.addHandler(logging.FileHandler(os.path.join(config.DATASET.OUTPUT_PATH , 'Heatmaps_Resnet101.log')))
         model_path = config.MODEL.PRETRAINED
 
-    trainloader, valloader = utils.multiclass_heatmap_load_train_val(config.DATASET.PATH, "train", "validation", config)
-    # print(trainloader)
+    trainloader, valloader,class_num = utils.multiclass_heatmap_load_train_val(config.DATASET.PATH, "train", "validation", config)
+    logger.info("class_num from DataLoader {}".format(class_num))
     logger.info('batch size {}'.format(config.TRAIN.BATCH_SIZE))
     print('dataset NAS',config.DATASET.PATH_NAS)
     logger.info("weights {}".format(config.TRAIN.UPDATE_WEIGHTS))
@@ -129,7 +130,7 @@ def main(config):
 
     writer = SummaryWriter(config.DATASET.OUTPUT_PATH)
     best_acc = 0
-
+    initial_time = time.time()
     for epoch in range(config.TRAIN.END_EPOCH):
         criterion = nn.MSELoss()
         logger.info('Epoch {}/{}'.format(epoch, config.TRAIN.END_EPOCH - 1))
@@ -143,7 +144,7 @@ def main(config):
         for i, (inputs, labels,class_id) in enumerate(trainloader):
 
             # print(class_id)
-            inputs, labels = inputs.to(device), labels.to(device)
+            inputs, labels, class_id = inputs.to(device), labels.to(device), class_id.to(device)
             num_images = inputs.size()[0]
             # print(summary(model, tuple(inputs.size())[1:]))
             logps,multiclass = model.forward(inputs)
@@ -177,19 +178,21 @@ def main(config):
 
             _, avg_acc, cnt, pred,target,dists = utils.accuracy(logps.detach().cpu().numpy(),
                                              labels.detach().cpu().numpy(),thr = config.TRAIN.THRESHOLD)
-            print("Current batch accuracy heatmap: ", avg_acc)
+            # print("Current batch accuracy heatmap: ", avg_acc)
             acc.update(avg_acc,cnt)
             # acc_classification.update()
-            print("Batch {} train accurcy: {}, classification acc: {}, loss: {}".format(i, acc.avg, batch_acc_class,batch_loss.avg))
+            # print("Batch {} train accurcy: {}, classification acc: {}, loss: {}".format(i, acc.avg, batch_acc_class,batch_loss.avg))
             num = num + num_images
 
         writer.add_scalar('Loss/train', float(batch_loss.avg), epoch)
 
         epoch_loss = running_loss / (num)
         epoch_acc_classification = running_corrects.double() / (num)
-        logger.info("Classification Accuracy {} epoch: {}, loss: {} ").format(epoch,epoch_acc_classification,epoch_loss)
+        epoch_time = time.time()-initial_time
+        print("epoch time: ",epoch_time)
+        logger.info('Classification Accuracy {} epoch: {}, loss: {} '.format(epoch,epoch_acc_classification,epoch_loss))
 
-        val_acc = run_val(model, valloader, device, criterion, writer, epoch,config)
+        val_acc = run_val(model, valloader, device, criterion, writer, epoch,config,logger)
 
         logger.info('Train Loss: {:.4f} Train Acc: {:.4f} Val Acc: {:.4f}'.format(
              batch_loss.avg, acc.avg, val_acc))
@@ -213,6 +216,7 @@ def main(config):
             }, os.path.join(config.DATASET.OUTPUT_PATH, "model" + str(epoch) + ".pt"))
 
     logger.info('Best val Acc: {:4f}'.format(best_acc))
+    logger.info("Run time: {} ".format(time.time()-initial_time))
 
 def Parser():
     parser = argparse.ArgumentParser(description='DeepSpine script')
@@ -220,13 +224,13 @@ def Parser():
     parser.add_argument('--data_dir', type=str, default="SpinousProcessData/FCN_PWH_train_dataset_heatmaps/data_19subj_2", metavar='N',
                         help='')
 
-    parser.add_argument('--batch_size', type=int, default=12, metavar='N',
+    parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                         help='input batch size for training (default: 64)')
 
     parser.add_argument('--update_weights', type=bool, default=False, metavar='P',
                         help='whether to train the networs from scratches or with fine tuning')
 
-    parser.add_argument('--lr', type=float, default=0.001, metavar='BS',
+    parser.add_argument('--lr', type=float, default=0.0001, metavar='BS',
                         help='learning rate')
     args = parser.parse_args()
 
