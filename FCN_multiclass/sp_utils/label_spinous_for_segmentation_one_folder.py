@@ -7,7 +7,7 @@ import cv2
 '''This code helps to generate labels from different subjects and record all in one folder'''
 patients_dataset_file = "C:\\Users\maryv\PycharmProjects\Polyu_navigation\FCN_multiclass\dataset_patients_PWH_all.txt"
 data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset"
-label_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_multiclass_heatmap\Labels_heatmaps"
+label_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\sweep018\Labels_sum_heatmaps"
 
 # data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/DATA_toNas_for CNN_IPCAI/data set patients images"
 # data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/Force_integration_DB/New_Patients"
@@ -24,6 +24,8 @@ def open_file(name_file):
 patient_name = open_file(patients_dataset_file)
 
 images_exist_flag = False
+
+patient_name = "sweep018",""
 for patient in patient_name:
     print("process patient {}".format(patient))
     path = os.path.join(label_dir, patient)

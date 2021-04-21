@@ -12,6 +12,7 @@ class DatasetPlane(Dataset):
         self.root_dir = root_dir
         # self.transform = transform
         self.image_list = os.listdir(os.path.join(self.root_dir, "images"))
+
         self.image_list = [item for item in self.image_list if ".png" in item]
         self.normalization = tv.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self.norm = norm
@@ -29,8 +30,9 @@ class DatasetPlane(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_name = os.path.join(self.root_dir, "images", self.image_list[idx])
-        label_name = os.path.join(self.root_dir, "labels", self.image_list[idx])
+        img_name = os.path.join(self.root_dir, "Images", self.image_list[idx])
+        # print(img_name)
+        label_name = os.path.join(self.root_dir, "Labels_sum_heatmaps", self.image_list[idx])
         # print(img_name)
 
         image = Image.open(img_name)

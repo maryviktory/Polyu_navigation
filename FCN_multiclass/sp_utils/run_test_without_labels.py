@@ -10,6 +10,110 @@ import os
 import keyboard
 import time
 
+
+def run_test_without_labels_multiclass(model,testdata,patient,device, logger,conf):
+    model.eval()
+    # print(model)
+    probability = np.zeros(0)
+    X = np.zeros(0)
+    Y = np.zeros(0)
+    pred = np.zeros(0)
+    inputs = np.zeros(0)
+    time_inference = utils.AverageMeter()
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    file = open('LOG1.txt', 'w')
+    out = cv2.VideoWriter(config.TEST.save_dir + '_original_%s.avi' % (patient), fourcc, 3.0,
+                          (1280, 480))  # for two images of size 480*640
+    test_dir_patient = os.path.join(testdata, patient, "Images")
+    test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
+
+    with torch.no_grad():
+        for data in test_list:
+            # logger.info("data file is {}".format(data))
+            time_start = time.time()
+            input_data = Image.open(data)
+            # print(np.array(data))
+            print("Image.open reads:",np.array(input_data).shape)
+            input_data= input_data.convert("RGB")
+            nonnull = np.argwhere(np.asarray(input_data)!=0)
+            # print(nonnull)
+            file.write(str(np.asarray(input_data)))
+
+
+            # print("input data", list(input_data.getdata()))
+            logger.info("size of the input image {}".format(input_data.size))
+            input_data= utils.trans_norm(input_data, conf.TEST.input_im_size)
+
+            tensor_image = input_data.unsqueeze_(0)
+            logger.info("tensor of the input image {}".format(tensor_image.shape))
+
+            inputs= tensor_image.to(device)
+            # print("inputs",inputs.shape, inputs)
+            logps = model.forward(inputs)
+            # print(logps)
+
+            prob_tensor = logps
+            p_map = np.squeeze(prob_tensor.to("cpu").numpy())
+            # logger.info("probability of spinous in frame {}".format(np.amax(p_map)))
+
+            #### Final point prediction
+            pred, _ = utils.get_max_preds(logps.detach().cpu().numpy())
+            # prediction of the final point in dimentions of heatmap. Transfer it to image size
+            pred = pred * config.TEST.input_im_size / config.TEST.heatmap_size
+            frame_probability = np.amax(p_map)
+            print("frame probability", frame_probability)
+            probability = np.append(probability, frame_probability)
+            X = np.append(X, pred[0][0][0])
+            Y = np.append(Y, config.TEST.input_im_size-pred[0][0][1])
+            # logger.info("coordinates X {}, Y{}".format(pred[0][0][0],config.TEST.input_im_size-pred[0][0][1]))
+
+            p_map = np.multiply(p_map, 255)
+            p_map_image = tv.transforms.ToPILImage()(p_map)
+            p_map = tv.transforms.Resize((conf.TEST.input_im_size, conf.TEST.input_im_size))(p_map_image)
+
+            inputs = utils.img_denorm(input_data)
+            inputs = tv.transforms.ToPILImage()(inputs)
+
+            if conf.TEST.PLOT:
+
+
+                plt.subplot(1, 2, 1)
+                plt.imshow(inputs)
+                plt.subplot(1, 2, 2)
+                plt.imshow(p_map)
+                plt.scatter(x=pred[0][0][0], y=pred[0][0][1], c='r', s=40)
+
+                xs = X
+                ys = Y
+                zs = probability
+                fig = plt.figure()
+                ax = fig.add_subplot(111, projection='3d')
+                ax.scatter(xs, ys, zs, c = "#1f77b4",marker="o")
+
+                ax.set_xlabel('X Label')
+                ax.set_ylabel('Y Label')
+                ax.set_zlabel('Z Label')
+
+
+                plt.show()
+
+            if config.TEST.VIDEO == True:
+
+                save_video(out,inputs, pred, frame_probability, patient, target=None, labels=None)
+
+            if keyboard.is_pressed('c'):
+                print("time avg", time_inference.avg)
+                out.release()
+                file.close()
+                os._exit(0)
+
+            time_inference.update(time.time()- time_start)
+        print("time avg", time_inference.avg)
+        if config.TRAIN.SWEEP_TRJ_PLOT:
+            plot_path(probability,X,Y,"b")
+
+
+
 # np.set_printoptions(threshold=sys.maxsize)
 def run_test_without_labels(model,testdata,patient,device, logger,conf):
     model.eval()
