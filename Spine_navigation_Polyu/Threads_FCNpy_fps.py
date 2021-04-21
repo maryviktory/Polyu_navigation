@@ -19,14 +19,13 @@ from Spine_navigation_Polyu.utils.config_robot_GUI import config
 from Spine_navigation_Polyu.utils.functions import run_FCN_streamed_image,save_video, AverageMeter
 #https://techtutorialsx.com/2018/11/08/python-websocket-client-sending-binary-content/
 
-
-
-
 message = config.IMAGE.JSON_WS
 json_mylist = json.dumps(message, separators=(',', ':'))
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter(os.path.join(config.IMAGE.SAVE_PATH,'output_original.avi'), fourcc, 3.0, (1280, 480))  # for images of size 480*640
+
+
 
 ws = websocket.WebSocket()
 ws.connect("ws://localhost:4100")
@@ -51,15 +50,22 @@ class Get_Image(Thread):
         # self.threads_stopper = self.stop_thread.threads_stopper
 
     def run(self):
-          # to stop all threads at the same time
+        # test_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
+        # for patient in ["US_probe_output"]:  # Empty_frames
+        #     test_dir_patient = os.path.join(test_dir, patient, "Images")
+        #     test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
+        #
+        # # to stop all threads at the same time
         time_start = time.time()
 
         num_text = 0
         while True: #self.num in range (100)
-
             if self.stop_thread.threads_stopper ==False:
-                # print("received")
-                # print(self.stop_thread.threads_stopper)
+                # for test_im in test_list:
+                #     # print("from for")
+                #     self.image = Image.open(test_im)
+                #     self.frame_num = self.frame_num + 1
+
                 binAnswer = ws.recv_frame()
 
                 if websocket.ABNF.OPCODE_MAP[binAnswer.opcode] == "binary":
@@ -78,6 +84,7 @@ class Get_Image(Thread):
                     if num_text ==2:
                         print("Ready to stream")
 
+
                 self.num=self.num+1
                 '''To interupt the thread '''
                 # global threads_stopper
@@ -95,7 +102,7 @@ class Get_Image(Thread):
 class FCN_Thread(Thread):
     '''Run FCN pre-trained model on online streamed images
     calculate the coordinate'''
-    def __init__(self,Get_Image,Stop_Thread):
+    def __init__(self,Get_Image,Stop_Thread,device,model):
         Thread.__init__(self)
 
         self.result_im = np.zeros(0)
@@ -104,51 +111,38 @@ class FCN_Thread(Thread):
         self.num = 0
         self.stop_thread = Stop_Thread
         self.threads_stopper = self.stop_thread.threads_stopper
+        self.model = model
+        self.device = device
     def run(self):
 
           # to stop all threads at the same time
         probability = np.zeros(0)
         X = np.zeros(0)
         Y = np.zeros(0)
-
         num= 0
         patient = "US_probe"
         time_inference = AverageMeter()
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        if config.IMAGE.Windows == True:
-            model = utils.model_pose_resnet.get_pose_net(config.IMAGE.Windows_MODEL_FILE, is_train=False)
-            logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
-            model.load_state_dict(
-                torch.load(config.IMAGE.Windows_MODEL_FILE, map_location=device)['model_state_dict']) #map_location=torch.device('cpu')
-            model.eval()  # Super important for testing! Otherwise the result would be random
-            if torch.cuda.is_available():
-                model.cuda()
-
-            # logger.info("Setting model to eval. It is important for testing")
-        else:
-            print("Model is not defined")
-            model = []
-
         time_start = time.time()
         n = 0
-        with torch.no_grad():
-            while True:
+        while True:
+            with torch.no_grad():
 
+               # print("frame num of received image in FCN thread", self.get_image.frame_num)
                 if self.get_image.image.size: #image we get from WebSocket connection
                     # print("image received")
                     self.image_flag = True
                     # print("frame num of received image in FCN thread", self.get_image.frame_num)
                     start_time = time.time()
 
-                    inputs,pred,probability, X, Y, frame_probability = run_FCN_streamed_image(self.get_image.image,model, device, probability,X,Y,logger,config)
+                    inputs,pred,probability, X, Y, frame_probability = run_FCN_streamed_image(self.get_image.image,self.model, self.device, probability,X,Y,logger,config)
                     # print("x",X)
+                    time_one = time.time() - start_time
+                    time_inference.update(time_one)
                     if config.IMAGE.VIDEO == True:
                         self.result_im = save_video(out, inputs, pred, frame_probability, patient,config, target=None, labels=None)
                     #TODO: accumulate array of robot positions and force values to write it to npz file
-                    time_one = time.time() - start_time
-                    time_inference.update(time_one)
+
                     n = n+1
                     self.num = self.num + 1
                 else:
@@ -157,6 +151,9 @@ class FCN_Thread(Thread):
                 '''To interrupt the thread'''
 
                 if self.stop_thread.threads_stopper==True:
+                    print("Allocated:", round(torch.cuda.memory_allocated(0) / 10243, 1),"GB")
+                    # print('Cached: ', round(torch.cuda.memory_reserved(0) / 10243, 1))
+
                     print("FCN_Thread stopped")
                     if time_inference.avg !=0:
                         print("fps FCN thread {}, average time per cycle {}".format(1/time_inference.avg, time_inference.avg))
@@ -195,7 +192,7 @@ class Stop_Thread(Thread):
         while True:
             self.num = self.num +1
             # print(i)
-            if keyboard.is_pressed('c') or (self.threads_stopper == True):
+            if keyboard.is_pressed('q') or (self.threads_stopper == True):
                 self.threads_stopper = True
                 print("Killing threads")
                 time_thread = time.time() - time_start
@@ -208,15 +205,68 @@ class Stop_Thread(Thread):
 
                 break
 
+class Shadow_Image(Thread):
+    '''# we need to receive the data of length 307329'''
+    def __init__(self,Stop_Thread, Get_Image):
+        Thread.__init__(self)
+
+        self.image = np.zeros(0)
+        self.num = 0
+        self.frame_num = 0
+        self.stop_thread = Stop_Thread
+        self.get_image = Get_Image
+        # self.threads_stopper = self.stop_thread.threads_stopper
+
+    def run(self):
+        time_start = time.time()
+        while True:
+            if self.stop_thread.threads_stopper == False:
+                # print(self.get_image.image)
+                self.num = self.num + 1
+            else:
+                time_thread = time.time() - time_start
+                fps_im = self.num / time_thread
+                print("Total time {},fps Shadow_image thread {}, average time per cycle {}".format(time_thread,fps_im, 1 / fps_im))
+                break
+
+
+def initialization():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = "cpu"
+    print(device)
+    # a = torch.cuda.FloatTensor(10000)
+    # print("Allocated:", round(torch.cuda.memory_allocated(0) / 10243, 1), "GB")
+    print(torch.cuda.get_device_name(0))
+
+    if config.IMAGE.Windows == True:
+        model = utils.model_pose_resnet.get_pose_net(config.IMAGE.Windows_MODEL_FILE, is_train=False)
+        logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
+        model.load_state_dict(
+            torch.load(config.IMAGE.Windows_MODEL_FILE, map_location=device)[
+                'model_state_dict'])  # map_location=torch.device('cpu')
+        model.eval()  # Super important for testing! Otherwise the result would be random
+
+        model.to(device)
+        print("Model on cuda: ", next(model.parameters()).is_cuda)
+        # logger.info("Setting model to eval. It is important for testing")
+    else:
+        print("Model is not defined")
+        model = []
+    return device,model
 
 if __name__ == '__main__':
+
+    device,model = initialization()
+
     stop_threads = Stop_Thread()
     # stop_threads2 = Stop_Thread()
     get_image = Get_Image(stop_threads)
-    fcn_thread = FCN_Thread(get_image, stop_threads)
-    stop_threads.start()
+    fcn_thread = FCN_Thread(get_image, stop_threads,device,model)
+    shadow = Shadow_Image(stop_threads,get_image)
 
+    # stop_threads.start()
     get_image.start()
+    # shadow.start()
     # stop_threads2.start()
     try:
 

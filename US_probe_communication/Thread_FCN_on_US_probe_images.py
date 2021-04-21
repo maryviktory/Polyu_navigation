@@ -23,7 +23,7 @@ fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter('output_original.avi', fourcc, 3.0, (1280, 480))  # for images of size 480*640
 
 ws = websocket.WebSocket()
-ws.connect("ws://localhost:4100")
+ws.connect("ws://localhost:4100") #"ws://localhost:4100"
 ws.send(json_mylist)
 
 logger = logging.getLogger()
@@ -77,6 +77,7 @@ class FCN_Thread(Thread):
             logger.info('=> loading model from {}'.format(config.TEST.Windows_MODEL_FILE))
             model.load_state_dict(
                 torch.load(config.TEST.Windows_MODEL_FILE, map_location=torch.device('cpu'))['model_state_dict'])
+            model.to(device)
         else:
             print("Model is not defined")
             model = []

@@ -96,10 +96,10 @@ config.TEST.Windows = True
 config.TEST.BATCH_SIZE = 1
 # Test Model
 config.TEST.PLOT = False #plots each frame
-config.TEST.VIDEO = True #record video with detected point and label
+config.TEST.VIDEO = False #record video with detected point and label
 config.TEST.PLOT_VIDEO = False #plot each frame of the video
 config.TEST.labels_exist = False #True if the sweep is labelled
-config.TRAIN.SWEEP_TRJ_PLOT = True
+config.TRAIN.SWEEP_TRJ_PLOT = False
 config.TEST.SAVE_NPZ_FILE = False
 config.TEST.PLOT_SMOOTH_LABEL_TRAJECTORY = False #True if the file already exists and need to be loaded
 ## Augmentation of data
@@ -121,7 +121,7 @@ config.TEST.save_dir = "/media/maryviktory/My Passport/spine navigation Polyu 20
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Spinous_positions_sweeps"
 config.TEST.Windows_save_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\output"
 config.TEST.MODEL_FILE = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/models_FCN/best_model_exp40184.pt"
-config.TEST.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\best_model_exp40184.pt"
+config.TEST.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\human_best_model_exp40184.pt"
 #'/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/models_FCN/best_model_exp36817.pt'
 #"/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/models/best_model.pt"
 config.TEST.data_npz = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_train_dataset_heatmaps/output"

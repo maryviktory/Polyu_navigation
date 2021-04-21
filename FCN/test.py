@@ -412,7 +412,7 @@ def main():
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
         logger.info("STARTING TEST, press C to exit")
-        time.sleep(2)
+        # time.sleep(2)
         # fourcc = cv2.VideoWriter_fourcc(*'XVID')
         # out = cv2.VideoWriter(config.TEST.save_dir + 'output_original_.avi', fourcc, 3.0,
         #                       (1280, 480))  # for two images of size 480*640
@@ -424,10 +424,15 @@ def main():
             config.TEST.sweep_data_dir = config.TEST.Windows_sweep_data_dir
             config.TEST.save_dir = config.TEST.Windows_save_dir
 
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # device = "cpu"
+        print("device: ",device)
+
+
         model = utils.model_pose_resnet.get_pose_net(config.TEST.MODEL_FILE, is_train=False)
         logger.info('=> loading model from {}'.format(config.TEST.MODEL_FILE))
         model.load_state_dict(
-            torch.load(config.TEST.MODEL_FILE, map_location=torch.device('cpu'))['model_state_dict'])
+            torch.load(config.TEST.MODEL_FILE, map_location=device)['model_state_dict'])
 
 
         if config.TEST.PLOT:
@@ -435,7 +440,7 @@ def main():
             config.TEST.BATCH_SIZE = 1
 
         model.eval()
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 
         if config.TEST.labels_exist:
@@ -459,14 +464,17 @@ def main():
 
         else:
             test_dir = config.TEST.data_dir_w_out_labels
+            test_dir = config.TEST.sweep_data_dir
             if config.TRAIN.SWEEP_TRJ_PLOT:
                 test_dir = config.TEST.sweep_data_dir
             for patient in ["US_probe_output"]: #Empty_frames
                 test_dir_patient = os.path.join(test_dir,patient,"Images")
                 test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
 
+                time_start = time.time()
                 run_test_without_labels(model, test_list,patient, device, logger,config)
-
+                time_total = time.time() - time_start
+                print("fps without labels for patient ({}) is {}".format(patient,len(test_list)/time_total))
 
     except KeyboardInterrupt:
         # out.release()

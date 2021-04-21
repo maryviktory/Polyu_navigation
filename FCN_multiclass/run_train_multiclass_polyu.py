@@ -16,6 +16,9 @@ import time
 def run_val(model, valloader, device, criterion, writer, epoch, config,logger):
     val_loss = 0
     acc = utils.AverageMeter()
+    batch_loss = utils.AverageMeter()
+    class_loss = utils.AverageMeter()
+    heatmap_loss = utils.AverageMeter()
     model.eval()
     running_loss=0
     running_corrects=0
@@ -35,13 +38,17 @@ def run_val(model, valloader, device, criterion, writer, epoch, config,logger):
             loss_classification = criterion_classification(multiclass, class_id)
             criterion_heatmap = nn.MSELoss()
             loss_heatmap = criterion_heatmap(logps, labels.float())
-            batch_loss = loss_classification + loss_heatmap
+            loss = loss_classification + config.TRAIN.loss_alpha*loss_heatmap
 
-            running_loss += batch_loss.item() * inputs.size(0)
+            batch_loss.update(loss.item(), inputs.size(0))
+            class_loss.update(loss_classification.item(), inputs.size(0))
+            heatmap_loss.update(loss_heatmap.item(), inputs.size(0))
+
+            running_loss += loss.item() * inputs.size(0)
             running_corrects += torch.sum(pred_class == class_id.data)
 
             # batch_loss = criterion(logps, labels.float())
-            val_loss += batch_loss.item()
+            # val_loss += batch_loss.item()
 
             _, avg_acc, cnt, pred,target,dists = utils.accuracy(logps.detach().cpu().numpy(),
                                              labels.detach().cpu().numpy(),thr = config.TRAIN.THRESHOLD)
@@ -68,14 +75,22 @@ def run_val(model, valloader, device, criterion, writer, epoch, config,logger):
 
             num = num + num_images
 
-        writer.add_scalar('Loss/val', float(val_loss / len(valloader)), epoch)
-        # writer.add_scalar('Accuracy/val', float(accuracy / len(valloader)), epoch)
-        writer.add_scalar('Accuracy/val', acc.avg, epoch)
-
         epoch_loss = running_loss / num
         epoch_acc_classification = running_corrects.double() / num
-        logger.info("Classification Validation Accuracy {} epoch: {}, loss: {} ".format(epoch, epoch_acc_classification,
-                                                                              epoch_loss))
+
+
+        writer.add_scalar('Loss/total_val', float(batch_loss.avg), epoch)
+        writer.add_scalar('Loss_class/val', float(class_loss.avg), epoch)
+        writer.add_scalar('Loss_heatmap/val', float(heatmap_loss.avg), epoch)
+
+        # writer.add_scalar('Accuracy/val', float(accuracy / len(valloader)), epoch)
+        writer.add_scalar('Accuracy/heatmap_val', acc.avg, epoch)
+        writer.add_scalar('Accuracy/class_val', epoch_acc_classification, epoch)
+        logger.info("Total validation loss {}".format(batch_loss.avg))
+
+        logger.info("Classification Validation, epoch: {}, Accuracy {} , loss: {} ".format(epoch, epoch_acc_classification,class_loss.avg))
+        logger.info("Heatmap Validation (epoch {}),Accuracy {} , loss: {} ".format(epoch,acc.avg,heatmap_loss.avg))
+
 
     return acc.avg
 
@@ -124,7 +139,7 @@ def main(config):
 
     optimizer = optim.Adam(model.parameters(), lr=config.TRAIN.LR)
     model.to(device)
-
+    print("Model on cuda: ", next(model.parameters()).is_cuda)
     # Decay LR by a factor of 0.1 every 3 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.01)
 
@@ -138,6 +153,8 @@ def main(config):
         acc = utils.AverageMeter()
         acc_classification = utils.AverageMeter()
         batch_loss = utils.AverageMeter()
+        class_loss = utils.AverageMeter()
+        heatmap_loss = utils.AverageMeter()
         running_loss = 0.0
         running_corrects = 0
         num = 0
@@ -162,8 +179,11 @@ def main(config):
             criterion_heatmap = nn.MSELoss()
             loss_heatmap = criterion_heatmap(logps, labels.float())
 
-            loss = loss_classification+loss_heatmap
+            loss = loss_classification+config.TRAIN.loss_alpha*loss_heatmap
+
             batch_loss.update(loss.item(),inputs.size(0))
+            class_loss.update(loss_classification.item(),inputs.size(0))
+            heatmap_loss.update(loss_heatmap.item(), inputs.size(0))
 
             optimizer.zero_grad()
             loss.backward()
@@ -172,8 +192,7 @@ def main(config):
 
             running_loss += loss.item() * inputs.size(0)
             running_corrects += torch.sum(pred_class == class_id.data)
-            batch_correct = torch.sum(pred_class == class_id.data)
-            batch_acc_class = batch_correct/config.TRAIN.BATCH_SIZE
+
             # print("running corrects",running_corrects.size())
 
             _, avg_acc, cnt, pred,target,dists = utils.accuracy(logps.detach().cpu().numpy(),
@@ -184,17 +203,25 @@ def main(config):
             # print("Batch {} train accurcy: {}, classification acc: {}, loss: {}".format(i, acc.avg, batch_acc_class,batch_loss.avg))
             num = num + num_images
 
-        writer.add_scalar('Loss/train', float(batch_loss.avg), epoch)
-
         epoch_loss = running_loss / (num)
         epoch_acc_classification = running_corrects.double() / (num)
-        epoch_time = time.time()-initial_time
-        print("epoch time: ",epoch_time)
-        logger.info('Classification Accuracy {} epoch: {}, loss: {} '.format(epoch,epoch_acc_classification,epoch_loss))
+        epoch_time = time.time() - initial_time
+
+        writer.add_scalar('Accuracy/heatmap_train', float(acc.avg), epoch)
+        writer.add_scalar('Accuracy/class_train', epoch_acc_classification, epoch)
+        writer.add_scalar('Loss/total_train', float(batch_loss.avg), epoch)
+        writer.add_scalar('Loss_class/train', float(class_loss.avg), epoch)
+        writer.add_scalar('Loss_heatmap/train', float(heatmap_loss.avg), epoch)
+
+
+        logger.info("epoch time: {}".format(epoch_time))
+        logger.info('Classification Train Accuracy {} epoch: {}'.format(epoch,epoch_acc_classification))
 
         val_acc = run_val(model, valloader, device, criterion, writer, epoch,config,logger)
 
-        logger.info('Train Loss: {:.4f} Train Acc: {:.4f} Val Acc: {:.4f}'.format(
+        logger.info("loss classification {}, loss heatmap {} ".format(class_loss.avg,heatmap_loss.avg))
+
+        logger.info('Train Total Loss: {:.4f} Train Heatmap Acc: {:.4f} Val Heatmap Acc: {:.4f}'.format(
              batch_loss.avg, acc.avg, val_acc))
 
         if val_acc > best_acc:
@@ -207,7 +234,7 @@ def main(config):
                 'loss': batch_loss.avg,
             }, os.path.join(config.DATASET.OUTPUT_PATH, "best_model.pt"))
 
-        if epoch % 250 == 0:
+        if epoch % 10 == 0:
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
@@ -224,7 +251,7 @@ def Parser():
     parser.add_argument('--data_dir', type=str, default="SpinousProcessData/FCN_PWH_train_dataset_heatmaps/data_19subj_2", metavar='N',
                         help='')
 
-    parser.add_argument('--batch_size', type=int, default=64, metavar='N',
+    parser.add_argument('--batch_size', type=int, default=12, metavar='N',
                         help='input batch size for training (default: 64)')
 
     parser.add_argument('--update_weights', type=bool, default=False, metavar='P',
