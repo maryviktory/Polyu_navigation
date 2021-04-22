@@ -14,8 +14,8 @@ import pandas as pd
 import os
 import keyboard
 import time
-from FCN_multiclass.sp_utils.run_test_without_labels import run_test_without_labels
-
+from FCN_multiclass.sp_utils.run_test_without_labels import run_test_without_labels_multiclass
+from FCN_multiclass.sp_utils import smooth
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter(config.TEST.save_dir + 'output_original_.avi', fourcc, 3.0,
 #                               (1280, 480))  # for two images of size 480*640
@@ -63,7 +63,16 @@ def smoothed_trajectory(X_label_from_file, Y_label_from_file,datatype,*argv):
     X_Y_label_interpolated_smoothed = np.column_stack((X_label_interpolated_smoothed, Y_label_interpolated))
     return X_label_interpolated_smoothed, X_Y_label_interpolated_smoothed
 
-def run_val(model, valloader, device, criterion,logger,config,patient):
+
+def get_label_from_image(label_image):
+    label_array = np.asarray(label_image)
+    pixel_sum = np.sum(label_array)
+
+    return int(pixel_sum > 0)
+
+
+
+def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,config,patient):
     '''
         Main function to run if the sweep is labeled and labels exist in the folder
         This function can record video of the sweep with the detected point and label on it
@@ -80,6 +89,22 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
     Y = np.zeros(0)
     X_label = np.zeros(0)
     Y_label = np.zeros(0)
+    c_sacrum_prob = np.zeros(0)
+    c_lumbar_prob = np.zeros(0)
+    c_thoracic_prob = np.zeros(0)
+    c_gap_prob = np.zeros(0)
+    sacrum_labels_array = np.zeros(0)
+    spinous_labels_array = np.zeros(0)
+    sacrum_labels_im_list = os.listdir(os.path.join(patient_dir,"Labels_sacrum"))
+    spinous_labels_im_list = os.listdir(os.path.join(patient_dir,"Labels"))
+    num_classes = 0
+
+    for label in sacrum_labels_im_list:
+        sacrum_labels_array = np.append(sacrum_labels_array,get_label_from_image(Image.open(os.path.join(patient_dir,"Labels_sacrum",label))))
+    # print(sacrum_labels_array)
+    for label in spinous_labels_im_list:
+        spinous_labels_array = np.append(spinous_labels_array,get_label_from_image(Image.open(os.path.join(patient_dir,"Labels",label))))
+
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     '''if the size of the frames doesn't match with the size in "out", the video will not play'''
@@ -126,6 +151,29 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
 
             logps,multiclass = model.forward(inputs)
 
+            #NOTE: Classification probabilities
+            num_classes = multiclass.shape[1]
+            prob = torch.sigmoid(multiclass)
+
+            c1 = prob[0, 0]
+            c2 = prob[0, 1]
+            c3 = prob[0, 2]
+
+            if num_classes == 3:
+                c_sacrum_prob = np.append(c_sacrum_prob,np.squeeze(c1.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob,np.squeeze(c2.to("cpu").numpy()))
+                c_thoracic_prob = np.append(c_thoracic_prob,np.squeeze(c3.to("cpu").numpy()))
+
+            # print("c1_array",c1_prob)
+
+            if num_classes == 4:
+                c4 = prob[0, 3]
+                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c2.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c4.to("cpu").numpy()))
+                c_gap_prob = np.append(c_gap_prob,np.squeeze(c1.to("cpu").numpy()))
+
+ ###########NOTE: Heatmap calculations
             batch_loss = criterion(logps, labels.float())
             val_loss += batch_loss.item()
 
@@ -169,6 +217,8 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
                 # save target position to csv file for the following trajectory smoothing and ploting.
                 # The coordinates in the image size of 224*224
                 np.savez(os.path.join(config.TEST.save_dir, patient + '.npz'), probability=probability, X=X, Y=Y, X_label=X_label, Y_label=Y_label)
+
+
 
             # print(probability_label,X_label,Y_label)
             ################___ _Transformations for plotting ####################
@@ -218,7 +268,7 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
 
                 # put a red dot, size 40, at 2 locations:
                 print(probab_frame)
-                if probab_frame>0.5:
+                if probab_frame>config.TEST.THRESHOLD:
                     plt.scatter(x=pred[0][0][0], y=pred[0][0][1], c='r', s=40)
 
                 # plt.subplot(3, 3, 5)
@@ -275,7 +325,7 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
                 image_predicted = cv2.putText(image_predicted, 'probability %s' % (round(probab_frame,2)), org, font,
                                               fontScale, color, thickness, cv2.LINE_AA)
                 #Only if the probability is larger than 0.7 it is counted as detected
-                if probab_frame>0.7:
+                if probab_frame>config.TEST.THRESHOLD:
                     x, y = pred[0][0][0], pred[0][0][1]
                     # x = int((pred[0][0][0]) * 640 / 244)
                     # y = int((pred[0][0][1]) * 480 / 244)
@@ -342,9 +392,49 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
                 # np.abs(X_Y_label_interpolated_smoothed[i][0]-
 
         logger.info("Accuracy mean {}".format(acc.avg))
-        logger.info("Distance mean {}".format(dist_error.avg))
+        logger.info("Distance mean {} mm".format(dist_error.avg))
         if config.TEST.PLOT_SMOOTH_LABEL_TRAJECTORY == True:
             logger.info("Distance mean calculated between line and predicted point {} pixels, {} mm".format(dist_error_calculated.avg,dist_error_calculated.avg/8)) #8 - 640 pix/80mm
+
+        plt.figure()
+        ax1 = plt.subplot(6, 1, 1)
+        # ax1.set_title("CNN probabilities")
+        plt.xlabel('Frames', fontsize=8)
+        plt.ylabel("Sacrum prob.", fontsize=8)
+        ax1.plot(smooth(c_sacrum_prob))
+
+        ax2 = plt.subplot(6, 1, 2)
+        # ax2.set_title("Labels")
+        plt.ylabel("Sacrum Labels", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax2.plot(sacrum_labels_array)
+
+        ax3 = plt.subplot(6, 1, 3)
+        # ax2.set_title("Labels")
+        plt.ylabel("Lumbar prob.", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax3.plot(smooth(c_lumbar_prob))
+
+        ax4 = plt.subplot(6, 1, 4)
+        # ax2.set_title("Labels")
+        plt.ylabel("Thoracic prob.", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax4.plot(smooth(c_thoracic_prob))
+
+        ax5 = plt.subplot(6, 1, 5)
+        # ax2.set_title("Labels")
+        plt.ylabel("Spinous labels", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax5.plot(spinous_labels_array)
+
+        ax6 = plt.subplot(6, 1, 6)
+        # ax2.set_title("Labels")
+        plt.ylabel("Probabilities heatmap", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax6.plot(smooth(probability))
+
+
+        plt.show()
 
         if config.TRAIN.SWEEP_TRJ_PLOT:
 
@@ -361,7 +451,7 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
                 xs = X[i]
                 ys = Y[i]
 
-                if probability[i] > 0.7 and X[i] != 0:  # Spinous
+                if probability[i] > config.TEST.THRESHOLD and X[i] != 0:  # Spinous
                     color = "r"
                     marker = "o"
                     path = np.append(path, xs)
@@ -373,7 +463,7 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
                 plt.title('red - spinous detected, x - Gap', y=1.02, fontsize=10)
                 ax.scatter(xs, zs, c=color, marker=marker)
 
-                if probability_label[i] > 0.7 and X_label[i] != 0:  # Spinous
+                if probability_label[i] > config.TEST.THRESHOLD and X_label[i] != 0:  # Spinous
                     color = "b"
                     marker = "o"
                     path_target = np.append(path_target, X_label[i])
@@ -452,20 +542,20 @@ def main():
 
             model.to(device)
 
-            for patient in ["test"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
+            for patient in ["sweep018"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
                 patient_dir = os.path.join(test_dir,patient)
                 test_dataloader = utils.load_test_data(patient_dir, '', config)
-                val_acc = run_val(model, test_dataloader, device, criterion,logger,config,patient)
+                val_acc = run_val_multiclass(model, test_dataloader,patient_dir, device, criterion,logger,config,patient)
 
         else:
             test_dir = config.TEST.data_dir_w_out_labels
             if config.TRAIN.SWEEP_TRJ_PLOT:
                 test_dir = config.TEST.sweep_data_dir
-            for patient in ["US_probe_output"]: #Empty_frames
-                test_dir_patient = os.path.join(test_dir,patient,"Images")
-                test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
+            for patient in ["sweep018"]: #Empty_frames
+                test_dir_patient = os.path.join(test_dir,patient)
+                # test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
 
-                run_test_without_labels(model, test_list,patient, device, logger,config)
+                run_test_without_labels_multiclass(model, test_dir_patient,patient, device, logger,config)
 
 
     except KeyboardInterrupt:
