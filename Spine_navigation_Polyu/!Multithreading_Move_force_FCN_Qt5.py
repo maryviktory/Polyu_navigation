@@ -588,7 +588,7 @@ class Move_Thread(Process):
                 if frame_probability > config.IMAGE.probability_threshold:
                     delta_X = x_scaled - config.IMAGE.ORIGINAL_IMAGE_SIZE/2 # NOTE: middle of the image, because we want to maintain feature in the middle
                     # print("delta_X",delta_X)
-                    if delta_X < 100:
+                    if delta_X < 100: #in pixels
                         K_im = config.IMAGE.K_im_near
                     else:
                         K_im = config.IMAGE.K_im_out

@@ -1,5 +1,5 @@
 import math
-import Spine_navigation_Polyu.GUI.Scolioscan_robotics_big_GUI_Qt4 as GUI
+import Spine_navigation_Polyu.old.Scolioscan_robotics_big_GUI_Qt4 as GUI
 import sys
 import time
 from PIL import ImageGrab

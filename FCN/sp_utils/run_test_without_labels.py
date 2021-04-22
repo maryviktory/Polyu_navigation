@@ -22,9 +22,9 @@ def run_test_without_labels(model,testdata,patient,device, logger,conf):
     time_inference = utils.AverageMeter()
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     file = open('LOG1.txt', 'w')
-    out = cv2.VideoWriter(config.TEST.save_dir + '_original_%s.avi' % (patient), fourcc, 3.0,
-                          (1280, 480))  # for two images of size 480*640
-
+    # out = cv2.VideoWriter(config.TEST.save_dir + '_original_%s.avi' % (patient), fourcc, 3.0,
+    #                       (1280, 480))  # for two images of size 480*640
+    model.to(device)
     with torch.no_grad():
         for data in testdata:
             # logger.info("data file is {}".format(data))
@@ -47,7 +47,11 @@ def run_test_without_labels(model,testdata,patient,device, logger,conf):
 
             inputs= tensor_image.to(device)
             # print("inputs",inputs.shape, inputs)
+            # print(inputs)
+            start_time_one = time.time()
             logps = model.forward(inputs)
+            time_one = time.time() - start_time_one
+            print("time one:",time_one)
             # print(logps)
 
             prob_tensor = logps

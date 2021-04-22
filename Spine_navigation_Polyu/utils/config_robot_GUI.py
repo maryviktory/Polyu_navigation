@@ -7,35 +7,55 @@ import os
 
 import numpy as np
 from easydict import EasyDict as edict
-
+import urx
 
 config = edict()
-config.Mode_Develop = False #Allows to launch code without robot
-config.IP_ADRESS = "158.132.172.194"
+config.Mode_Develop = True #Allows to launch code without robot
+config.IP_ADRESS = "192.168.0.100" # "158.132.172.194"
 config.FOV = 0.045 #Field of view of the robot
-config.alpha = 0.5
+config.alpha = 0.1
+config.robot_TCP = (0, 0, 0.306, 0, 0, 0)
+config.robot_payload = 1 #KG
 
 config.w = 400
 config.hg = 360
-config.Trajectory_n = '3probe'
+config.Trajectory_n = 'FCN_force'
+config.default_distance = 0.3 #meters
+config.maximum_distance = 2 #meters
+config.VELOCITY_up = 0.004 #0.002
+# config.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
+# print("robot in config")
+config.MODE = edict()
+config.MODE.Develop = False #Allows to launch code without robot
+config.MODE.FCN = True
+config.MODE.FCN_vcontrol = True
+config.MODE.FORCE = True
+config.MODE.BASE_csys = False
+config.MODE.exp_smoothing_velocity = True
+
+config.MODE.median_filter = False
+config.Median_kernel_size = 31
 
 config.FORCE = edict()
 
 config.FORCE.Fref_first_move = 4 #Force [N]
-config.FORCE.Fref = 6 #Force [N]
-config.FORCE.Fmax = 20 #Force [N]
-config.FORCE.Fcrit = 30 #Force [N]
+config.FORCE.Fref = 5 #Force [N]
+config.FORCE.Fmax = 30 #Force [N]
+config.FORCE.Fcrit = 35 #Force [N]
 config.FORCE.K_delta = 0.0005
-config.FORCE.Kf = 0.002
+config.FORCE.Kf = 0.0004 #0.002  Kunal - 0.0004
 config.FORCE.Kz = 0.6
 config.FORCE.v = 0.007 #move first point
 config.FORCE.a = 0.01 #move first point
 config.FORCE.thr = 0.004
+config.FORCE.K_torque = 0.07
 
 config.IMAGE = edict()
 
-
-config.IMAGE.FCN = False
+config.IMAGE.K_im_out = 0.5
+config.IMAGE.K_im_near = 0.2
+# config.IMAGE.FCN = False
+config.IMAGE.subject_mode = "phantom" #"human" #phantom
 
 config.IMAGE.JSON_WS = {
     "Command": "Us_Config",
@@ -47,7 +67,8 @@ config.IMAGE.JSON_WS = {
 
 config.IMAGE.LOCAL_HOST = "ws://localhost:4100"
 config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\human_best_model_exp40184.pt"
-config.IMAGE.PROBE_SIZE = 80 #old wifi probe 48mm, new probe 80
+config.IMAGE.Windows_MODEL_FILE_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\best_model_exp49560_phantom_6scans.pt"
+config.IMAGE.PROBE_SIZE = 0.08 #old wifi probe 48mm, new probe 80 mm = 0.08m
 config.IMAGE.ORIGINAL_IMAGE_SIZE = 640 #width, IFL - 480, Polyu - 640
 config.IMAGE.ORIGINAL_IMAGE_HEIGHT = 480
 config.IMAGE.input_im_size = 224
@@ -57,10 +78,11 @@ config.IMAGE.normalization = True
 config.IMAGE.Windows = True
 # size of images for each device
 config.IMAGE.BATCH_SIZE = 1
+config.IMAGE.probability_threshold = 0.5
 # Test Model
 config.IMAGE.input_im_size = 224
 config.IMAGE.PLOT = False #plots each frame
-config.IMAGE.VIDEO = False #record video with detected point and label
+config.IMAGE.VIDEO = True #record video with detected point and label
 config.IMAGE.PLOT_VIDEO = False #plot each frame of the video
 config.IMAGE.labels_exist = True #True if the sweep is labelled
 # config.TRAIN.SWEEP_TRJ_PLOT = True
@@ -69,7 +91,6 @@ config.IMAGE.SAVE_PATH = "D:\spine navigation Polyu 2021\\robot_trials_output"
 config.IMAGE.PLOT_SMOOTH_LABEL_TRAJECTORY = True #True if the file already exists and need to be loaded
 ## Augmentation of data
 config.IMAGE.enable_transform = False
-
 
 # pose_resnet related params
 POSE_RESNET = edict()

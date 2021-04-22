@@ -45,6 +45,7 @@ def Client_US_frames(ws,out):
             image = np.array(pil_image)
 
             cv2.imshow("image",image)
+            print(image.shape)
 
             # Don't try to write out gray frames, only BGR, otherwise the output will be empty
             out.write(cv2.cvtColor(image,cv2.COLOR_GRAY2BGR))
