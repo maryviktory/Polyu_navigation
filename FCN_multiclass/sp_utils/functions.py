@@ -25,18 +25,62 @@ def load_split_train_val(dataroot, train_dir, val_dir, config):
 
 
 def multiclass_heatmap_load_train_val(dataroot, train_dir, val_dir, config):
+    class_num = len(os.listdir(os.path.join(dataroot, train_dir)))
+
     train_data = Dataset_Multiclass_heatmaps(os.path.join(dataroot, train_dir), image_size=config.TEST.input_im_size,
                               label_size=config.TEST.heatmap_size, enable_transform=config.TRAIN.Augmentation,
                               norm=True)
     val_data = Dataset_Multiclass_heatmaps(os.path.join(dataroot, val_dir), image_size=config.TEST.input_im_size,
                             label_size=config.TEST.heatmap_size, enable_transform=False, norm=True)
 
-    # print(train_data.__getitem__(1))
-    trainloader = torch.utils.data.DataLoader(train_data, batch_size=config.TRAIN.BATCH_SIZE, shuffle=True,num_workers=0)
+
+    target_list = torch.tensor(train_data.class_id_list)
+    target_list = target_list[torch.randperm(len(target_list))]
+
+    weights_classes = make_weights_for_balanced_classes(os.path.join(dataroot, train_dir), class_num)
+    print("weights_classes",weights_classes)
+
+    class_weights_all = weights_classes[target_list]
+    # print(class_weights_all)
+
+    weighted_sampler = torch.utils.data.sampler.WeightedRandomSampler(
+        weights=class_weights_all,
+        num_samples=len(class_weights_all),
+        replacement=True
+    )
+    trainloader = torch.utils.data.DataLoader(train_data, batch_size=config.TRAIN.BATCH_SIZE, shuffle=False,num_workers=0, sampler = weighted_sampler)
 
     valloader = torch.utils.data.DataLoader(val_data, batch_size=config.TRAIN.VAL_BATCH_SIZE)
 
-    return trainloader, valloader
+
+    return trainloader, valloader, class_num
+
+
+def make_weights_for_balanced_classes(images, nclasses):
+
+    classes_list = os.listdir(images)
+    weight = [0] * nclasses
+    for i, class_name in enumerate(classes_list):
+        list_class = [index for index in os.listdir(os.path.join(images,class_name))]
+        weight[i] = len(list_class)
+    # print(weight)
+    # weight = torch.Tensor([0.0008, 0.0008, 0.0007, 0.0007])
+    weight = 1 / torch.Tensor(weight)
+    # sum = len(list_class[0]+list_class[1]+list_class[2]+list_class[3])
+
+    # weight = np.array(weight)//sum
+
+
+    # for item in enumerate(os.listdir(images)):
+    #     count[item[1]] += 1
+    # weight_per_class = [0.] * nclasses
+    # N = float(sum(count))
+    # for i in range(nclasses):
+    #     weight_per_class[i] = N/float(count[i])
+    # weight = [0] * len(images)
+    # for idx, val in enumerate(images):
+    #     weight[idx] = weight_per_class[val[1]]
+    return weight
 
 
 def load_test_data(dataroot, val_dir,config):

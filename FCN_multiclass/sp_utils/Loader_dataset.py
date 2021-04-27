@@ -4,6 +4,8 @@ from torch.utils.data import Dataset
 from PIL import Image
 import torchvision as tv
 import random
+import matplotlib.pyplot as plt
+import numpy as np
 
 class DatasetPlane(Dataset):
 
@@ -32,7 +34,7 @@ class DatasetPlane(Dataset):
 
         img_name = os.path.join(self.root_dir, "Images", self.image_list[idx])
         # print(img_name)
-        label_name = os.path.join(self.root_dir, "Labels_sum_heatmaps", self.image_list[idx])
+        label_name = os.path.join(self.root_dir, "Labels_heatmaps", self.image_list[idx])
         # print(img_name)
 
         image = Image.open(img_name)
@@ -138,6 +140,8 @@ class Dataset_Multiclass_heatmaps(Dataset):
         label = label.convert("RGB")
 
 
+
+
         if self.enable_transform == True:
             rotation, translation = self.custom_transform()
             scale_image_label = self.image_size/self.label_size
@@ -147,8 +151,19 @@ class Dataset_Multiclass_heatmaps(Dataset):
             label = tv.transforms.functional.affine(label, rotation, (translation, 0), 1,0)
             # print("translation {}".format(translation), "rotation {}".format(rotation))
 
+        Plot = False
+        if Plot == True:
+            print(img_name)
+            print("class id", class_id)
+            plt.figure()
+            plt.imshow(np.asarray(image))
+            plt.figure()
+            plt.imshow(np.asarray(label))
+            plt.show()
+
         image = tv.transforms.Resize((self.image_size, self.image_size))(image)
         label = tv.transforms.Resize((self.label_size, self.label_size))(label)
+
 
 
         image = tv.transforms.ToTensor()(image)
@@ -165,18 +180,19 @@ class Dataset_Multiclass_heatmaps(Dataset):
 
         factor = random.random()
         if factor <= 0.25:  # rotation
-            rotation = random.randint(-15, 15)
+            rotation = random.randint(-30, 30)
             translation = 0
         elif 0.25 < factor >= 0.5:
             rotation = 0
             translation =  random.randint(-20, 20) #56*56 label image
         elif 0.5 < factor >= 0.75:
-            rotation = random.randint(-15, 15)
+            rotation = random.randint(-30, 30)
             translation = 0.1 * random.randint(1, 3)
 
         else:
             rotation = 0
             translation = 0
+
 
 
         self.rotation = rotation

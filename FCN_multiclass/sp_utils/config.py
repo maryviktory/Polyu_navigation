@@ -50,7 +50,7 @@ config.MODEL.PRETRAINED = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_
 config.MODEL.PRETRAINED_NAS = "SpinousProcessData/FCN_PWH_train_dataset_heatmaps/model_best_resnet_fixed_False_pretrained_True_data_19subj_2_exp_36776.pt"
 #"SpinousProcessData/spinous_best_18_retrain.pt"
 config.MODEL.NUM_JOINTS = 1
-config.MODEL.num_classes = 3
+config.MODEL.num_classes = 4
 config.MODEL.IMAGE_SIZE = [256, 256]  # width * height, ex: 192 * 256
 config.MODEL.EXTRA = MODEL_EXTRAS[config.MODEL.NAME]
 
@@ -61,10 +61,10 @@ config.LOSS.USE_TARGET_WEIGHT = True
 
 # DATASET related params
 config.DATASET = edict()
-config.DATASET.PATH ="D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_multiclass_heatmap"
+config.DATASET.PATH = "C:\\Users\Administrator\Documents\dataset_multiclass_FCN"
 #"/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_train_dataset_heatmaps/data_19subj_2"
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Small_dataset_heatmaps"
-config.DATASET.OUTPUT_PATH = config.DATASET.PATH
+config.DATASET.OUTPUT_PATH = os.path.join(config.DATASET.PATH,"output")
 #"/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_train_dataset_heatmaps/data_19subj_2"
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Small_dataset_heatmaps"
 config.DATASET.PATH_NAS = 'SpinousProcessData/FCN_PWH_train_dataset_heatmaps/data_19subj_2'
@@ -79,9 +79,9 @@ config.TRAIN.BATCH_SIZE = 12
 config.TRAIN.VAL_BATCH_SIZE = 12
 config.TRAIN.THRESHOLD = 0.5 #distance error maximum allowed - 2.4mm (threshold = 0.5)
 config.TRAIN.Augmentation = True
-config.TRAIN.UPDATE_WEIGHTS = True
-config.TRAIN.LR = 0.0001
-config.TRAIN.END_EPOCH = 40
+config.TRAIN.UPDATE_WEIGHTS = False
+config.TRAIN.LR = 0.001
+config.TRAIN.END_EPOCH = 30
 config.TRAIN.SWEEP_TRJ_PLOT = True
 
 #EXTRA
@@ -90,7 +90,8 @@ config.TRAIN.LR_STEP = [90, 110]
 config.TRAIN.OPTIMIZER = 'adam'
 config.TRAIN.MOMENTUM = 0.9
 config.TRAIN.WD = 0.0001
-
+config.TRAIN.loss_alpha = 1000
+config.TRAIN.weight_decay = 0.1
 # testing
 config.TEST = edict()
 
@@ -102,19 +103,19 @@ config.TEST.PLOT = False #plots each frame
 config.TEST.VIDEO = True #record video with detected point and label
 config.TEST.PLOT_VIDEO = False #plot each frame of the video
 config.TEST.labels_exist = True #True if the sweep is labelled
-config.TRAIN.SWEEP_TRJ_PLOT = False
+config.TRAIN.SWEEP_TRJ_PLOT = True
 config.TEST.SAVE_NPZ_FILE = False
 config.TEST.PLOT_SMOOTH_LABEL_TRAJECTORY = False #True if the file already exists and need to be loaded
 ## Augmentation of data
 config.TEST.enable_transform = False
-
+config.TEST.THRESHOLD = 0.5
 
 config.TEST.data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_multiclass_heatmap "
 config.TEST.Windows_data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_2"
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Heatmaps_spine"
 # config.TEST.sweep_data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/DATA_toNas_for CNN_IPCAI/data set patients images/Maria_T/Images" #images_subset
 config.TEST.sweep_data_dir = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_dataset_heatmaps_all"
-config.TEST.Windows_sweep_data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
+config.TEST.Windows_sweep_data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset"
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Dataset_Heatmaps_all_subjects"
 # config.TEST.data_dir_w_out_labels = "/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Spinous_and_Gap_without_labels"
 config.TEST.data_dir_w_out_labels = "/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/small_test"
@@ -124,7 +125,7 @@ config.TEST.save_dir = "/media/maryviktory/My Passport/spine navigation Polyu 20
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Spinous_positions_sweeps"
 config.TEST.Windows_save_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\output"
 config.TEST.MODEL_FILE = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/models_FCN/best_model_exp40184.pt"
-config.TEST.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_multiclass_heatmap\\best_model_3class_no_gap_lr0001_val0.89.pt"
+config.TEST.Windows_MODEL_FILE = "C:\\Users\Administrator\Documents\dataset_multiclass_FCN\output\\2\model30.pt"
 #"D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\human_best_model_exp40184.pt"
 #'/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/models_FCN/best_model_exp36817.pt'
 #"/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/models/best_model.pt"

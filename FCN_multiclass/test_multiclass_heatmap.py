@@ -168,8 +168,8 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
 
             if num_classes == 4:
                 c4 = prob[0, 3]
-                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c2.to("cpu").numpy()))
-                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c2.to("cpu").numpy()))
                 c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c4.to("cpu").numpy()))
                 c_gap_prob = np.append(c_gap_prob,np.squeeze(c1.to("cpu").numpy()))
 
@@ -401,7 +401,7 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
         # ax1.set_title("CNN probabilities")
         plt.xlabel('Frames', fontsize=8)
         plt.ylabel("Sacrum prob.", fontsize=8)
-        ax1.plot(smooth(c_sacrum_prob))
+        ax1.plot(c_sacrum_prob)
 
         ax2 = plt.subplot(6, 1, 2)
         # ax2.set_title("Labels")
@@ -413,13 +413,13 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
         # ax2.set_title("Labels")
         plt.ylabel("Lumbar prob.", fontsize=8)
         plt.xlabel('Frames', fontsize=8)
-        ax3.plot(smooth(c_lumbar_prob))
+        ax3.plot(c_lumbar_prob)
 
         ax4 = plt.subplot(6, 1, 4)
         # ax2.set_title("Labels")
         plt.ylabel("Thoracic prob.", fontsize=8)
         plt.xlabel('Frames', fontsize=8)
-        ax4.plot(smooth(c_thoracic_prob))
+        ax4.plot(c_thoracic_prob)
 
         ax5 = plt.subplot(6, 1, 5)
         # ax2.set_title("Labels")
@@ -431,7 +431,7 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
         # ax2.set_title("Labels")
         plt.ylabel("Probabilities heatmap", fontsize=8)
         plt.xlabel('Frames', fontsize=8)
-        ax6.plot(smooth(probability))
+        ax6.plot(probability)
 
 
         plt.show()

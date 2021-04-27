@@ -7,7 +7,7 @@ import cv2
 '''This code helps to generate labels from different subjects and record all in one folder'''
 patients_dataset_file = "C:\\Users\maryv\PycharmProjects\Polyu_navigation\FCN_multiclass\dataset_patients_PWH_all.txt"
 data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset"
-label_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\sweep018\Labels_sum_heatmaps"
+
 
 # data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/DATA_toNas_for CNN_IPCAI/data set patients images"
 # data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/Force_integration_DB/New_Patients"
@@ -21,12 +21,20 @@ def open_file(name_file):
     return lines_train
 
 
-patient_name = open_file(patients_dataset_file)
+# patient_name = open_file(patients_dataset_file)
 
 images_exist_flag = False
 
-patient_name = "sweep018",""
+patient_name = "sweep018","sweep3013","sweep5005","sweep9001","sweep20001","sweep18001"
+
 for patient in patient_name:
+    input_dir = os.path.join(data_dir, ("%s/Labels_sacrum" % patient))
+
+
+    label_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\%s\Labels_sacrum_heatmaps"%(patient)
+
+    print("input {} to {}",input_dir, label_dir)
+
     print("process patient {}".format(patient))
     path = os.path.join(label_dir, patient)
 
@@ -37,12 +45,12 @@ for patient in patient_name:
             os.mkdir(os.path.join(path, 'Images'))
 
 
-    input_dir =  os.path.join(data_dir,("%s/Labels_sum"%patient))
+
     coords = []
 
     if not os.path.exists(input_dir):
         print("Does not exist {} for {}".format(input_dir,patient))
-        input_dir = os.path.join(data_dir, ("%s/Labels" % patient))
+        input_dir = os.path.join(data_dir, ("%s/Labels_heatmaps" % patient))
         # continue
 
 
@@ -107,6 +115,7 @@ for patient in patient_name:
         if images_exist_flag == True:
             cv2.imwrite(os.path.join(label_dir, patient,'Images', image_name), image)
 
+        # print("Copy")
         # put text and highlight the center
         # cv2.circle(image, (x0_0, y0_0), 5, 0, -1)
         # plt.subplot(1, 2, 1)
