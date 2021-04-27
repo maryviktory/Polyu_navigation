@@ -136,9 +136,9 @@ def main(config):
         if "deconv" in name or "final" in name:
             parameter.requires_grad = True
 
-    for name,parameter in model.named_parameters():
-        if parameter.requires_grad == True:
-            print(name)
+    # for name,parameter in model.named_parameters():
+    #     if parameter.requires_grad == True:
+    #         print(name)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -169,6 +169,8 @@ def main(config):
         num = 0
         class_2 = 0
         class_1 = 0
+        class_0 = 0
+        class_3 = 0
         for i, (inputs, labels,class_id) in enumerate(trainloader):
             # print(inputs.shape)
 
@@ -177,7 +179,10 @@ def main(config):
                     class_2 = class_2+1
                 if id ==1:
                     class_1 = class_1 +1
-
+                if id == 0:
+                    class_0 = class_0+1
+                if id ==3:
+                    class_3 = class_3 +1
 
             # grid = tv.utils.make_grid(inputs)
             # plt.imshow(grid.numpy().transpose((1, 2, 0)))
@@ -204,8 +209,8 @@ def main(config):
             criterion_heatmap = nn.MSELoss()
             loss_heatmap = criterion_heatmap(logps, labels.float())
 
-            # loss = loss_classification+config.TRAIN.loss_alpha*loss_heatmap
-            loss = config.TRAIN.loss_alpha*loss_heatmap
+            loss = loss_classification+config.TRAIN.loss_alpha*loss_heatmap
+            # loss = config.TRAIN.loss_alpha*loss_heatmap
             batch_loss.update(loss.item(),inputs.size(0))
             class_loss.update(loss_classification.item(),inputs.size(0))
             heatmap_loss.update(loss_heatmap.item(), inputs.size(0))
@@ -228,8 +233,10 @@ def main(config):
             # print("Batch {} train accurcy: {}, classification acc: {}, loss: {}".format(i, acc.avg, batch_acc_class,batch_loss.avg))
             num = num + num_images
 
+        print("cl0",class_0)
         print("cl1",class_1)
-        print("cl2",class_2)
+        print("cl2", class_2)
+        print("cl3", class_3)
 
         epoch_loss = running_loss / (num)
         epoch_acc_classification = running_corrects.double() / (num)
@@ -310,7 +317,7 @@ def Parser():
     parser.add_argument('--update_weights', type=bool, default=False, metavar='P',
                         help='whether to train the networs from scratches or with fine tuning')
 
-    parser.add_argument('--lr', type=float, default=0.5, metavar='BS',
+    parser.add_argument('--lr', type=float, default=0.01, metavar='BS',
                         help='learning rate')
     args = parser.parse_args()
 

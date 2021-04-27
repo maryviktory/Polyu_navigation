@@ -35,7 +35,7 @@ def multiclass_heatmap_load_train_val(dataroot, train_dir, val_dir, config):
 
 
     target_list = torch.tensor(train_data.class_id_list)
-    target_list = target_list[torch.randperm(len(target_list))]
+    # target_list = target_list[torch.randperm(len(target_list))]
 
     weights_classes = make_weights_for_balanced_classes(os.path.join(dataroot, train_dir), class_num)
     print("weights_classes",weights_classes)

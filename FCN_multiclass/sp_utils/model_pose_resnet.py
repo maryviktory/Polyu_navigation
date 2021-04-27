@@ -160,9 +160,9 @@ class PoseResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
 
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.avgpool_class = nn.AdaptiveAvgPool2d((1, 1))
 
-        self.fc = nn.Linear(512 * block.expansion, cfg.MODEL.num_classes)
+        self.fc_class = nn.Linear(512 * block.expansion, cfg.MODEL.num_classes)
 
         # used for deconv layers
         self.deconv_layers = self._make_deconv_layer(
@@ -249,9 +249,9 @@ class PoseResNet(nn.Module):
         branch_out = x
 
         # Classification HEAD
-        x = self.avgpool(x)
+        x = self.avgpool_class(x)
         x = torch.flatten(x, 1)
-        x = self.fc(x)
+        x = self.fc_class(x)
         classification = x
 
         # Heatmap HEAD
@@ -285,13 +285,23 @@ class PoseResNet(nn.Module):
                     nn.init.normal_(m.weight, std=0.001)
                     nn.init.constant_(m.bias, 0)
 
-            # pretrained_state_dict = torch.load(pretrained)
-            logger.info('=> loading pretrained model {}'.format(pretrained))
-            # self.load_state_dict(pretrained_state_dict, strict=False)
-            checkpoint = torch.load(pretrained, map_location=torch.device('cpu'))
 
-            state_dict = checkpoint['model_state_dict']
-            self.load_state_dict(state_dict, strict=False)
+            Imagenet_pretrained = True
+            if Imagenet_pretrained == True:
+                logger.info("Loading imagenet pretrained model")
+                state_dict = torch.hub.load_state_dict_from_url(
+                    'https://s3.amazonaws.com/pytorch/models/resnet18-5c106cde.pth')
+                self.load_state_dict(state_dict, strict=False)
+
+            # pretrained_state_dict = torch.load(pretrained)
+
+            else:
+                logger.info('=> loading pretrained model {}'.format(pretrained))
+                # self.load_state_dict(pretrained_state_dict, strict=False)
+                checkpoint = torch.load(pretrained, map_location=torch.device('cpu'))
+
+                state_dict = checkpoint['model_state_dict']
+                self.load_state_dict(state_dict, strict=False)
 
         #     if isinstance(checkpoint, OrderedDict):
         #         state_dict = checkpoint
@@ -339,5 +349,6 @@ def get_pose_net( model_path, is_train, **kwargs):
 
     if is_train == True and cfg.MODEL.INIT_WEIGHTS:
         # model.init_weights(cfg.MODEL.PRETRAINED)
+
         model.init_weights(model_path)
     return model

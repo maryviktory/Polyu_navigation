@@ -49,6 +49,8 @@ config.MODEL.PRETRAINED = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_
 #'/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/models/spinous_best_18_retrain.pt'
 config.MODEL.PRETRAINED_NAS = "SpinousProcessData/FCN_PWH_train_dataset_heatmaps/model_best_resnet_fixed_False_pretrained_True_data_19subj_2_exp_36776.pt"
 #"SpinousProcessData/spinous_best_18_retrain.pt"
+config.MODEL.Imagenet_pretrained = "C:\\Users\Administrator\Documents\dataset_multiclass_FCN\pretrained model\\resnet18-5c106cde.pth"
+
 config.MODEL.NUM_JOINTS = 1
 config.MODEL.num_classes = 4
 config.MODEL.IMAGE_SIZE = [256, 256]  # width * height, ex: 192 * 256
@@ -79,9 +81,9 @@ config.TRAIN.BATCH_SIZE = 12
 config.TRAIN.VAL_BATCH_SIZE = 12
 config.TRAIN.THRESHOLD = 0.5 #distance error maximum allowed - 2.4mm (threshold = 0.5)
 config.TRAIN.Augmentation = True
-config.TRAIN.UPDATE_WEIGHTS = False
+config.TRAIN.UPDATE_WEIGHTS = True
 config.TRAIN.LR = 0.001
-config.TRAIN.END_EPOCH = 30
+config.TRAIN.END_EPOCH = 100
 config.TRAIN.SWEEP_TRJ_PLOT = True
 
 #EXTRA
@@ -90,7 +92,7 @@ config.TRAIN.LR_STEP = [90, 110]
 config.TRAIN.OPTIMIZER = 'adam'
 config.TRAIN.MOMENTUM = 0.9
 config.TRAIN.WD = 0.0001
-config.TRAIN.loss_alpha = 1000
+config.TRAIN.loss_alpha = 5000
 config.TRAIN.weight_decay = 0.1
 # testing
 config.TEST = edict()
