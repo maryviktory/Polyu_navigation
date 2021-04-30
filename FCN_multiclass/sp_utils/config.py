@@ -45,7 +45,7 @@ MODEL_EXTRAS = {
 config.MODEL = edict()
 config.MODEL.NAME = 'pose_resnet'
 config.MODEL.INIT_WEIGHTS = True
-config.MODEL.PRETRAINED = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_multiclass_heatmap\pretrained model\model_best_resnet_fixed_False_pretrained_True_Multiclass_spine_4classes_exp6106.pt"
+config.MODEL.PRETRAINED = "C:\\Users\Administrator\Documents\dataset_multiclass_FCN\pretrained model\model_best_resnet_fixed_False_pretrained_True_Multiclass_spine_4classes_exp6106.pt"
 #'/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/models/spinous_best_18_retrain.pt'
 config.MODEL.PRETRAINED_NAS = "SpinousProcessData/FCN_PWH_train_dataset_heatmaps/model_best_resnet_fixed_False_pretrained_True_data_19subj_2_exp_36776.pt"
 #"SpinousProcessData/spinous_best_18_retrain.pt"
@@ -83,7 +83,9 @@ config.TRAIN.THRESHOLD = 0.5 #distance error maximum allowed - 2.4mm (threshold 
 config.TRAIN.Augmentation = True
 config.TRAIN.UPDATE_WEIGHTS = True
 config.TRAIN.LR = 0.001
-config.TRAIN.END_EPOCH = 100
+config.TRAIN.LR_heatmap = 0.0006
+config.TRAIN.LR_cl = 0.01
+config.TRAIN.END_EPOCH = 40
 config.TRAIN.SWEEP_TRJ_PLOT = True
 
 #EXTRA
@@ -92,7 +94,7 @@ config.TRAIN.LR_STEP = [90, 110]
 config.TRAIN.OPTIMIZER = 'adam'
 config.TRAIN.MOMENTUM = 0.9
 config.TRAIN.WD = 0.0001
-config.TRAIN.loss_alpha = 5000
+config.TRAIN.loss_alpha = 500
 config.TRAIN.weight_decay = 0.1
 # testing
 config.TEST = edict()

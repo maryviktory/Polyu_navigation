@@ -286,7 +286,7 @@ class PoseResNet(nn.Module):
                     nn.init.constant_(m.bias, 0)
 
 
-            Imagenet_pretrained = True
+            Imagenet_pretrained = False
             if Imagenet_pretrained == True:
                 logger.info("Loading imagenet pretrained model")
                 state_dict = torch.hub.load_state_dict_from_url(
@@ -352,3 +352,35 @@ def get_pose_net( model_path, is_train, **kwargs):
 
         model.init_weights(model_path)
     return model
+
+
+class MultiTaskLossWrapper(nn.Module):
+    def __init__(self, log_var_a,log_var_b,task_num = 2):
+        super(MultiTaskLossWrapper, self).__init__()
+        self.task_num = task_num
+        # self.log_vars = nn.Parameter(torch.zeros((task_num)))
+        self.log_vars_a = log_var_a
+        self.log_vars_b = log_var_b
+
+    def forward(self, preds_multiclass, preds_heatmap, class_id, labels):
+        # mse, crossEntropy = MSELossFlat(), CrossEntropyFlat()
+        criterion_classification = nn.CrossEntropyLoss()
+        criterion_heatmap = nn.MSELoss()
+        loss0 = criterion_classification(preds_multiclass, class_id)
+        loss1 = config.TRAIN.loss_alpha*criterion_heatmap(preds_heatmap, labels.float())
+
+        precision0 = torch.exp(-self.log_vars_a)
+        loss0 = precision0 * loss0 + self.log_vars_a
+
+        precision1 = torch.exp(-self.log_vars_b)
+        loss1 = precision1 * loss1 + self.log_vars_b
+        # print("loss parameters1", loss0, precision0, self.log_vars[0])
+        # print("loss parameters2", loss1, precision1, self.log_vars[1])
+
+        # Initialized standard deviations (ground truth is 10 and 1):
+        # std_1 = torch.exp(self.log_vars[0]) ** 0.5
+        # std_2 = torch.exp(self.log_vars[1]) ** 0.5
+        # print([std_1.item(), std_2.item()])
+
+
+        return loss0,loss1
