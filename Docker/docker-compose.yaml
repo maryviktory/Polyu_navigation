@@ -1,0 +1,31 @@
+version: '3.5'
+services:
+    cms:
+       image: maryviktory:fcn_cnn
+       container_name: train
+       stdin_open: true # docker run -i
+       tty: true        # docker run -t
+       shm_size: 8G
+       ports:
+       - 65080:6006
+#       user: "$(id -u):$(id -g)"
+#       gpus: all
+       volumes:
+       - /storage/maryviktory/FCN_CNN:/workspace
+#       - /media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_train_dataset_heatmaps/data_19subj_15train_no_sacrum_lab:/app/home/user/data/
+
+#    - /home/maryviktory/Documents/dataset_multiclass_FCN/output:/home/user/data/output
+#       - /home/maryviktory/Documents/dataset_multiclass_FCN/pretrained model:/home/user/data/pretrained model
+       command: >
+          sh -c "cd /workspace &&
+
+
+                 python3 run_train_multiclass_polyu.py --lr 0.001 --imagenet &&
+                 python3 run_train_multiclass_polyu.py --lr 0.0001 --imagenet
+                 "
+       deploy:
+          resources:
+             reservations:
+                devices:
+                   - capabilities: [ gpu ]
+#docker run -it --shm-size 8G -p 1234:6006 --name docker_container_fcn_cnn --gpus all -v /storage/maryviktory/FCN_CNN:/workspace maryviktory:fcn_cnn

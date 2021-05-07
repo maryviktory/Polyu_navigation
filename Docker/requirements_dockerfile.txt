@@ -1,0 +1,5 @@
+tensorboard==2.1.0
+future
+scipy==1.4.1
+pillow==7.0.0
+easydict==1.9
