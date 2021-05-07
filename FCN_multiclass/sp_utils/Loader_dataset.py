@@ -32,7 +32,7 @@ class DatasetPlane(Dataset):
 
         img_name = os.path.join(self.root_dir, "Images", self.image_list[idx])
         # print(img_name)
-        label_name = os.path.join(self.root_dir, "Labels_sum_heatmaps", self.image_list[idx])
+        label_name = os.path.join(self.root_dir, "Labels_heatmaps", self.image_list[idx])
         # print(img_name)
 
         image = Image.open(img_name)

@@ -5,7 +5,7 @@ from pykalman import KalmanFilter
 
 # measurements = np.asarray([(399,293),(403,299),(409,308),(416,315),(418,318),(420,323),(429,326),(423,328),(429,334),(431,337),(433,342),(434,352),(434,349),(433,350),(431,350),(430,349),(428,347),(427,345),(425,341),(429,338),(431,328),(410,313),(406,306),(402,299),(397,291),(391,294),(376,270),(372,272),(351,248),(336,244),(327,236),(307,220)])
 
-data_path_heatmap = "/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Spinous_positions_sweeps/Maria_T.npz"
+data_path_heatmap = "D:\IROS 2020 TUM\Spine navigation vertebrae tracking\FCN_spine_point_regression\Spinous_positions_sweeps\Maria_T.npz"
 data_array = np.load(data_path_heatmap)
 X = data_array["X"]
 Y = data_array["Y"]
@@ -54,7 +54,7 @@ j = 0
 # print(probability[:-200])
 for num,measurement in enumerate(measurements[-n_real_time:, :]):
 
-    if probability[num] > 0.5:
+    if probability[num] > 0.7:
 
         time_before = time.time()
         (x_now, P_now) = kf3.filter_update(filtered_state_mean = x_now,

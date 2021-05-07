@@ -10,7 +10,7 @@ from __future__ import print_function
 
 import os
 import logging
-from sp_utils.config import config
+from FCN_multiclass.sp_utils.config import config
 
 import torch
 import torch.nn as nn
@@ -160,9 +160,9 @@ class PoseResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
 
-        self.avgpool_class = nn.AdaptiveAvgPool2d((1, 1))
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
-        self.fc_class = nn.Linear(512 * block.expansion, cfg.MODEL.num_classes)
+        self.fc = nn.Linear(512 * block.expansion, cfg.MODEL.num_classes)
 
         # used for deconv layers
         self.deconv_layers = self._make_deconv_layer(
@@ -249,9 +249,9 @@ class PoseResNet(nn.Module):
         branch_out = x
 
         # Classification HEAD
-        x = self.avgpool_class(x)
+        x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x = self.fc_class(x)
+        x = self.fc(x)
         classification = x
 
         # Heatmap HEAD
@@ -285,22 +285,13 @@ class PoseResNet(nn.Module):
                     nn.init.normal_(m.weight, std=0.001)
                     nn.init.constant_(m.bias, 0)
 
-            cfg.MODEL.Imagenet_pretrained = False
-            if cfg.MODEL.Imagenet_pretrained == True:
-                logger.info("Loading imagenet pretrained model")
-                state_dict = torch.hub.load_state_dict_from_url(
-                    'https://s3.amazonaws.com/pytorch/models/resnet18-5c106cde.pth')
-                self.load_state_dict(state_dict, strict=False)
-
             # pretrained_state_dict = torch.load(pretrained)
+            logger.info('=> loading pretrained model {}'.format(pretrained))
+            # self.load_state_dict(pretrained_state_dict, strict=False)
+            checkpoint = torch.load(pretrained, map_location=torch.device('cpu'))
 
-            else:
-                logger.info('=> loading pretrained model {}'.format(pretrained))
-                # self.load_state_dict(pretrained_state_dict, strict=False)
-                checkpoint = torch.load(pretrained, map_location=torch.device('cpu'))
-
-                state_dict = checkpoint['model_state_dict']
-                self.load_state_dict(state_dict, strict=False)
+            state_dict = checkpoint['model_state_dict']
+            self.load_state_dict(state_dict, strict=False)
 
         #     if isinstance(checkpoint, OrderedDict):
         #         state_dict = checkpoint
@@ -348,38 +339,5 @@ def get_pose_net( model_path, is_train, **kwargs):
 
     if is_train == True and cfg.MODEL.INIT_WEIGHTS:
         # model.init_weights(cfg.MODEL.PRETRAINED)
-
         model.init_weights(model_path)
     return model
-
-
-class MultiTaskLossWrapper(nn.Module):
-    def __init__(self, log_var_a,log_var_b,task_num = 2):
-        super(MultiTaskLossWrapper, self).__init__()
-        self.task_num = task_num
-        # self.log_vars = nn.Parameter(torch.zeros((task_num)))
-        self.log_vars_a = log_var_a
-        self.log_vars_b = log_var_b
-
-    def forward(self, preds_multiclass, preds_heatmap, class_id, labels):
-        # mse, crossEntropy = MSELossFlat(), CrossEntropyFlat()
-        criterion_classification = nn.CrossEntropyLoss()
-        criterion_heatmap = nn.MSELoss()
-        loss0 = criterion_classification(preds_multiclass, class_id)
-        loss1 = config.TRAIN.loss_alpha*criterion_heatmap(preds_heatmap, labels.float())
-
-        precision0 = torch.exp(-self.log_vars_a)
-        loss0 = precision0 * loss0 + self.log_vars_a
-
-        precision1 = torch.exp(-self.log_vars_b)
-        loss1 = precision1 * loss1 + self.log_vars_b
-        # print("loss parameters1", loss0, precision0, self.log_vars[0])
-        # print("loss parameters2", loss1, precision1, self.log_vars[1])
-
-        # Initialized standard deviations (ground truth is 10 and 1):
-        # std_1 = torch.exp(self.log_vars[0]) ** 0.5
-        # std_2 = torch.exp(self.log_vars[1]) ** 0.5
-        # print([std_1.item(), std_2.item()])
-
-
-        return loss0,loss1
