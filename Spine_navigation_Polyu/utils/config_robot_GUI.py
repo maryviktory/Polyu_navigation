@@ -14,7 +14,7 @@ config.Mode_Develop = True #Allows to launch code without robot
 config.IP_ADRESS = "192.168.0.100" # "158.132.172.194"
 config.FOV = 0.045 #Field of view of the robot
 config.alpha = 0.1
-config.robot_TCP = (0, 0, 0.306, 0, 0, 0)
+config.robot_TCP = (0, 0, 0.315, 0, 0, 0) #306 for smaller holder
 config.robot_payload = 1 #KG
 
 config.w = 400
@@ -22,7 +22,7 @@ config.hg = 360
 config.Trajectory_n = 'FCN_force'
 config.default_distance = 0.3 #meters
 config.maximum_distance = 2 #meters
-config.VELOCITY_up = 0.004 #0.002
+config.VELOCITY_up = 0.002 #0.004
 # config.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
 # print("robot in config")
 config.MODE = edict()
@@ -48,7 +48,7 @@ config.FORCE.Kz = 0.6
 config.FORCE.v = 0.007 #move first point
 config.FORCE.a = 0.01 #move first point
 config.FORCE.thr = 0.004
-config.FORCE.K_torque = 0.07
+config.FORCE.K_torque = 0.07 #0.07
 
 config.IMAGE = edict()
 

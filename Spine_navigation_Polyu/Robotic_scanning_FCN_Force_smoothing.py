@@ -40,12 +40,12 @@ from Spine_navigation_Polyu.utils.functions import save_video, save_video_origin
 handler = logging.FileHandler(os.path.join(config.IMAGE.SAVE_PATH, 'Phantom_scanning.log'))
 handler.suffix = "%Y-%m-%d_%H-%M-%S"
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-logger.addHandler(handler)
+logger_robot = logging.getLogger()
+logger_robot.setLevel(logging.INFO)
+logger_robot.addHandler(handler)
 
 # logger.addHandler(logging.FileHandler(os.path.join(config.IMAGE.SAVE_PATH, 'Phantom_scanning.log')))
-logger.info("STARTING SCOLIOSCAN ROBOTIC SOFTWARE")
+logger_robot.info("STARTING SCOLIOSCAN ROBOTIC SOFTWARE")
 
 # fheight =1080
 # fwidth = 1920
@@ -264,7 +264,7 @@ class Window(QtWidgets.QDialog, GUI.Ui_Dialog):
             # self.last_record_point = last_record_point
 
         if self.first_record_point_var is None:
-            logger.info("No first point specified. Accept current pose as init")
+            logger_robot.info("No first point specified. Accept current pose as init")
             print("No first point specified. Accept current pose as init")
             self.first_record_point = current_pose
             self.first_record_point_var = current_pose
@@ -370,9 +370,9 @@ class Force_Thread(Process):
                 socket.AF_INET, socket.SOCK_STREAM)
 
             s.connect((config.IP_ADRESS, 63351))
-            logger.info('Socket is connected')
+            logger_robot.info('Socket is connected')
         else:
-            logger.info('Ethernet is not connected')
+            logger_robot.info('Ethernet is not connected')
             s = None
             # os._exit(0)
 
@@ -503,6 +503,18 @@ class Move_Thread(Process):
         self.patient = "phantom"
 
     def run(self):
+        logger_robot.info('config.VELOCITY_up {}'.format(config.VELOCITY_up))
+        logger_robot.info('config.MODE.FCN {}'.format(config.MODE.FCN))
+        logger_robot.info('config.MODE.FCN_vcontrol {}'.format(config.MODE.FCN_vcontrol))
+        logger_robot.info('config.MODE.FORCE {}'.format(config.MODE.FORCE))
+        logger_robot.info('config.MODE.exp_smoothing_velocity {}'.format(config.MODE.exp_smoothing_velocity))
+        logger_robot.info('config.MODE.median_filter {}'.format(config.MODE.median_filter))
+        logger_robot.info('config.FORCE.Fref_first_move {}'.format(config.FORCE.Fref_first_move))
+        logger_robot.info('config.FORCE.Fref {}'.format(config.FORCE.Fref))
+        logger_robot.info('config.FORCE.Kf {}'.format(config.FORCE.Kf))
+        logger_robot.info('config.FORCE.K_torque {}'.format(config.FORCE.K_torque))
+
+
 
         print("Move Process starts")
         print("move end distance", self.move_end_distance.value)
@@ -510,6 +522,7 @@ class Move_Thread(Process):
             self.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
 
             utils.reset_FT300(self.robot)
+            time.sleep(1)
             self.robot.set_tcp(config.robot_TCP)
             self.robot.set_payload(config.robot_payload)
         else:
@@ -524,7 +537,7 @@ class Move_Thread(Process):
         # robot_pose_array = Pose
 
         start_movement_Y = 0  # TCP
-        print("start movement Y tool", start_movement_Y)
+        # print("start movement Y tool", start_movement_Y)
         num = 0
         T_b_init = self.robot.get_pose()
         time_start = time.time()
@@ -824,7 +837,7 @@ class Move_Thread(Process):
                     # self.robot.stopj()
                     break
             else:
-                logger.info("Robot move stopped from function: move_first_point")
+                logger_robot.info("Robot move stopped from function: move_first_point")
                 move_first = False
 
 def main():

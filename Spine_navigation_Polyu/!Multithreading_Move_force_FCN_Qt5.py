@@ -595,7 +595,7 @@ class Move_Thread(Process):
                     delta_X_meters = (delta_X*config.IMAGE.PROBE_SIZE)/config.IMAGE.ORIGINAL_IMAGE_SIZE
                     vel_im = -K_im*delta_X_meters*T_tool_image_x
                     # print("delta_X: ", delta_X,delta_X_meters)
-                    if config.MODE.exp_smoothing == True:
+                    if config.MODE.exp_smoothing_velocity == True:
                         alpha = 0.5
                         vel_im = alpha*(-K_im*delta_X_meters*T_tool_image_x)+ (1-alpha)*V_im_array[-1]
                 else:
