@@ -10,7 +10,7 @@ from __future__ import print_function
 
 import os
 import logging
-from sp_utils.config import config
+from FCN_multiclass.sp_utils.config import config
 
 import torch
 import torch.nn as nn
@@ -285,7 +285,7 @@ class PoseResNet(nn.Module):
                     nn.init.normal_(m.weight, std=0.001)
                     nn.init.constant_(m.bias, 0)
 
-            cfg.MODEL.Imagenet_pretrained = False
+            # cfg.MODEL.Imagenet_pretrained = False
             if cfg.MODEL.Imagenet_pretrained == True:
                 logger.info("Loading imagenet pretrained model")
                 state_dict = torch.hub.load_state_dict_from_url(
@@ -293,14 +293,12 @@ class PoseResNet(nn.Module):
                 self.load_state_dict(state_dict, strict=False)
 
             # pretrained_state_dict = torch.load(pretrained)
+            logger.info('=> loading pretrained model {}'.format(pretrained))
+            # self.load_state_dict(pretrained_state_dict, strict=False)
+            checkpoint = torch.load(pretrained, map_location=torch.device('cpu'))
 
-            else:
-                logger.info('=> loading pretrained model {}'.format(pretrained))
-                # self.load_state_dict(pretrained_state_dict, strict=False)
-                checkpoint = torch.load(pretrained, map_location=torch.device('cpu'))
-
-                state_dict = checkpoint['model_state_dict']
-                self.load_state_dict(state_dict, strict=False)
+            state_dict = checkpoint['model_state_dict']
+            self.load_state_dict(state_dict, strict=False)
 
         #     if isinstance(checkpoint, OrderedDict):
         #         state_dict = checkpoint
@@ -332,7 +330,7 @@ resnet_spec = {18: (BasicBlock, [2, 2, 2, 2]),
                152: (Bottleneck, [3, 8, 36, 3])}
 
 
-def get_pose_net( model_path, is_train, **kwargs):
+def get_pose_net( config,model_path, is_train, **kwargs):
     logging.basicConfig(level=logging.INFO)
 
     cfg = config
@@ -348,7 +346,6 @@ def get_pose_net( model_path, is_train, **kwargs):
 
     if is_train == True and cfg.MODEL.INIT_WEIGHTS:
         # model.init_weights(cfg.MODEL.PRETRAINED)
-
         model.init_weights(model_path)
     return model
 

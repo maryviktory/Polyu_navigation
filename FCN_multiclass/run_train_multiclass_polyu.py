@@ -4,6 +4,8 @@ from FCN_multiclass.sp_utils.config import config
 import argparse
 import logging
 import os
+
+
 # from torchsummary import summary
 import torch
 import torch.optim as optim
@@ -12,6 +14,7 @@ from torch import nn
 import torchvision as tv
 from torch.optim import lr_scheduler
 import time
+import matplotlib.pyplot as plt
 
 def run_val(model, valloader, device, criterion, writer, epoch, config,logger):
     val_loss = 0
@@ -78,7 +81,7 @@ def run_val(model, valloader, device, criterion, writer, epoch, config,logger):
         epoch_loss = running_loss / num
         epoch_acc_classification = running_corrects.double() / num
 
-
+        mean_accuracy = (acc.avg + epoch_acc_classification) / 2
         writer.add_scalar('Loss/total_val', float(batch_loss.avg), epoch)
         writer.add_scalar('Loss_class/val', float(class_loss.avg), epoch)
         writer.add_scalar('Loss_heatmap/val', float(heatmap_loss.avg), epoch)
@@ -86,15 +89,16 @@ def run_val(model, valloader, device, criterion, writer, epoch, config,logger):
         # writer.add_scalar('Accuracy/val', float(accuracy / len(valloader)), epoch)
         writer.add_scalar('Accuracy/heatmap_val', acc.avg, epoch)
         writer.add_scalar('Accuracy/class_val', epoch_acc_classification, epoch)
-        logger.info("Total validation loss {}".format(batch_loss.avg))
+        logger.info("Total validation loss {}, total accuracy {}".format(batch_loss.avg, mean_accuracy))
 
         logger.info("Classification Validation, epoch: {}, Accuracy {} , loss: {} ".format(epoch, epoch_acc_classification,class_loss.avg))
         logger.info("Heatmap Validation (epoch {}),Accuracy {} , loss: {} ".format(epoch,acc.avg,heatmap_loss.avg))
 
 
-    return acc.avg
+    return acc.avg,mean_accuracy, epoch_acc_classification
 
 def main(config):
+    torch.cuda.empty_cache()
     logging.basicConfig(level=logging.INFO)
     logging.info("STARTING PROGRAM")
 
@@ -123,30 +127,80 @@ def main(config):
     logger.info('batch size {}'.format(config.TRAIN.BATCH_SIZE))
     print('dataset NAS',config.DATASET.PATH_NAS)
     logger.info("weights {}".format(config.TRAIN.UPDATE_WEIGHTS))
+    logger.info("weights loss {}".format(config.TRAIN.loss_alpha))
     logger.info("Model: {}".format(model_path))
     logger.info("LR: {}".format(config.TRAIN.LR))
     model = utils.model_pose_resnet.get_pose_net(model_path,is_train = True)
 
     model.eval()
-
+    # print(model)
     for name,parameter in model.named_parameters():
         parameter.requires_grad = config.TRAIN.UPDATE_WEIGHTS
-        if "deconv" in name or "final" in name:
+        if "deconv" in name or "final" in name or "fc_class" in name:
             parameter.requires_grad = True
 
+    for name,parameter in model.named_parameters():
+        if parameter.requires_grad == True:
+            print(name)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    optimizer = optim.Adam(model.parameters(), lr=config.TRAIN.LR)
+    adaptive_weights = False
+    if adaptive_weights == True:
+        # log_vars = nn.Parameter(torch.zeros((2)))
+        log_var_a = torch.zeros((1,), requires_grad=True,device=device)
+        log_var_b = torch.zeros((1,), requires_grad=True,device=device)
+        # print("model parameters",list(model.parameters()))
+        # get all parameters (model parameters + task dependent log variances)
+        params = ([p for p in model.parameters()] + [log_var_a] + [log_var_b])
+        optimizer = optim.Adam(params)
+
+        # optimizer = optim.Adam([
+        #     {"params": model.conv1.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": model.bn1.parameters(),"lr": config.TRAIN.LR},
+        #     {"params": model.relu.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": model.maxpool.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": model.layer1.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": model.layer2.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": model.layer3.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": model.layer4.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": model.avgpool_class.parameters(), "lr": config.TRAIN.LR_cl},
+        #     {"params": model.fc_class.parameters(), "lr": config.TRAIN.LR_cl},
+        #     {"params": model.deconv_layers.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": model.final_layer.parameters(), "lr": config.TRAIN.LR},
+        #     {"params": log_vars, "lr": config.TRAIN.LR},
+        # ], lr=config.TRAIN.LR)
+    else:
+        # optimizer = optim.Adam(model.parameters(), lr=config.TRAIN.LR)  # weight_decay=config.TRAIN.weight_decay
+
+        optimizer = optim.Adam([
+                {"params": model.conv1.parameters(), "lr": config.TRAIN.LR},
+                {"params": model.bn1.parameters(),"lr": config.TRAIN.LR},
+                {"params": model.relu.parameters(), "lr": config.TRAIN.LR},
+                {"params": model.maxpool.parameters(), "lr": config.TRAIN.LR},
+                {"params": model.layer1.parameters(), "lr": config.TRAIN.LR},
+                {"params": model.layer2.parameters(), "lr": config.TRAIN.LR},
+                {"params": model.layer3.parameters(), "lr": config.TRAIN.LR},
+                {"params": model.layer4.parameters(), "lr": config.TRAIN.LR},
+                {"params": model.avgpool_class.parameters(), "lr": config.TRAIN.LR_cl},
+                {"params": model.fc_class.parameters(), "lr": config.TRAIN.LR_cl},
+                {"params": model.deconv_layers.parameters(), "lr": config.TRAIN.LR_heatmap},
+                {"params": model.final_layer.parameters(), "lr": config.TRAIN.LR_heatmap},
+
+            ], lr=config.TRAIN.LR)
     model.to(device)
     print("Model on cuda: ", next(model.parameters()).is_cuda)
     # Decay LR by a factor of 0.1 every 3 epochs
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.01)
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=20, gamma=1./2)
 
     writer = SummaryWriter(config.DATASET.OUTPUT_PATH)
     best_acc = 0
+    best_acc_class = 0
+    best_mean_acc = 0
     initial_time = time.time()
     for epoch in range(config.TRAIN.END_EPOCH):
+
+        logger.info('Epoch-{0} lr: {1}'.format(epoch, optimizer.param_groups[0]['lr']))
         criterion = nn.MSELoss()
         logger.info('Epoch {}/{}'.format(epoch, config.TRAIN.END_EPOCH - 1))
         logger.info('-' * 10)
@@ -155,16 +209,38 @@ def main(config):
         batch_loss = utils.AverageMeter()
         class_loss = utils.AverageMeter()
         heatmap_loss = utils.AverageMeter()
+        loss_weight = utils.AverageMeter()
         running_loss = 0.0
         running_corrects = 0
         num = 0
+        class_2 = 0
+        class_1 = 0
+        class_0 = 0
+        class_3 = 0
         for i, (inputs, labels,class_id) in enumerate(trainloader):
+            # print(inputs.shape)
 
+            for id in class_id:
+                if id == 2:
+                    class_2 = class_2+1
+                if id ==1:
+                    class_1 = class_1 +1
+                if id == 0:
+                    class_0 = class_0+1
+                if id ==3:
+                    class_3 = class_3 +1
+
+            # grid = tv.utils.make_grid(inputs)
+            # plt.imshow(grid.numpy().transpose((1, 2, 0)))
+
+            # imshow(inputs.permute(1, 2, 0))
             # print(class_id)
+            # plt.show()
             inputs, labels, class_id = inputs.to(device), labels.to(device), class_id.to(device)
             num_images = inputs.size()[0]
             # print(summary(model, tuple(inputs.size())[1:]))
             logps,multiclass = model.forward(inputs)
+
             # print("multiclass: ", multiclass)
 
             probabilities = torch.nn.functional.softmax(multiclass, dim=0)
@@ -173,21 +249,36 @@ def main(config):
             # print("preds_class", pred_class)
 
             # print("labels",labels)
-            criterion_classification = nn.CrossEntropyLoss()
-            loss_classification = criterion_classification(multiclass,class_id)
 
-            criterion_heatmap = nn.MSELoss()
-            loss_heatmap = criterion_heatmap(logps, labels.float())
 
-            loss = loss_classification+config.TRAIN.loss_alpha*loss_heatmap
+            if adaptive_weights == True:
+                loss = utils.MultiTaskLossWrapper(log_var_a, log_var_b)
+                loss_classification, loss_heatmap = loss.forward(multiclass,logps,class_id,labels)
+                loss = loss_classification + loss_heatmap
+                # loss = loss/2
+            else:
+                criterion_classification = nn.CrossEntropyLoss()
+                loss_classification = criterion_classification(multiclass,class_id)
 
-            batch_loss.update(loss.item(),inputs.size(0))
-            class_loss.update(loss_classification.item(),inputs.size(0))
+                criterion_heatmap = nn.MSELoss()
+                loss_heatmap = criterion_heatmap(logps, labels.float())
+
+
+                # loss_weight.update(loss_alpha)
+                # print("weight loss",config.TRAIN.loss_alpha)
+                # config.TRAIN.loss_alpha = loss_alpha
+                loss = loss_classification+config.TRAIN.loss_alpha*loss_heatmap
+
+            class_loss.update(loss_classification.item(), inputs.size(0))
             heatmap_loss.update(loss_heatmap.item(), inputs.size(0))
+            # loss = config.TRAIN.loss_alpha*loss_heatmap
+            batch_loss.update(loss.item(),inputs.size(0))
+
 
             optimizer.zero_grad()
-            loss.backward()
+            loss.backward(retain_graph=True)
             optimizer.step()
+            exp_lr_scheduler.step()
 
 
             running_loss += loss.item() * inputs.size(0)
@@ -202,6 +293,19 @@ def main(config):
             # acc_classification.update()
             # print("Batch {} train accurcy: {}, classification acc: {}, loss: {}".format(i, acc.avg, batch_acc_class,batch_loss.avg))
             num = num + num_images
+        if adaptive_weights == True:
+            print("log vars",log_var_a, log_var_b)
+            std_1 = torch.exp(log_var_a) ** 0.5
+            std_2 = torch.exp(log_var_b) ** 0.5
+            print([std_1.item(), std_2.item()])
+
+        # loss_alpha = class_loss.avg / heatmap_loss.avg
+        # config.TRAIN.loss_alpha = loss_alpha
+        # print("weight loss", loss_alpha)
+        print("cl0",class_0)
+        print("cl1",class_1)
+        print("cl2", class_2)
+        print("cl3", class_3)
 
         epoch_loss = running_loss / (num)
         epoch_acc_classification = running_corrects.double() / (num)
@@ -217,16 +321,41 @@ def main(config):
         logger.info("epoch time: {}".format(epoch_time))
         logger.info('Classification Train Accuracy {} epoch: {}'.format(epoch,epoch_acc_classification))
 
-        val_acc = run_val(model, valloader, device, criterion, writer, epoch,config,logger)
+
+
+        val_acc, mean_acc, val_acc_class = run_val(model, valloader, device, criterion, writer, epoch,config,logger)
+
+
+
 
         logger.info("loss classification {}, loss heatmap {} ".format(class_loss.avg,heatmap_loss.avg))
 
         logger.info('Train Total Loss: {:.4f} Train Heatmap Acc: {:.4f} Val Heatmap Acc: {:.4f}'.format(
              batch_loss.avg, acc.avg, val_acc))
+        if val_acc_class > best_acc_class:
+            best_acc_class = val_acc_class
+            logging.info("best val class at epoch: " + str(epoch) + str(best_acc_class))
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': batch_loss.avg,
+            }, os.path.join(config.DATASET.OUTPUT_PATH, "best_acc_class_model.pt"))
+
+
+        if mean_acc > best_mean_acc:
+            best_mean_acc = mean_acc
+            logging.info("best val mean at epoch: " + str(epoch) + str(best_mean_acc))
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': batch_loss.avg,
+            }, os.path.join(config.DATASET.OUTPUT_PATH, "best_mean_acc_model.pt"))
 
         if val_acc > best_acc:
             best_acc = val_acc
-            logging.info("best val at epoch: " + str(epoch))
+            logging.info("best val heatmap at epoch: " + str(epoch))
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
@@ -234,7 +363,7 @@ def main(config):
                 'loss': batch_loss.avg,
             }, os.path.join(config.DATASET.OUTPUT_PATH, "best_model.pt"))
 
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
@@ -257,7 +386,7 @@ def Parser():
     parser.add_argument('--update_weights', type=bool, default=False, metavar='P',
                         help='whether to train the networs from scratches or with fine tuning')
 
-    parser.add_argument('--lr', type=float, default=0.0001, metavar='BS',
+    parser.add_argument('--lr', type=float, default=0.001, metavar='BS',
                         help='learning rate')
     args = parser.parse_args()
 
@@ -275,5 +404,6 @@ def update_config(config,args):
 
 if __name__ == '__main__':
     args = Parser()
-    update_config(config,args)
+    # update_config(config,args)
     main(config)
+

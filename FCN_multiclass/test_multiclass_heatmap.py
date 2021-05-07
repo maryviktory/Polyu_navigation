@@ -168,10 +168,10 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
 
             if num_classes == 4:
                 c4 = prob[0, 3]
-                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c3.to("cpu").numpy()))
-                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c2.to("cpu").numpy()))
-                c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c1.to("cpu").numpy()))
-                c_gap_prob = np.append(c_gap_prob,np.squeeze(c4.to("cpu").numpy()))
+                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c2.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c4.to("cpu").numpy()))
+                c_gap_prob = np.append(c_gap_prob,np.squeeze(c1.to("cpu").numpy()))
 
  ###########NOTE: Heatmap calculations
             batch_loss = criterion(logps, labels.float())
