@@ -239,7 +239,7 @@ class Shadow_Image(Process):
 
 
 
-def get_image_fun(q_im,threads_stopper):
+def get_image_fun(q_im,q_im_raw,threads_stopper):
     message = config.IMAGE.JSON_WS
     json_mylist = json.dumps(message, separators=(',', ':'))
     ws = websocket.WebSocket()
@@ -264,9 +264,19 @@ def get_image_fun(q_im,threads_stopper):
             image_byte_array = (binAnswer.data)[129:]
             # Create a PIL Image from our pixel array.
             image = Image.frombuffer('L', (640, 480), image_byte_array)
+            image_display = np.array(image)
             # print("received")
             if image.size:
                 q_im.put(image)
+
+
+
+                q_im_raw[:] = np.array(image).flatten()
+                # print(image.size) #(640,480)
+                if config.MODE.FCN == False:
+                    cv2.imshow("Raw", np.array(image_display))
+                    cv2.waitKey(1)
+
                 # image = image
                 # self.frame_num = self.frame_num + 1
             image_display = np.array(image)

@@ -33,16 +33,33 @@ from Spine_navigation_Polyu.utils.functions import save_video, save_video_origin
 # import mss.tools
 
 #################################_____PARAMETERS to adjust_____##########################
+def setup_logger(name, log_file, level=logging.INFO):
+    """To setup as many loggers as you want"""
 
-handler = logging.FileHandler(os.path.join(config.IMAGE.SAVE_PATH, 'Phantom_scanning.log'))
-handler.suffix = "%Y-%m-%d_%H-%M-%S"
+    handler = logging.FileHandler(log_file)
+    # handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
+
+# # first file logger
+# logger = setup_logger('first_logger', os.path.join(config.IMAGE.SAVE_PATH,'first_logfile.log'))
+# logger.info('This is just info message')
+
+# second file logger
+logger_robot = setup_logger('second_logger', os.path.join(config.IMAGE.SAVE_PATH,'Scolioscan_robotic.log'))
+
+handler = logging.FileHandler(os.path.join(config.IMAGE.SAVE_PATH, 'Background_log.log'))
+# handler.suffix = "%Y-%m-%d_%H-%M-%S"
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
 # logger.addHandler(logging.FileHandler(os.path.join(config.IMAGE.SAVE_PATH, 'Phantom_scanning.log')))
-logger.info("STARTING SCOLIOSCAN ROBOTIC SOFTWARE")
+logger_robot.info("STARTING SCOLIOSCAN ROBOTIC SOFTWARE")
 
 # fheight =1080
 # fwidth = 1920
@@ -156,25 +173,25 @@ class Window(QtWidgets.QDialog, GUI.Ui_Dialog):
         self.q_im = mp.Queue()
         # self.q_im_inputs = mp.Queue()
         self.q_im_inputs = mp.Array(ctypes.c_double, config.IMAGE.input_im_size * config.IMAGE.input_im_size * 3)
+        self.q_im_raw = mp.Array(ctypes.c_double, 640*480)
+
         self.q_im_pred = mp.Array("f", range(2))
         self.q_frame_probability = mp.Value("f", 0)
         self.q_num = mp.Queue()
         self.v_num = mp.Value("f", 0)
         self.start_send_image = mp.Value("i", 0)
 
+        self.get_image_process = Process(target=get_image_fun, args=(self.q_im, self.q_im_raw,self.threads_stopper,))
+        # p2 = Process(target=shadow.run)
+        self.get_image_process.daemon = True
+
+        self.get_image_process.start()
+
         if config.MODE.FCN == True:
             # q = mp.Queue()
-
             self.FCN_thread = FCN_Thread(self.q_im,self.threads_stopper,self.q_im_inputs,self.q_im_pred,self.q_frame_probability,self.q_num,self.v_num,self.start_send_image)
             # # self.get_image_process = get_image_fun(self.q_im,self.threads_stopper)
-
-            self.get_image_process = Process(target=get_image_fun, args=(self.q_im, self.threads_stopper,))
-            # p2 = Process(target=shadow.run)
-
             self.FCN_thread.daemon = True
-            self.get_image_process.daemon = True
-
-            self.get_image_process.start()
             self.FCN_thread.start()
             time.sleep(5)
 
@@ -257,7 +274,7 @@ class Window(QtWidgets.QDialog, GUI.Ui_Dialog):
             # self.last_record_point = last_record_point
 
         if self.first_record_point_var is None:
-            logger.info("No first point specified. Accept current pose as init")
+            logger_robot.info("No first point specified. Accept current pose as init")
             print("No first point specified. Accept current pose as init")
             self.first_record_point = current_pose
             self.first_record_point_var = current_pose
@@ -294,7 +311,7 @@ class Window(QtWidgets.QDialog, GUI.Ui_Dialog):
 
 
         self.Move_Thread = Move_Thread(self.q_Full_Force, self.q_Force, self.move_end_distance,
-                                       self.first_record_point, self.threads_stopper, self.q_im_inputs,
+                                       self.first_record_point, self.threads_stopper,self.q_im_raw, self.q_im_inputs,
                                        self.q_im_pred, self.q_frame_probability, self.q_num, self.v_num,self.start_send_image)
 
         self.Move_Thread.daemon = True
@@ -366,9 +383,9 @@ class Force_Thread(Process):
                 socket.AF_INET, socket.SOCK_STREAM)
 
             s.connect((config.IP_ADRESS, 63351))
-            logger.info('Socket is connected')
+            logger_robot.info('Socket is connected')
         else:
-            logger.info('Ethernet is not connected')
+            logger_robot.info('Ethernet is not connected')
             s = None
             # os._exit(0)
 
@@ -485,7 +502,7 @@ class Force_Thread(Process):
 
 
 class Move_Thread(Process):
-    def __init__(self, q_Full_Force,q_Force,move_end_distance,first_record_point,threads_stopper,q_im_inputs,q_im_pred,q_frame_probability, q_num, v_num,start_send_image):
+    def __init__(self, q_Full_Force,q_Force,move_end_distance,first_record_point,threads_stopper, q_im, q_im_inputs,q_im_pred,q_frame_probability, q_num, v_num,start_send_image):
         Process.__init__(self)
 
         self.num = 0
@@ -496,6 +513,7 @@ class Move_Thread(Process):
         self.first_record_point = first_record_point
         self.q_Full_Force = q_Full_Force
         self.q_im_inputs = q_im_inputs
+        self.q_im_raw = q_im
         self.q_im_pred = q_im_pred
         self.q_frame_probability = q_frame_probability
         self.start_send_image = start_send_image
@@ -503,13 +521,24 @@ class Move_Thread(Process):
         self.v_num = v_num
         self.patient = "phantom"
     def run(self):
+        logger_robot.info('config.VELOCITY_up {}'.format(config.VELOCITY_up))
+        logger_robot.info('config.MODE.FCN {}'.format(config.MODE.FCN))
+        logger_robot.info('config.MODE.FCN_vcontrol {}'.format(config.MODE.FCN_vcontrol))
+        logger_robot.info('config.MODE.FORCE {}'.format(config.MODE.FORCE))
+        logger_robot.info('config.MODE.exp_smoothing_velocity {}'.format(config.MODE.exp_smoothing_velocity))
+        logger_robot.info('config.MODE.median_filter {}'.format(config.MODE.median_filter))
+        logger_robot.info('config.FORCE.Fref_first_move {}'.format(config.FORCE.Fref_first_move))
+        logger_robot.info('config.FORCE.Fref {}'.format(config.FORCE.Fref))
+        logger_robot.info('config.FORCE.Kf {}'.format(config.FORCE.Kf))
+        logger_robot.info('config.FORCE.K_torque {}'.format(config.FORCE.K_torque))
 
         print("Move Process starts")
         print("move end distance", self.move_end_distance.value)
         if config.MODE.Develop == False:
             self.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
-            # self.robot.set_tcp((0, 0, 0.1, 0, 0, 0))
-            # self.robot.set_payload(2, (0, 0, 0.1))
+            self.robot.set_tcp(config.robot_TCP)#(0, 0, 0.315, 0, 0, 0)
+            self.robot.set_payload(config.robot_payload)#1kg
+
             utils.reset_FT300(self.robot)
         else:
             self.robot = None
@@ -519,6 +548,18 @@ class Move_Thread(Process):
         print("go to first point")
         self.move_first_point()
 
+        # NOTE: initialization of Kalman filter parameters
+        xhat = np.zeros(0)  # a posteri estimate of x
+        P = np.zeros(0)  # a posteri error estimate
+        xhatminus = np.zeros(0)  # a priori estimate of x
+        Pminus = np.zeros(0)  # a priori error estimate
+        K = np.zeros(0)
+        # config.IMAGE.Kalman_R = 500  # estimate of measurement variance, change to see effect
+        xhat = np.append(xhat, config.IMAGE.ORIGINAL_IMAGE_SIZE / 2)
+        P = np.append(P, 0)
+        # config.IMAGE.Kalman_Q = 50  # process variance #1e-5
+        x_filt = 0
+
         Pose = self.robot.getl()
         # robot_pose_array = Pose
         start_movement_Y = Pose[1]
@@ -527,12 +568,12 @@ class Move_Thread(Process):
         time_start = time.time()
         V_im_array = np.zeros(0)
         V_im_array = np.append(V_im_array,0)
-        if config.MODE.FCN == True:
-            pd_frame = pd.DataFrame(columns=["timestamp","X_im","Y_im","Frame_Probability","X_tcp","Y_tcp","Z_tcp","X", "Y", "Z","Rx","Ry","Rz","Fx","Fy","Fz","Mx","My","Mz"])
-        else:
-            pd_frame = pd.DataFrame(
-                columns=["timestamp", "X_tcp", "Y_tcp", "Z_tcp", "X", "Y", "Z", "Rx", "Ry", "Rz", "Fx", "Fy", "Fz",
-                         "Mx", "My", "Mz"])
+        # if config.MODE.FCN == True:
+        pd_frame = pd.DataFrame(columns=["timestamp","X_im","Y_im","Frame_Probability","X_tcp","Y_tcp","Z_tcp","X", "Y", "Z","Rx","Ry","Rz","Fx","Fy","Fz","Mx","My","Mz","x_filt","velocity_im"])
+        # else:
+        #     pd_frame = pd.DataFrame(
+        #         columns=["timestamp", "X_tcp", "Y_tcp", "Z_tcp", "X", "Y", "Z", "Rx", "Ry", "Rz", "Fx", "Fy", "Fz",
+        #                  "Mx", "My", "Mz"])
 
         fourcc = cv2.VideoWriter_fourcc(*'XVID')  # "DIVX" 'XVID'
         # print(fourcc)  # fourcc tag 0x44495658/'XVID' codec_id 000C
@@ -558,14 +599,13 @@ class Move_Thread(Process):
             #T_point_intcp = T_tcp_pose_init_inbase^(-1) * T_point_inbase
             T_points_intcp = np.around(np.linalg.inv(T_b_init.matrix) * T_point.matrix, 4)
             # TODO: record information (time,robot pose, force, image, image coordinates) to csv file
-            # TODO: how to record positions, in base coordinates? or somehow find tool coordinates
 
             if config.MODE.FCN == True:
 
                 q_num = self.q_num.get()
                 v_num = self.v_num.value
 
-                # print("Numbers from Move: ",q_num,v_num)
+                # print("Numbers from Move: ",q_num,v_num) #used for testing synhronization
                 # inputs = self.q_im_inputs[:]
                 # arr = np.array(self.q_im_inputs[:])
                 arr = (np.frombuffer(self.q_im_inputs.get_obj())).astype('uint8')
@@ -585,27 +625,59 @@ class Move_Thread(Process):
                 x_scaled, y_scaled = int(X * (config.IMAGE.ORIGINAL_IMAGE_SIZE / config.IMAGE.input_im_size)), int(
                     Y * ((config.IMAGE.ORIGINAL_IMAGE_HEIGHT / config.IMAGE.input_im_size)))
 
-                if frame_probability > config.IMAGE.probability_threshold:
-                    delta_X = x_scaled - config.IMAGE.ORIGINAL_IMAGE_SIZE/2 # NOTE: middle of the image, because we want to maintain feature in the middle
+                if config.MODE.Kalman == True:
+                    #NOTE: prediction stage occurs each step
+                    xhatminus = np.append(xhatminus, xhat[-1])  # +B*0.01
+                    Pminus = np.append(Pminus, P[-1] + Q)
+
+                    if frame_probability > config.IMAGE.probability_threshold:
+                        #NOTE: measurement fuse/update state only occurs when the point is valid (>threshold)
+                        K = np.append(K, Pminus[-1] / (Pminus[-1] + R))
+                        # print("K[k]",K[k])
+                        xhat = np.append(xhat, (xhatminus[-1] + K[-1] * (x_scaled - xhatminus[-1])))
+                        P = np.append(P, (1 - K[-1]) * Pminus[-1])
+                    else:
+                        xhat = np.append(xhat, xhatminus[-1])
+                    x_filt = xhat[-1]
+
+                    #NOTE: calculate velocity according to the filtered point
+                    delta_X = x_filt - config.IMAGE.ORIGINAL_IMAGE_SIZE / 2  # NOTE: middle of the image, because we want to maintain feature in the middle
                     # print("delta_X",delta_X)
-                    if delta_X < 100: #in pixels
+                    if delta_X < 100:  # in pixels
                         K_im = config.IMAGE.K_im_near
                     else:
                         K_im = config.IMAGE.K_im_out
-                    delta_X_meters = (delta_X*config.IMAGE.PROBE_SIZE)/config.IMAGE.ORIGINAL_IMAGE_SIZE
-                    vel_im = -K_im*delta_X_meters*T_tool_image_x
+                    delta_X_meters = (delta_X * config.IMAGE.PROBE_SIZE) / config.IMAGE.ORIGINAL_IMAGE_SIZE
+                    vel_im = -K_im * delta_X_meters * T_tool_image_x
                     # print("delta_X: ", delta_X,delta_X_meters)
                     if config.MODE.exp_smoothing_velocity == True:
                         alpha = 0.5
-                        vel_im = alpha*(-K_im*delta_X_meters*T_tool_image_x)+ (1-alpha)*V_im_array[-1]
-                else:
-                    vel_im = 0.0
-                # print("vel_im: ",vel_im)
+                        vel_im = alpha * (-K_im * delta_X_meters * T_tool_image_x) + (1 - alpha) * V_im_array[-1]
+
+
+                else: #NOTE: FCN mode without pose filtering, exponential velocities smoothing only
+
+                    if frame_probability > config.IMAGE.probability_threshold:
+                        delta_X = x_scaled - config.IMAGE.ORIGINAL_IMAGE_SIZE/2 # NOTE: middle of the image, because we want to maintain feature in the middle
+                        # print("delta_X",delta_X)
+                        if delta_X < 100: #in pixels
+                            K_im = config.IMAGE.K_im_near
+                        else:
+                            K_im = config.IMAGE.K_im_out
+                        delta_X_meters = (delta_X*config.IMAGE.PROBE_SIZE)/config.IMAGE.ORIGINAL_IMAGE_SIZE
+                        vel_im = -K_im*delta_X_meters*T_tool_image_x
+                        # print("delta_X: ", delta_X,delta_X_meters)
+                        if config.MODE.exp_smoothing_velocity == True:
+                            alpha = 0.5
+                            vel_im = alpha*(-K_im*delta_X_meters*T_tool_image_x)+ (1-alpha)*V_im_array[-1]
+                    else:
+                        vel_im = 0.0
+                    # print("vel_im: ",vel_im)
 
                 force_curr_full = self.q_Full_Force[:]
                 pd_frame = pd_frame.append({'timestamp': time.time(),"X_im":x_scaled,"Y_im": y_scaled,"Frame_Probability":frame_probability, "X_tcp":T_points_intcp[0,3],"Y_tcp":T_points_intcp[1,3],"Z_tcp":T_points_intcp[2,3],'X': pos_curr[0],'Y': pos_curr[1],'Z': pos_curr[2],'Rx': pos_curr[3],
                                         'Ry': pos_curr[4],'Rz': pos_curr[5], "Fx": force_curr_full[0],"Fy": force_curr_full[1],"Fz": force_curr_full[2],
-                                        "Mx": force_curr_full[3],"My": force_curr_full[4],"Mz": force_curr_full[5]}, ignore_index=True)
+                                        "Mx": force_curr_full[3],"My": force_curr_full[4],"Mz": force_curr_full[5],"x_filt":x_filt,"velocity_im":vel_im}, ignore_index=True)
 
 
                 if config.IMAGE.VIDEO == True:
@@ -615,12 +687,19 @@ class Move_Thread(Process):
             else:
                 force_curr_full = self.q_Full_Force[:]
                 pd_frame = pd_frame.append(
-                    {'timestamp': time.time(), "X_tcp": T_points_intcp[0, 3], "Y_tcp": T_points_intcp[1, 3],
+                    {'timestamp': time.time(), "X_im":0,"Y_im":0,"Frame_Probability":0,"X_tcp": T_points_intcp[0, 3], "Y_tcp": T_points_intcp[1, 3],
                      "Z_tcp": T_points_intcp[2, 3], 'X': pos_curr[0], 'Y': pos_curr[1], 'Z': pos_curr[2],
                      'Rx': pos_curr[3],
                      'Ry': pos_curr[4], 'Rz': pos_curr[5], "Fx": force_curr_full[0], "Fy": force_curr_full[1],
                      "Fz": force_curr_full[2],
-                     "Mx": force_curr_full[3], "My": force_curr_full[4], "Mz": force_curr_full[5]}, ignore_index=True)
+                     "Mx": force_curr_full[3], "My": force_curr_full[4], "Mz": force_curr_full[5],"x_filt":0,"velocity_im":0}, ignore_index=True)
+
+                if config.IMAGE.VIDEO == True:
+                    arr = (np.frombuffer(self.q_im_raw.get_obj())).astype('uint8')
+                    # make it two-dimensional
+                    inputs = arr.reshape((480, 640, -1))
+
+                    image = save_video_original(self.out2,inputs)
 
             vel_up = config.VELOCITY_up
             # vel_im = 0.0
@@ -778,7 +857,7 @@ class Move_Thread(Process):
                     # self.robot.stopj()
                     break
             else:
-                logger.info("Robot move stopped from function: move_first_point")
+                logger_robot.info("Robot move stopped from function: move_first_point")
                 move_first = False
 # class Image_thread(QtCore.QThread):
 #     changePixmap = pyqtSignal(QImage)

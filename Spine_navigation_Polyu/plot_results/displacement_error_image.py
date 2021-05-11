@@ -3,13 +3,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, filtfilt
 
-def smooth(signal, N=2):
+def smooth(signal, N=1):
     # N = 2  # Filter order
     Wn = 0.05  # Cutoff frequency
     B, A = butter(N, Wn, output='ba')
     # Second, apply the filter
     filt = filtfilt(B, A, signal)
     return filt
+
+def undrift(signal,N=1):
+    # N = 2  # Filter order
+    Wn = 0.01  # Cutoff frequency
+    B, A = butter(N, Wn, output='ba')
+    # Second, apply the filter
+    avg = filtfilt(B, A, signal)
+    undrifted = signal - avg
+
+    return undrifted
 
 def plot_path(probability, X, Y,color_ext,labels = None) :
     print("Plotting path")
@@ -37,7 +47,7 @@ def plot_path(probability, X, Y,color_ext,labels = None) :
         ax.scatter(xs, zs, c=color, marker=marker)
 
         zs = zs + 1
-    ax.plot(smooth(path), index, label="coordinate continious")
+    ax.plot(path, index, label="coordinate continious")
     # fig2 = plt.figure()
     # ax2 = plt.gca()
     # ax2.set_aspect((320 / zs) * 5)
@@ -74,10 +84,10 @@ def plot_path(probability, X, Y,color_ext,labels = None) :
     ax1.legend()
     ax4.legend()
     # ax2.legend()
-    plt.show()
-    return path
+    # plt.show()
+    return path, index
 
-folder = "phantom experiments\scanning\median_filter_k21"
+folder = "phantom experiments\Kalman"
 data_path = "D:\spine navigation Polyu 2021\\robot_trials_output\%s\Move_thread_output0.csv"%folder
 
 frame = pd.read_csv(data_path)
@@ -97,6 +107,7 @@ frame_probability = frame["Frame_Probability"]
 X_tcp = frame["X_tcp"]
 Y_tcp = frame["Y_tcp"]
 Z_tcp = frame["Z_tcp"]
+X_filt = frame["x_filt"]
 delta_X = abs(X_im - X_mid)
 
 t = np.linspace(0, len(X_robot), len(X_robot))
@@ -111,37 +122,45 @@ ax.set_xlabel('X_tcp')
 ax.set_ylabel('step')
 ax.set_xlim(-0.08,0.08)
 #
+plt.figure()
+# plt.plot(timestamp,smooth(delta_X))
+ax = plt.gca() #you first need to get the axis handle
+ax.set_aspect((320 / len(X_filt)) * 5) #sets the height to width ratio to 1.5.
+# plt.plot(smooth(-Y_robot),Z_robot)
+ax.plot(smooth(X_filt),t)
+ax.set_xlabel('X_filt')
+ax.set_ylabel('step')
+ax.set_xlim(0,640)
 
 # plt.plot(X_robot, Y_robot)
 
 # plt.plot(-smooth(X_robot),t)
 
+# plt.plot(t,smooth(undrift(Y_force)))
+# plt.title(" Y force")
+#
+# plt.figure()
+#
+# plt.plot(t,X_force)
+# plt.title(" X force")
+#
+# plt.figure()
+# plt.plot(t,Z_force)
+# plt.title(" Z force")
+
+# plt.figure()
+# plt.plot(t,smooth(frame_probability))
+# plt.title(" Probability")
+
+path,index = plot_path(frame_probability,X_im,Y_im,"r")
+
+
 plt.figure()
-
-plt.plot(t,smooth(Y_force))
-plt.title(" Y force")
-
-plt.figure()
-
-plt.plot(t,smooth(X_force))
-plt.title(" X force")
-
-plt.figure()
-plt.plot(t,smooth(Z_force))
-plt.title(" Z force")
-
-plt.figure()
-plt.plot(t,smooth(frame_probability))
-plt.title(" Probability")
-
-# path = plot_path(frame_probability,X_im,Y_im,"r")
-
-
-
-# plt.plot(path,timestamp)
-# plt.title(" X_im")
-
-
+ax = plt.gca()
+ax.set_aspect((320 / len(X_filt)) * 5)
+ax.plot(path,index)
+ax.set_xlabel('X_im_unfilt')
+ax.set_xlim(0,640)
 
 
 plt.show()

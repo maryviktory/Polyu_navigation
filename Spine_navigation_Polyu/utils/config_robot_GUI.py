@@ -20,9 +20,9 @@ config.robot_payload = 1 #KG
 config.w = 400
 config.hg = 360
 config.Trajectory_n = 'FCN_force'
-config.default_distance = 0.3 #meters
+config.default_distance = 1 #meters
 config.maximum_distance = 2 #meters
-config.VELOCITY_up = 0.002 #0.004
+config.VELOCITY_up = 0.003 #0.004
 # config.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
 # print("robot in config")
 config.MODE = edict()
@@ -32,6 +32,7 @@ config.MODE.FCN_vcontrol = True
 config.MODE.FORCE = True
 config.MODE.BASE_csys = False
 config.MODE.exp_smoothing_velocity = True
+config.MODE.Kalman = True
 
 config.MODE.median_filter = False
 config.Median_kernel_size = 31
@@ -39,11 +40,11 @@ config.Median_kernel_size = 31
 config.FORCE = edict()
 
 config.FORCE.Fref_first_move = 4 #Force [N]
-config.FORCE.Fref = 5 #Force [N]
+config.FORCE.Fref = 7 #Force [N]
 config.FORCE.Fmax = 30 #Force [N]
 config.FORCE.Fcrit = 35 #Force [N]
 config.FORCE.K_delta = 0.0005
-config.FORCE.Kf = 0.0004 #0.002  Kunal - 0.0004
+config.FORCE.Kf = 0.0007 #0.002  Kunal - 0.0004
 config.FORCE.Kz = 0.6
 config.FORCE.v = 0.007 #move first point
 config.FORCE.a = 0.01 #move first point
@@ -54,6 +55,12 @@ config.IMAGE = edict()
 
 config.IMAGE.K_im_out = 0.5
 config.IMAGE.K_im_near = 0.2
+
+config.IMAGE.Kalman_R = 500# estimate of measurement variance, change to see effect
+config.IMAGE.Kalman_Q = 50  # process variance #1e-5
+
+
+
 # config.IMAGE.FCN = False
 config.IMAGE.subject_mode = "phantom" #"human" #phantom
 
