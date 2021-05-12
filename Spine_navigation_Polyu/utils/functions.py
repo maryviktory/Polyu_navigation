@@ -12,32 +12,30 @@ import matplotlib.pyplot as plt
 from Spine_navigation_Polyu.utils.config_robot_GUI import config
 
 
-# class Kalman_filter_x_im():
-#     def __init__(self):
-#         # allocate space for arrays
-#         self.xhat = np.zeros(0)  # a posteri estimate of x
-#         self.P = np.zeros(0)  # a posteri error estimate
-#         self.xhatminus = np.zeros(0)  # a priori estimate of x
-#         self.Pminus = np.zeros(0)  # a priori error estimate
-#         self.K = np.zeros(0)  # gain or blending factor
-#         self.R = 500 # estimate of measurement variance, change to see effect
-#         self.Q = 90
-#         self.xhat = np.append(self.xhat,224 / 2)
-#         self.P = np.append(self.P,0)
-#
-#     def predict_stage(self):
-#         # time update
-#         self.xhatminus = np.append(self.xhatminus,self.xhat[-1])  # +B*0.01
-#         self.Pminus = np.append(self.Pminus ,self.P[-1] + self.Q)
-#
-#
-#     def update_with_measurement(self,z):
-#         # measurement update
-#         self.K = np.append(self.K, self.Pminus[-1] / (self.Pminus[-1] + self.R))
-#         # print("K[k]",K[k])
-#         self.xhat = np.append(self.xhat,self.xhatminus[-1] + self.K[-1] * (z - self.xhatminus[-1]))
-#         self.P = np.append(self.P,(1 - self.K[-1]) * self.Pminus[-1])
 
+class Kalman_filter_x_im():
+    def __init__(self):
+        # allocate space for arrays
+        self.xhat = np.zeros(0)  # a posteri estimate of x
+        self.P = np.zeros(0)  # a posteri error estimate
+        self.xhatminus = np.zeros(0)  # a priori estimate of x
+        self.Pminus = np.zeros(0)  # a priori error estimate
+        self.K = np.zeros(0)  # gain or blending factor
+        self.R = 0.001 # estimate of measurement variance, change to see effect
+        self.Q = 1e-5
+        self.xhat = np.append(self.xhat,-config.FORCE.Fref)
+        self.P = np.append(self.P,0)
+
+    def update(self, z):
+        # time update
+        self.xhatminus = np.append(self.xhatminus,self.xhat[-1])  # +B*0.01
+        self.Pminus = np.append(self.Pminus ,self.P[-1] + self.Q)
+        # measurement update
+        self.K = np.append(self.K, self.Pminus[-1] / (self.Pminus[-1] + self.R))
+        # print("K[k]",K[k])
+        self.xhat = np.append(self.xhat,self.xhatminus[-1] + self.K[-1] * (z - self.xhatminus[-1]))
+        self.P = np.append(self.P,(1 - self.K[-1]) * self.Pminus[-1])
+        return self.xhat[-1]
 
 def find_centroid(c):
     M = cv2.moments(c)
