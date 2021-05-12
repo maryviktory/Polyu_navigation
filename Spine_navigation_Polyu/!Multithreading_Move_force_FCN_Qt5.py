@@ -391,6 +391,7 @@ class Force_Thread(Process):
 
         F = 0
         time_start = time.time()
+        array = np.zeros(6)
         while bool(self.threads_stopper.value) == False:
 
             # if i == 150:
@@ -404,12 +405,14 @@ class Force_Thread(Process):
 
 
             tstart = time.time()
-            response = s.recv(4096)
+            response = s.recv(512)
             # print("socket response",response)
             # response = bytearray(response)
-            val = response.decode("ascii").split('(', 1)[1].split(')')[0]
-            array = [float(x) for x in val[1:-1].split(',')]
-
+            try:
+                val = response.decode("ascii").split('(', 1)[1].split(')')[0]
+                array = [float(x) for x in val[0:-1].split(',')]
+            except:
+                print("Recevied incomplete package")
             # print ('Fx:', array[0], 'Fy:', array[1],'Fz:', array[2],'Mx:', array[3], 'My:', array[4], 'Mz:', array[5])
             #print ('      ')
             self.F_full = array
@@ -628,11 +631,11 @@ class Move_Thread(Process):
                 if config.MODE.Kalman == True:
                     #NOTE: prediction stage occurs each step
                     xhatminus = np.append(xhatminus, xhat[-1])  # +B*0.01
-                    Pminus = np.append(Pminus, P[-1] + Q)
+                    Pminus = np.append(Pminus, P[-1] + config.IMAGE.Kalman_Q)
 
                     if frame_probability > config.IMAGE.probability_threshold:
                         #NOTE: measurement fuse/update state only occurs when the point is valid (>threshold)
-                        K = np.append(K, Pminus[-1] / (Pminus[-1] + R))
+                        K = np.append(K, Pminus[-1] / (Pminus[-1] + config.IMAGE.Kalman_R))
                         # print("K[k]",K[k])
                         xhat = np.append(xhat, (xhatminus[-1] + K[-1] * (x_scaled - xhatminus[-1])))
                         P = np.append(P, (1 - K[-1]) * Pminus[-1])

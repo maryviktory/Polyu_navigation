@@ -33,20 +33,20 @@ logger.info("STARTING TEST")
 class FCN_Thread(Process):
     '''Run FCN pre-trained model on online streamed images
     calculate the coordinate'''
-    def __init__(self,q_im,threads_stopper,q_im_inputs,q_im_pred,q_frame_probability,q_num,v_num,start_send_image):
+    def __init__(self,q_im_raw,threads_stopper,q_im_inputs,q_im_pred,q_frame_probability,v_num,start_send_image):
         Process.__init__(self)
 
         self.result_im = np.zeros(0)
 
         self.image_flag = False
         self.num = 0
-
+        self.q_im_raw = q_im_raw
         self.threads_stopper = threads_stopper
-        self.q_image = q_im
+        # self.q_image = q_im
         self.q_im_inputs = q_im_inputs
         self.q_im_pred = q_im_pred
         self.q_frame_probability = q_frame_probability
-        self.q_num = q_num
+        # self.q_num = q_num
         self.v_num = v_num
         self.start_send_image = start_send_image
 
@@ -96,7 +96,7 @@ class FCN_Thread(Process):
         Y = np.zeros(0)
         num= 0
         patient = "US_probe"
-        time_inference = AverageMeter()
+        # time_inference = AverageMeter()
 
         time_start = time.time()
         n = 0
@@ -104,11 +104,15 @@ class FCN_Thread(Process):
         with torch.no_grad():
             while True:
 
-                start_time = time.time()
+                # start_time = time.time()
                 # input_data = Image.open(data)
                 # print(input_data)
                 # print("from FCN",self.q_image.get())
-                image_from_probe = self.q_image.get()
+                # image_from_probe = self.q_image.get()
+                arr = (np.frombuffer(self.q_im_raw.get_obj())).astype('uint8')
+                # make it two-dimensional
+                # image_from_probe = arr.reshape((480, 640, -1))
+                image_from_probe = Image.frombuffer("L",(640,480),arr)
                 inputs,pred,pobability,X,Y,frame_probability = run_FCN_streamed_image(image_from_probe,self.model,self.device,probability,X,Y,logger,config)
                 # self.q_image.put(input_data) #should be after image usage, otherwise it affects it
                 cv2.imshow("Raw",np.array(image_from_probe))
@@ -119,15 +123,15 @@ class FCN_Thread(Process):
 
                     self.q_im_inputs[:] = np.array(inputs).flatten()
 
-                    self.q_num.put(self.num)
+                    # self.q_num.put(self.num)
                     self.q_im_pred[:] = pred[0][0]
 
                     self.q_frame_probability.value = frame_probability
-                    self.v_num.value = self.num
+                    # self.v_num.value = self.num
                     # print("numbers FCN: ", self.num )
 
-                time_one = time.time() - start_time
-                time_inference.update(time_one)
+                # time_one = time.time() - start_time
+                # time_inference.update(time_one)
 
                 # if config.IMAGE.VIDEO == True:
                 #     self.result_im = save_video(self.out, inputs, pred, frame_probability, patient, config, target=None,
@@ -144,8 +148,8 @@ class FCN_Thread(Process):
                     # print('Cached: ', round(torch.cuda.memory_reserved(0) / 10243, 1))
 
                     print("FCN_Thread stopped")
-                    if time_inference.avg !=0:
-                        print("fps FCN thread {}, average time per cycle {}".format(1/time_inference.avg, time_inference.avg))
+                    # if time_inference.avg !=0:
+                    #     print("fps FCN thread {}, average time per cycle {}".format(1/time_inference.avg, time_inference.avg))
 
                     time_thread = time.time() - time_start
                     fps_im = self.num / time_thread
@@ -160,7 +164,7 @@ class FCN_Thread(Process):
                         pd_frame = pd.DataFrame({"frame_probability":frame_probability, "X":X, "Y":Y})
                         pd_frame.to_csv(os.path.join(config.IMAGE.SAVE_PATH, "FCNthread_output%s.csv" % num))
                     # self.out.release()
-                    print("out released")
+                    # print("out released")
 
 
 
@@ -239,13 +243,15 @@ class Shadow_Image(Process):
 
 
 
-def get_image_fun(q_im,q_im_raw,threads_stopper):
+def get_image_fun(q_im_raw,threads_stopper):
     message = config.IMAGE.JSON_WS
     json_mylist = json.dumps(message, separators=(',', ':'))
     ws = websocket.WebSocket()
     ws.connect("ws://localhost:4100")
     ws.send(json_mylist)
     num_text = 0
+    start_time = time.time()
+    num = 0
     while True:  # self.num in range (100)
         # if self.stop_thread.threads_stopper ==False:
         # for test_im in test_list:
@@ -267,7 +273,7 @@ def get_image_fun(q_im,q_im_raw,threads_stopper):
             image_display = np.array(image)
             # print("received")
             if image.size:
-                q_im.put(image)
+                # q_im.put(image)
 
 
 
@@ -286,10 +292,14 @@ def get_image_fun(q_im,q_im_raw,threads_stopper):
             num_text = num_text + 1
             if num_text == 2:
                 print("Ready to stream")
-
+        num = num+1
         if bool(threads_stopper.value) == True:
             # out.release()
+            time_thread = time.time() - start_time
             print("Get image stopped")
+            fps_im = num / time_thread
+            print("Total time {},fps Get Image thread {}, average time per cycle {}".format(time_thread, fps_im,
+                                                                                              1 / fps_im))
             break
 
 

@@ -13,19 +13,19 @@ import sys
 import time
 from threading import Thread
 import pandas as pd
+import socket
 from multiprocessing import Process
 import multiprocessing
 from Spine_navigation_Polyu.utils.config_robot_GUI import config
 from Spine_navigation_Polyu.utils.functions import run_FCN_streamed_image,save_video, AverageMeter
 #https://techtutorialsx.com/2018/11/08/python-websocket-client-sending-binary-content/
+import pprofile
 
 message = config.IMAGE.JSON_WS
 json_mylist = json.dumps(message, separators=(',', ':'))
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter(os.path.join(config.IMAGE.SAVE_PATH,'output_original.avi'), fourcc, 3.0, (1280, 480))  # for images of size 480*640
-
-
 
 ws = websocket.WebSocket()
 ws.connect("ws://localhost:4100")
@@ -34,6 +34,8 @@ ws.send(json_mylist)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.info("STARTING TEST")
+
+prof = pprofile.Profile()
 
 # cpu_count = multiprocessing.cpu_count()
 # print("CPU counting", cpu_count)
@@ -50,6 +52,7 @@ class Get_Image(Thread):
         # self.threads_stopper = self.stop_thread.threads_stopper
 
     def run(self):
+
         # test_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
         # for patient in ["US_probe_output"]:  # Empty_frames
         #     test_dir_patient = os.path.join(test_dir, patient, "Images")
@@ -137,14 +140,15 @@ class FCN_Thread(Thread):
 
                     inputs,pred,probability, X, Y, frame_probability = run_FCN_streamed_image(self.get_image.image,self.model, self.device, probability,X,Y,logger,config)
                     # print("x",X)
-                    time_one = time.time() - start_time
-                    time_inference.update(time_one)
+
                     if config.IMAGE.VIDEO == True:
                         self.result_im = save_video(out, inputs, pred, frame_probability, patient,config, target=None, labels=None)
                     #TODO: accumulate array of robot positions and force values to write it to npz file
 
                     n = n+1
                     self.num = self.num + 1
+                    time_one = time.time() - start_time
+                    time_inference.update(time_one)
                 else:
                     self.image_flag = False
 
@@ -192,7 +196,9 @@ class Stop_Thread(Thread):
         while True:
             self.num = self.num +1
             # print(i)
-            if keyboard.is_pressed('q') or (self.threads_stopper == True):
+
+
+            if keyboard.read_key() == "q" or (self.threads_stopper == True): #keyboard.is_pressed('q')
                 self.threads_stopper = True
                 print("Killing threads")
                 time_thread = time.time() - time_start
@@ -254,6 +260,187 @@ def initialization():
         model = []
     return device,model
 
+
+class Force_Thread(Thread):
+    '''Force sensor has different coordinate system, it reads measurements in tool coordintate system,
+        so that when it touches the surface perpendicular to the tool, it reads the Fz
+
+        To get exact forces in the robot coordinate system, it is better to multiply Forces from the Force sensor with
+        the transformation matrix from the robot, Universal robot can provide it at each moment of time.
+
+        To symplify the task just the proportion between the Fz and Fset is used to generate the velocity
+        for the robot control. ?Velocity should be set also in the tool frame? Otherwise the axis of the robot
+        and the force sensor should be aligned during robot manipulation
+
+        Now is (check sensor and base alignment):
+        x robot - z force sensor
+        y robot - x force sensor
+        z robot - y force sensor
+
+        #TODO: To change it the transformation matrix should be introduced.
+        '''
+    def __init__(self,Stop_Thread):
+        Thread.__init__(self)
+        self.Fz = 0
+        self.Fdelta = 0
+        self.Rx_next = 0
+        self.Mx_raw = 0
+        # self.point_x_next = 0
+        # self.force_tread_stopper = False
+        # self.stop_movement = False
+        self.num = 0
+        # self.q_Force = q_Force
+        # self.q_Full_Force = q_Full_Force
+        self.stop_thread = Stop_Thread
+    def run(self):
+        i = 0
+        # if config.MODE.Develop == False:
+        #     self.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
+        # else:
+        #     self.robot = None
+
+        print("Force Process starts")
+        # print("robot Force", self.robot)
+
+        if config.MODE.Develop == False:
+            # robot = urx.Robot(config.IP_ADRESS, use_rt=True)
+            s = socket.socket(
+                socket.AF_INET, socket.SOCK_STREAM)
+
+            s.connect((config.IP_ADRESS, 63351))
+            # logger_robot.info('Socket is connected')
+        else:
+            # logger_robot.info('Ethernet is not connected')
+            s = None
+            # os._exit(0)
+
+        F = 0
+        time_start = time.time()
+        while True:
+            if self.stop_thread.threads_stopper == False:
+
+
+                # if i == 150:
+                #    Fref = -6
+                #
+                # if i == 300:
+                #    Fref = -3
+
+                # if i == 1000:
+                #     self.stop_movement = True
+
+
+                # tstart = time.time()
+                # response = s.recv(4096)
+                response = s.recv(136)#1024 #512
+                print(response)
+                # print("socket response",response)
+                # response = bytearray(response)
+                try:
+                    val = response.decode("ascii").split('(', 1)[1].split(')')
+                    print(len(val))
+                    val = val[0]
+                except:
+                    print("Not full package.")
+
+
+                array = [float(x) for x in val[0:-1].split(',')]
+
+                print ('Fx:', array[0], 'Fy:', array[1],'Fz:', array[2],'Mx:', array[3], 'My:', array[4], 'Mz:', array[5])
+                #print ('      ')
+                self.F_full = array
+                self.F_changed_order = [array[2], array[0], array[1],array[5],array[3], array[4]]
+                self.Fz = array[2] # robot X axis, contr directed
+                self.Fy = array[1] # robot Z axis
+                self.Fx = array[0] # robot Y axis
+                self.Mx_raw = array[3]
+                self.My = array[4]
+                self.Mz = array[5]
+                #print array[3],array[4], array[5]
+                # self.Fdelta = config.FORCE.Fref - math.fabs(self.Fz)
+
+                if self.Fz > config.FORCE.Fmax:
+                    self.Fz_sat = config.FORCE.Fmax
+                elif self.Fz < -config.FORCE.Fmax:
+                    self.Fz_sat = -config.FORCE.Fmax
+                else:
+                    self.Fz_sat = self.Fz
+                # print("Fz_sat", self.Fz_sat)
+
+                #SEND to other threads
+                # self.q_Force.value = self.Fz_sat
+                # self.q_Full_Force[:] = self.F_full
+                # posa = self.robot.getl()
+                # point_x = posa[0]
+                # Rx_current = posa[3]
+                #print "X", point_x
+                ######## F - total force
+
+                #F = ((self.Fx) ** 2 + (self.Fy) ** 2 + (self.Fz) ** 2) ** 1 / 2
+
+
+
+
+
+                ################ velocity control #################
+
+                #TODO: move it to Move_Thread
+                # self.point_x_next = point_x + config.FORCE.K_delta * (math.fabs(self.Fz_sat) - config.FORCE.Fref)
+
+                # print(self.velocity_x )
+                #self.velocity_x = Kf * (F - Fref)
+                #print 'F:', F
+
+                ####################################################
+                if self.Mx_raw < -0.8:
+                    self.Mx = -0.8
+                elif self.Mx_raw > 0.8:
+                    self.Mx = 0.8
+                else:
+                    self.Mx = self.Mx_raw
+
+                Krx = 0.03
+                self.velocity_Rx = -Krx*(self.Mx_raw)
+
+
+                # if self.Mx < -0.2:
+                #     self.Rx_next = Rx_current - 0.1*(math.fabs(self.Mx) - 0.1)
+                #     R1 = 0.1 * (math.fabs(self.Mx) - 0.1)
+                #     #print('change: - ', R1)
+                # elif self.Mx > 0.2:
+                #     self.Rx_next = Rx_current + 0.1*(math.fabs(self.Mx) - 0.1)
+                #     R2 = 0.1 * (math.fabs(self.Mx) - 0.1)
+                #     #print('change: + ', R2)
+
+                # else:
+                #     self.Rx_next = Rx_current
+
+                #print "X+", self.point_x_next
+                # tstop = time.time()
+                #print ((tstop - tstart))
+                #TODO: init robot for force function
+                if self.Fz > config.FORCE.Fcrit:
+                    # self.robot.stop()
+                    self.stop_thread.threads_stopper = 1 #stop threads
+                    print('Value is more than F critical. Throw threads_stopper flag')
+
+                i = i + 1
+                # print(self.num)
+
+                self.num = self.num +1
+
+            else:
+                print("Force thread is stopped")
+                time_thread = time.time() - time_start
+                fps_im = self.num / time_thread
+                print("fps Force thread {}, average time per cycle {}".format(fps_im, 1 / fps_im))
+                break
+
+                    #print 'i:', i
+
+
+
+
 if __name__ == '__main__':
 
     device,model = initialization()
@@ -263,9 +450,13 @@ if __name__ == '__main__':
     get_image = Get_Image(stop_threads)
     fcn_thread = FCN_Thread(get_image, stop_threads,device,model)
     shadow = Shadow_Image(stop_threads,get_image)
+    force = Force_Thread(stop_threads)
 
-    # stop_threads.start()
+    stop_threads.start()
     get_image.start()
+
+    force.start()
+
     # shadow.start()
     # stop_threads2.start()
     try:
