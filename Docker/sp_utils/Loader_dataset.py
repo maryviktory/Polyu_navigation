@@ -95,10 +95,11 @@ class DatasetPlane(Dataset):
 
 class Dataset_Multiclass_heatmaps(Dataset):
 
-    def __init__(self, root_dir, image_size, label_size, enable_transform = True, norm=False):
+    def __init__(self, root_dir, image_size, label_size, config,enable_transform = True, norm=False):
         self.image_list = []
         self.class_id_list = []
         self.root_dir = root_dir
+        self.config = config
         print(self.root_dir)
         # self.transform = transform
         for class_id, (class_folder) in enumerate(os.listdir(self.root_dir)):
@@ -128,7 +129,12 @@ class Dataset_Multiclass_heatmaps(Dataset):
 
         img_name = self.image_list[idx]
         # print("split",os.path.split(self.root_dir))
-        label_name = os.path.join(os.path.split(self.root_dir)[0], "Labels_heatmaps",  os.path.split(img_name)[-1])
+        label_name = os.path.join(os.path.split(self.root_dir)[0], "Labels_heatmaps", os.path.split(img_name)[-1])
+
+        if self.config.TRAIN.three_heads == True:
+            label_sacrum_name = os.path.join(os.path.split(self.root_dir)[0], "Labels_sacrum_heatmaps",
+                                             os.path.split(img_name)[-1])
+
         class_id = self.class_id_list[idx]
         # print(img_name)
         # print(label_name)
@@ -139,7 +145,9 @@ class Dataset_Multiclass_heatmaps(Dataset):
         label = Image.open(label_name)
         label = label.convert("RGB")
 
-
+        if self.config.TRAIN.three_heads == True:
+            label_sacrum = Image.open(label_sacrum_name)
+            label_sacrum = label_sacrum.convert("RGB")
 
 
         if self.enable_transform == True:
@@ -149,6 +157,10 @@ class Dataset_Multiclass_heatmaps(Dataset):
 
             image = tv.transforms.functional.affine(image, rotation, (translation,0), 1, 0) #scale_image_label*translation
             label = tv.transforms.functional.affine(label, rotation, (translation, 0), 1,0)
+
+            if self.config.TRAIN.three_heads == True:
+                label_sacrum = tv.transforms.functional.affine(label_sacrum, rotation, (translation, 0), 1, 0)
+
             # print("translation {}".format(translation), "rotation {}".format(rotation))
 
         # Plot = False
@@ -170,11 +182,19 @@ class Dataset_Multiclass_heatmaps(Dataset):
         label = label.convert("L")
         label = tv.transforms.ToTensor()(label)
 
+
+
         if self.norm:
             image = self.normalization(image)
         # print(image.shape, "loader")
+        if self.config.TRAIN.three_heads == True:
+            label_sacrum = tv.transforms.Resize((self.label_size, self.label_size))(label_sacrum)
+            label_sacrum = label_sacrum.convert("L")
+            label_sacrum = tv.transforms.ToTensor()(label_sacrum)
 
-        return image, label, class_id
+            return image, label,label_sacrum, class_id
+        else:
+            return image, label, class_id
 
     def custom_transform(self):
 
@@ -192,8 +212,6 @@ class Dataset_Multiclass_heatmaps(Dataset):
         else:
             rotation = 0
             translation = 0
-
-
 
         self.rotation = rotation
         self.translation = translation

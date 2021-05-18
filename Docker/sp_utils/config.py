@@ -75,7 +75,7 @@ config.DATASET.PATH_NAS = 'SpinousProcessData/FCN_PWH_train_dataset_heatmaps/dat
 
 # train
 config.TRAIN = edict()
-
+config.TRAIN.three_heads = True
 config.TRAIN.POLYAXON = False
 config.TRAIN.BATCH_SIZE = 12
 config.TRAIN.VAL_BATCH_SIZE = 12
@@ -85,9 +85,9 @@ config.TRAIN.UPDATE_WEIGHTS = True
 config.TRAIN.LR = 0.001
 config.TRAIN.LR_heatmap = 0.0006
 config.TRAIN.LR_cl = 0.01
-config.TRAIN.END_EPOCH = 100
+config.TRAIN.END_EPOCH = 50
 config.TRAIN.SWEEP_TRJ_PLOT = True
-
+config.TRAIN.adaptive_weights = False
 #EXTRA
 config.TRAIN.LR_FACTOR = 0.1
 config.TRAIN.LR_STEP = [90, 110]
@@ -95,7 +95,7 @@ config.TRAIN.OPTIMIZER = 'adam'
 config.TRAIN.MOMENTUM = 0.9
 config.TRAIN.WD = 0.0001
 config.TRAIN.loss_alpha = 500
-config.TRAIN.weight_decay = 0.1
+config.TRAIN.weight_decay = 0.0
 # testing
 config.TEST = edict()
 

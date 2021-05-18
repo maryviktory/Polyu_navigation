@@ -148,7 +148,7 @@ class PoseResNet(nn.Module):
         self.inplanes = 64
         extra = cfg.MODEL.EXTRA
         self.deconv_with_bias = extra.DECONV_WITH_BIAS
-
+        self.cfg = cfg
         super(PoseResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -171,6 +171,12 @@ class PoseResNet(nn.Module):
             extra.NUM_DECONV_KERNELS,
         )
 
+        self.deconv_layers_second_head = self._make_deconv_layer(
+            extra.NUM_DECONV_LAYERS,
+            extra.NUM_DECONV_FILTERS,
+            extra.NUM_DECONV_KERNELS,
+        )
+
         self.final_layer = nn.Conv2d(
             in_channels=extra.NUM_DECONV_FILTERS[-1],
             out_channels=cfg.MODEL.NUM_JOINTS,
@@ -179,6 +185,13 @@ class PoseResNet(nn.Module):
             padding=1 if extra.FINAL_CONV_KERNEL == 3 else 0
         )
 
+        self.final_layer_second_head = nn.Conv2d(
+            in_channels=extra.NUM_DECONV_FILTERS[-1],
+            out_channels=cfg.MODEL.NUM_JOINTS,
+            kernel_size=extra.FINAL_CONV_KERNEL,
+            stride=1,
+            padding=1 if extra.FINAL_CONV_KERNEL == 3 else 0
+        )
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
@@ -255,10 +268,17 @@ class PoseResNet(nn.Module):
         classification = x
 
         # Heatmap HEAD
-        x = self.deconv_layers(branch_out)
-        heatmap = self.final_layer(x)
+        y = self.deconv_layers(branch_out)
+        heatmap = self.final_layer(y)
 
-        return heatmap,classification
+        # Second Heatmap HEAD
+        if self.cfg.TRAIN.three_heads ==True:
+            z = self.deconv_layers_second_head(branch_out)
+            heatmap_second = self.final_layer_second_head(z)
+            return heatmap,heatmap_second,classification
+        else:
+            return heatmap, classification
+
 
     def init_weights(self, cfg,pretrained=''):
         if os.path.isfile(pretrained):
