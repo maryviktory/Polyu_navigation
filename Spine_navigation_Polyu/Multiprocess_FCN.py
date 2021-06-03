@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import os
-import FCN.sp_utils as utils
+import Spine_navigation_Polyu.utils as utils
 import time
 import logging
 import json
@@ -33,13 +33,17 @@ logger.info("STARTING TEST")
 class FCN_Thread(Process):
     '''Run FCN pre-trained model on online streamed images
     calculate the coordinate'''
-    def __init__(self,q_im_raw,threads_stopper,q_im_inputs,q_im_pred,q_frame_probability,v_num,start_send_image):
+    def __init__(self,q_im_raw,threads_stopper,q_im_inputs,q_im_pred,q_frame_probability,v_num,start_send_image,q_im_pred_sacrum,q_frame_probability_sacrum,
+                                       q_frame_class):
         Process.__init__(self)
 
         self.result_im = np.zeros(0)
 
         self.image_flag = False
         self.num = 0
+        self.q_im_pred_sacrum = q_im_pred_sacrum
+        self.q_frame_probability_sacrum = q_frame_probability_sacrum
+        self.q_frame_class = q_frame_class
         self.q_im_raw = q_im_raw
         self.threads_stopper = threads_stopper
         # self.q_image = q_im
@@ -59,10 +63,11 @@ class FCN_Thread(Process):
         # print("Allocated:", round(torch.cuda.memory_allocated(0) / 10243, 1), "GB")
         print(torch.cuda.get_device_name(0))
 
-        if config.IMAGE.Windows == True:
-            if config.IMAGE.subject_mode == "phantom":
-                config.IMAGE.Windows_MODEL_FILE = config.IMAGE.Windows_MODEL_FILE_PHANTOM
-            self.model = utils.model_pose_resnet.get_pose_net(config.IMAGE.Windows_MODEL_FILE, is_train=False)
+        if config.TRAIN.three_heads == True or config.TRAIN.two_heads == True:
+            if config.MODE.subject_mode == "phantom":
+                config.IMAGE.Windows_MODEL_FILE = config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM
+
+            self.model = utils.model_pose_resnet_3heads.get_pose_net(config,config.IMAGE.Windows_MODEL_FILE, is_train=False)
             logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
             print('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
             self.model.load_state_dict(
@@ -74,9 +79,23 @@ class FCN_Thread(Process):
             self.model.to(self.device)
             print("Model on cuda: ", next(self.model.parameters()).is_cuda)
             # logger.info("Setting model to eval. It is important for testing")
+
         else:
-            print("Model is not defined")
-            model = []
+            if config.MODE.subject_mode == "phantom":
+                config.IMAGE.Windows_MODEL_FILE = config.IMAGE.Windows_MODEL_FILE_PHANTOM
+
+            self.model = utils.model_pose_resnet.get_pose_net(config.IMAGE.Windows_MODEL_FILE, is_train=False)
+            logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
+            print('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
+            self.model.load_state_dict(
+                torch.load(config.IMAGE.Windows_MODEL_FILE, map_location=self.device)[
+                    'model_state_dict'])  # map_location=torch.device('cpu')
+
+            self.model.eval()  # Super important for testing! Otherwise the result would be random
+
+            self.model.to(self.device)
+            print("Model on cuda: ", next(self.model.parameters()).is_cuda)
+            # logger.info("Setting model to eval
 
         # fourcc = cv2.VideoWriter_fourcc(*'XVID')  # "DIVX" 'XVID'
         # print(fourcc)  # fourcc tag 0x44495658/'XVID' codec_id 000C
@@ -113,7 +132,20 @@ class FCN_Thread(Process):
                 # make it two-dimensional
                 # image_from_probe = arr.reshape((480, 640, -1))
                 image_from_probe = Image.frombuffer("L",(640,480),arr)
-                inputs,pred,pobability,X,Y,frame_probability = run_FCN_streamed_image(image_from_probe,self.model,self.device,probability,X,Y,logger,config)
+
+                if config.TRAIN.three_heads == True:
+                    inputs, pred, pobability, X, Y, frame_probability,pred_sacrum,frame_probability_sacrum,X_sac,Y_sac,classification = run_FCN_streamed_image(image_from_probe,
+                                                                                               self.model, self.device,
+                                                                                               probability, X, Y,
+                                                                         logger, config)
+                elif config.TRAIN.two_heads == True:
+                    inputs, pred, pobability, X, Y, frame_probability, classification = run_FCN_streamed_image(
+                        image_from_probe,
+                        self.model, self.device,
+                        probability, X, Y,logger, config)
+
+                else:
+                    inputs,pred,pobability,X,Y,frame_probability = run_FCN_streamed_image(image_from_probe,self.model,self.device,probability,X,Y,logger,config)
                 # self.q_image.put(input_data) #should be after image usage, otherwise it affects it
                 cv2.imshow("Raw",np.array(image_from_probe))
                 cv2.waitKey(1)
@@ -127,6 +159,25 @@ class FCN_Thread(Process):
                     self.q_im_pred[:] = pred[0][0]
 
                     self.q_frame_probability.value = frame_probability
+
+                    if config.TRAIN.three_heads == True:
+                        self.q_im_pred_sacrum[:] = pred_sacrum[0][0]
+
+                        self.q_frame_probability_sacrum.value = frame_probability_sacrum
+                        # print(classification)
+                        self.q_frame_class[:] = classification[0]
+
+                    elif config.TRAIN.two_heads == True:
+                        self.q_frame_class[:] = classification[0]
+                        self.q_im_pred_sacrum[:] = pred[0][0]
+
+                        self.q_frame_probability_sacrum.value = 0
+                        # print(classification)
+                    else:
+                        self.q_frame_class[:] = [0,0,0]
+                        self.q_im_pred_sacrum[:] = pred[0][0]
+
+                        self.q_frame_probability_sacrum.value = 0
                     # self.v_num.value = self.num
                     # print("numbers FCN: ", self.num )
 
@@ -162,7 +213,7 @@ class FCN_Thread(Process):
                                  probability=probability, x=X, y=Y)
                         print(len(probability),len(X),len(Y))
                         pd_frame = pd.DataFrame({"frame_probability":frame_probability, "X":X, "Y":Y})
-                        pd_frame.to_csv(os.path.join(config.IMAGE.SAVE_PATH, "FCNthread_output%s.csv" % num))
+                        # pd_frame.to_csv(os.path.join(config.IMAGE.SAVE_PATH, "FCNthread_output%s.csv" % num))
                     # self.out.release()
                     # print("out released")
 

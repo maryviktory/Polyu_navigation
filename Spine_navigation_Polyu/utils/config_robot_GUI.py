@@ -20,49 +20,44 @@ config.robot_payload = 1 #KG
 config.w = 400
 config.hg = 360
 config.Trajectory_n = 'FCN_force'
-config.default_distance = 1 #meters
 config.maximum_distance = 2 #meters
-config.VELOCITY_up = 0.003 #0.004
+
+# config.IMAGE.FCN = False
+
+config.default_distance = 0.3
+config.VELOCITY_up = 0.003 #0.003
 # config.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
 # print("robot in config")
-config.MODE = edict()
-config.MODE.Develop = False #Allows to launch code without robot
-config.MODE.FCN = True
-config.MODE.FCN_vcontrol = True
-config.MODE.FORCE = True
-config.MODE.BASE_csys = False
-config.MODE.exp_smoothing_velocity = True
-config.MODE.Kalman = True
-
-config.MODE.median_filter = False
-config.Median_kernel_size = 31
 
 config.FORCE = edict()
-
-config.FORCE.Fref_first_move = 4 #Force [N]
-config.FORCE.Fref = 7 #Force [N]
+config.FORCE.Kp_on_measurement = False
+config.FORCE.Fref_first_move = 10 #Force [N]
+config.FORCE.Fref = 10 #Force [N]
 config.FORCE.Fmax = 30 #Force [N]
 config.FORCE.Fcrit = 35 #Force [N]
 config.FORCE.K_delta = 0.0005
-config.FORCE.Kf = 0.0007 #0.002  Kunal - 0.0004
+config.FORCE.Kf = 0.0004 #0.002  Kunal - 0.0004
 config.FORCE.Kz = 0.6
-config.FORCE.v = 0.007 #move first point
+config.FORCE.v = 0.01 #move first point
 config.FORCE.a = 0.01 #move first point
 config.FORCE.thr = 0.004
 config.FORCE.K_torque = 0.07 #0.07
 
-config.IMAGE = edict()
 
+config.FORCE.Kalman_force = False
+config.FORCE.Kalman_R = 0.001
+config.FORCE.Kalman_Q = 1e-5
+config.FORCE.moving_average_filter = True
+config.FORCE.moving_average_filter_N = 7
+config.FORCE.adaptive_Kp = False
+
+
+
+config.IMAGE = edict()
 config.IMAGE.K_im_out = 0.5
 config.IMAGE.K_im_near = 0.2
-
 config.IMAGE.Kalman_R = 500# estimate of measurement variance, change to see effect
 config.IMAGE.Kalman_Q = 50  # process variance #1e-5
-
-
-
-# config.IMAGE.FCN = False
-config.IMAGE.subject_mode = "phantom" #"human" #phantom
 
 config.IMAGE.JSON_WS = {
     "Command": "Us_Config",
@@ -75,6 +70,7 @@ config.IMAGE.JSON_WS = {
 config.IMAGE.LOCAL_HOST = "ws://localhost:4100"
 config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\human_best_model_exp40184.pt"
 config.IMAGE.Windows_MODEL_FILE_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\best_model_exp49560_phantom_6scans.pt"
+config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM= "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_3class_3heads_model75.pt"
 config.IMAGE.PROBE_SIZE = 0.08 #old wifi probe 48mm, new probe 80 mm = 0.08m
 config.IMAGE.ORIGINAL_IMAGE_SIZE = 640 #width, IFL - 480, Polyu - 640
 config.IMAGE.ORIGINAL_IMAGE_HEIGHT = 480
@@ -93,7 +89,7 @@ config.IMAGE.VIDEO = True #record video with detected point and label
 config.IMAGE.PLOT_VIDEO = False #plot each frame of the video
 config.IMAGE.labels_exist = True #True if the sweep is labelled
 # config.TRAIN.SWEEP_TRJ_PLOT = True
-config.IMAGE.SAVE_NPZ_FILE = True
+config.IMAGE.SAVE_NPZ_FILE = False
 config.IMAGE.SAVE_PATH = "D:\spine navigation Polyu 2021\\robot_trials_output"
 config.IMAGE.PLOT_SMOOTH_LABEL_TRAJECTORY = True #True if the file already exists and need to be loaded
 ## Augmentation of data
@@ -110,9 +106,10 @@ POSE_RESNET.FINAL_CONV_KERNEL = 1
 POSE_RESNET.TARGET_TYPE = 'gaussian'
 POSE_RESNET.HEATMAP_SIZE = [64, 64]  # width * height, ex: 24 * 32
 POSE_RESNET.SIGMA = 2
-
 # common params for NETWORK
+
 config.MODEL = edict()
+config.MODEL.num_classes = 3
 config.MODEL.NAME = 'pose_resnet'
 config.MODEL.INIT_WEIGHTS = True
 # config.MODEL.PRETRAINED = '/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/model_best_resnet_fixed_False_pretrained_True_data_19subj_2_2_classes_exp6105.pt'
@@ -121,9 +118,98 @@ config.MODEL.INIT_WEIGHTS = True
 #"SpinousProcessData/spinous_best_18_retrain.pt"
 config.MODEL.NUM_JOINTS = 1
 config.MODEL.IMAGE_SIZE = [256, 256]  # width * height, ex: 192 * 256
-# config.MODEL.EXTRA = MODEL_EXTRAS[config.MODEL.NAME]
+MODEL_EXTRAS = {
+    'pose_resnet': POSE_RESNET,
+}
+config.MODEL.EXTRA = MODEL_EXTRAS[config.MODEL.NAME]
 
 config.MODEL.STYLE = 'pytorch'
 
 # config.LOSS = edict()
 # config.LOSS.USE_TARGET_WEIGHT = True
+
+
+
+#NOTE: Adjustable modes
+
+config.MODE = edict()
+config.MODE.Develop = False #Allows to launch code without robot
+config.MODE.FCN = True
+config.MODE.FCN_vcontrol = True
+config.MODE.FORCE = True
+config.MODE.BASE_csys = False
+config.MODE.exp_smoothing_velocity = True #image
+config.MODE.Kalman = True #image
+config.MODE.PID_control = True
+config.MODE.median_filter = False
+config.Median_kernel_size = 31
+
+
+config.MODE.subject_mode = "human" #"human" #phantom
+
+if config.MODE.subject_mode == "human":
+    config.default_distance = 1.5  # meters
+    config.FORCE.Kf = 0.0003  # 0.002  Kunal - 0.0004
+    config.FORCE.Kd = 0.0000
+    config.FORCE.Ki = 0.0000
+    config.FORCE.velocity_output_limits = 0.0015
+
+    config.FORCE.Fref_first_move = 15  # Force [N]
+    config.FORCE.Fref = 15 #Force [N]
+    config.VELOCITY_up = 0.0015 #0.003
+
+    config.MODE.PID_control = True
+    config.FORCE.Kp_on_measurement = True
+
+    config.FORCE.Kalman_force = False
+    config.FORCE.Kalman_R = 0.001
+    config.FORCE.Kalman_Q = 1e-5
+
+    config.FORCE.moving_average_filter = True
+    config.FORCE.moving_average_filter_N = 15
+
+
+config.TRAIN = edict()
+config.TRAIN.three_heads = False
+config.TRAIN.two_heads = False
+
+if config.TRAIN.two_heads == True and config.MODEL.num_classes == 3:
+    config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\\20_epoch32_best_mean_3_class.pt"
+    config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = ""
+
+if  config.TRAIN.two_heads == True and config.MODEL.num_classes ==4:
+    config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\8_best_acc_class_4_class.pt"
+    config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = ""
+
+if config.TRAIN.three_heads == True and config.MODEL.num_classes == 3:
+    config.IMAGE.Windows_MODEL_FILE = ""
+    config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_3class_3heads_model75.pt"
+
+if config.TRAIN.three_heads == True and config.MODEL.num_classes == 4:
+    config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\\21_epoch30_4class_3heads_human.pt"
+    config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_4class_3heads_model5.pt"
+
+
+
+
+
+def get_model_name(cfg):
+    name = cfg.MODEL.NAME
+    full_name = cfg.MODEL.NAME
+    extra = cfg.MODEL.EXTRA
+    if name in ['pose_resnet']:
+        name = '{model}_{num_layers}'.format(
+            model=name,
+            num_layers=extra.NUM_LAYERS)
+        deconv_suffix = ''.join(
+            'd{}'.format(num_filters)
+            for num_filters in extra.NUM_DECONV_FILTERS)
+        full_name = '{height}x{width}_{name}_{deconv_suffix}'.format(
+            height=cfg.MODEL.IMAGE_SIZE[1],
+            width=cfg.MODEL.IMAGE_SIZE[0],
+            name=name,
+            deconv_suffix=deconv_suffix)
+    else:
+        raise ValueError('Unkown model: {}'.format(cfg.MODEL))
+
+    return name, full_name

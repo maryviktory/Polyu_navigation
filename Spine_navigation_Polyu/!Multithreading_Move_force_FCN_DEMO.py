@@ -525,15 +525,24 @@ class Move_Thread(Process):
         self.patient = "phantom"
     def run(self):
         logger_robot.info('config.VELOCITY_up {}'.format(config.VELOCITY_up))
-        logger_robot.info('config.MODE.FCN {}'.format(config.MODE.FCN))
-        logger_robot.info('config.MODE.FCN_vcontrol {}'.format(config.MODE.FCN_vcontrol))
-        logger_robot.info('config.MODE.FORCE {}'.format(config.MODE.FORCE))
-        logger_robot.info('config.MODE.exp_smoothing_velocity {}'.format(config.MODE.exp_smoothing_velocity))
-        logger_robot.info('config.MODE.median_filter {}'.format(config.MODE.median_filter))
-        logger_robot.info('config.FORCE.Fref_first_move {}'.format(config.FORCE.Fref_first_move))
-        logger_robot.info('config.FORCE.Fref {}'.format(config.FORCE.Fref))
-        logger_robot.info('config.FORCE.Kf {}'.format(config.FORCE.Kf))
-        logger_robot.info('config.FORCE.K_torque {}'.format(config.FORCE.K_torque))
+
+        logger_robot.info("___________IMAGE control_____________")
+        logger_robot.info('config.MODE.FCN= {}'.format(config.MODE.FCN))
+        logger_robot.info('config.MODE.FCN_vcontrol= {}'.format(config.MODE.FCN_vcontrol))
+        logger_robot.info('config.MODE.exp_smoothing_velocity= {}'.format(config.MODE.exp_smoothing_velocity))
+        logger_robot.info('config.MODE.median_filter= {}'.format(config.MODE.median_filter))
+
+        logger_robot.info("___________FORCE control_____________")
+        logger_robot.info('config.MODE.FORCE= {}'.format(config.MODE.FORCE))
+        logger_robot.info('config.MODE.PID_control= {}'.format(config.MODE.PID_control))
+        logger_robot.info('config.FORCE.Kp_on_measurement= {}'.format(config.FORCE.Kp_on_measurement))
+        logger_robot.info('config.FORCE.Kalman_force= {}'.format(config.FORCE.Kalman_force))
+
+        logger_robot.info('config.FORCE.Fref_first_move= {}'.format(config.FORCE.Fref_first_move))
+        logger_robot.info('config.FORCE.Fref= {}'.format(config.FORCE.Fref))
+        logger_robot.info('config.FORCE.Kf= {}'.format(config.FORCE.Kf))
+        logger_robot.info('config.FORCE.K_torque= {}'.format(config.FORCE.K_torque))
+
 
         print("Move Process starts")
         print("move end distance", self.move_end_distance.value)
@@ -777,6 +786,7 @@ class Move_Thread(Process):
                     num = num + 1
                 # print(robot_pose_array[:, 0])
                 pd_frame.to_csv(os.path.join(config.IMAGE.SAVE_PATH, "Move_thread_output%s.csv" % num))
+                pd_frame.to_csv(os.path.join(config.IMAGE.SAVE_PATH, "robot_frames.csv"), header=False)
 
                 self.robot.close()
 
