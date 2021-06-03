@@ -28,10 +28,10 @@ def multiclass_heatmap_load_train_val(dataroot, train_dir, val_dir, config):
     class_num = len(os.listdir(os.path.join(dataroot, train_dir)))
 
     train_data = Dataset_Multiclass_heatmaps(os.path.join(dataroot, train_dir), image_size=config.TEST.input_im_size,
-                              label_size=config.TEST.heatmap_size, enable_transform=config.TRAIN.Augmentation,
+                              label_size=config.TEST.heatmap_size, config=config, enable_transform=config.TRAIN.Augmentation,
                               norm=True)
     val_data = Dataset_Multiclass_heatmaps(os.path.join(dataroot, val_dir), image_size=config.TEST.input_im_size,
-                            label_size=config.TEST.heatmap_size, enable_transform=False, norm=True)
+                            label_size=config.TEST.heatmap_size,config=config, enable_transform=False, norm=True)
 
 
     target_list = torch.tensor(train_data.class_id_list)
@@ -54,6 +54,7 @@ def multiclass_heatmap_load_train_val(dataroot, train_dir, val_dir, config):
 
 
     return trainloader, valloader, class_num
+
 
 
 def make_weights_for_balanced_classes(images, nclasses):
