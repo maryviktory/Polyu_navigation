@@ -144,7 +144,7 @@ def main():
     Pminus=np.zeros(sz)    # a priori error estimate
     K=np.zeros(sz)         # gain or blending factor
 
-    R = 0.01 # estimate of measurement variance, change to see effect
+    R = 0.001 # estimate of measurement variance, change to see effect
     # print("variance",R)
     # intial guesses
     xhat[0] = 224/2
