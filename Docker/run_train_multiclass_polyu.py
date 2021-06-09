@@ -177,21 +177,21 @@ def main(config):
     else:
         optimizer = optim.Adam(model.parameters(), lr=config.TRAIN.LR)  # weight_decay=config.TRAIN.weight_decay
         #
-        optimizer = optim.Adam([
-                {"params": model.conv1.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.bn1.parameters(),"lr": config.TRAIN.LR},
-                {"params": model.relu.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.maxpool.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.layer1.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.layer2.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.layer3.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.layer4.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.avgpool_class.parameters(), "lr": config.TRAIN.LR_cl},
-                {"params": model.fc_class.parameters(), "lr": config.TRAIN.LR_cl},
-                {"params": model.deconv_layers.parameters(), "lr": config.TRAIN.LR_heatmap},
-                {"params": model.final_layer.parameters(), "lr": config.TRAIN.LR_heatmap},
-
-            ], lr=config.TRAIN.LR)
+        # optimizer = optim.Adam([
+        #         {"params": model.conv1.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.bn1.parameters(),"lr": config.TRAIN.LR},
+        #         {"params": model.relu.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.maxpool.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.layer1.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.layer2.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.layer3.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.layer4.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.avgpool_class.parameters(), "lr": config.TRAIN.LR_cl},
+        #         {"params": model.fc_class.parameters(), "lr": config.TRAIN.LR_cl},
+        #         {"params": model.deconv_layers.parameters(), "lr": config.TRAIN.LR_heatmap},
+        #         {"params": model.final_layer.parameters(), "lr": config.TRAIN.LR_heatmap},
+        #
+        #     ], lr=config.TRAIN.LR)
     model.to(device)
     print("Model on cuda: ", next(model.parameters()).is_cuda)
     # Decay LR by a factor of 0.1 every 3 epochs
