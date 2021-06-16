@@ -181,18 +181,21 @@ def main(config):
 
 
     config.DATASET.OUTPUT_PATH = os.path.join(config.DATASET.PATH ,"runs",'%s'%dt_string)
+    print("output path",config.DATASET.OUTPUT_PATH)
     if not os.path.exists(config.DATASET.OUTPUT_PATH):
         os.makedirs(config.DATASET.OUTPUT_PATH)
+
+
     os.chmod(config.DATASET.OUTPUT_PATH,stat.S_IRWXO)
+    os.chmod(os.path.join(config.DATASET.PATH ,"runs"), stat.S_IRWXO)
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
     logger.addHandler(logging.FileHandler(os.path.join(config.DATASET.OUTPUT_PATH,'Heatmaps_Resnet101.log')))
     model_path = os.path.join(config.DATASET.PATH,"pretrained model","model_best_resnet_fixed_False_pretrained_True_Multiclass_spine_4classes_exp6106.pt")
 
     trainloader, valloader,class_num = utils.multiclass_heatmap_load_train_val(config.DATASET.PATH, "train", "validation", config)
-
-    logger.info("config.TRAIN.three_heads = {}".format(config.TRAIN.three_heads))
     logger.info("class_num from DataLoader {}".format(class_num))
+    logger.info("config.TRAIN.three_heads= {}".format(config.TRAIN.three_heads))
     logger.info('batch size {}'.format(config.TRAIN.BATCH_SIZE))
     print('dataset',config.DATASET.PATH)
     logger.info("weights {}".format(config.TRAIN.UPDATE_WEIGHTS))
@@ -203,6 +206,8 @@ def main(config):
     logger.info("Adaptive weights: {}".format(config.TRAIN.adaptive_weights))
     logger.info("Weight_decay: {}".format(config.TRAIN.weight_decay))
     logger.info("epoch: {}".format(config.TRAIN.END_EPOCH))
+
+
 
     model = utils.model_pose_resnet.get_pose_net(config,model_path,is_train = True)
 

@@ -9,7 +9,33 @@ import numpy as np
 import torchvision
 from PIL import Image
 import matplotlib.pyplot as plt
-from utils.config_robot_GUI import config
+from Spine_navigation_Polyu.utils.config_robot_GUI import config
+
+
+
+class Kalman_filter_x_im():
+    def __init__(self):
+        # allocate space for arrays
+        self.xhat = np.zeros(0)  # a posteri estimate of x
+        self.P = np.zeros(0)  # a posteri error estimate
+        self.xhatminus = np.zeros(0)  # a priori estimate of x
+        self.Pminus = np.zeros(0)  # a priori error estimate
+        self.K = np.zeros(0)  # gain or blending factor
+        self.R = config.FORCE.Kalman_R # estimate of measurement variance, change to see effect
+        self.Q = config.FORCE.Kalman_Q
+        self.xhat = np.append(self.xhat,-config.FORCE.Fref)
+        self.P = np.append(self.P,0)
+
+    def update(self, z):
+        # time update
+        self.xhatminus = np.append(self.xhatminus,self.xhat[-1])  # +B*0.01
+        self.Pminus = np.append(self.Pminus ,self.P[-1] + self.Q)
+        # measurement update
+        self.K = np.append(self.K, self.Pminus[-1] / (self.Pminus[-1] + self.R))
+        # print("K[k]",K[k])
+        self.xhat = np.append(self.xhat,self.xhatminus[-1] + self.K[-1] * (z - self.xhatminus[-1]))
+        self.P = np.append(self.P,(1 - self.K[-1]) * self.Pminus[-1])
+        return self.xhat[-1]
 
 def find_centroid(c):
     M = cv2.moments(c)
@@ -357,14 +383,19 @@ def run_FCN_streamed_image(data,model,device,probability,X,Y,logger,config):
     tensor_image = input_data.unsqueeze_(0)
     # logger.info("tensor of the input image {}".format(tensor_image.shape))
 
-    inputs= tensor_image.to(device)
+    inputs = tensor_image.to(device)
     # print(inputs)
     # print("Allocated:", round(torch.cuda.memory_allocated(0) / 1024 ** 3, 1), "GB")
     # print("inputs", inputs.shape, inputs)
     # print("Model on cuda: ",next(model.parameters()).is_cuda)
     # print("Inputs on cuda: ", inputs.is_cuda)
     start_time = time.time()
-    logps = model.forward(inputs)
+    if config.TRAIN.three_heads == True:
+        logps,logps_2,classification = model.forward(inputs)
+    elif config.TRAIN.two_heads == True:
+        logps, classification = model.forward(inputs)
+    else:
+        logps = model.forward(inputs)
     # print("time:", time.time()-start_time)
     # print(logps)
 
@@ -389,4 +420,21 @@ def run_FCN_streamed_image(data,model,device,probability,X,Y,logger,config):
 
     inputs = img_denorm(input_data)
     inputs = tv.transforms.ToPILImage()(inputs)
-    return inputs,pred,probability, X, Y, frame_probability
+
+    if config.TRAIN.three_heads == True:
+        p_map_2 = np.squeeze(logps_2.to("cpu").numpy())
+        pred_2, _ = get_max_preds(logps_2.detach().cpu().numpy())
+        # prediction of the final point in dimentions of heatmap. Transfer it to image size
+        pred_2 = pred_2 * config.IMAGE.input_im_size / config.IMAGE.heatmap_size
+        frame_probability_2 = np.amax(p_map_2)
+        X_2 = pred_2[0][0][0]
+        Y_2 = pred_2[0][0][1]
+
+        classification = torch.sigmoid(classification).detach().cpu().numpy()
+        return inputs,pred,probability, X, Y, frame_probability,pred_2,frame_probability_2,X_2,Y_2,classification
+
+    elif config.TRAIN.two_heads == True:
+        classification = torch.sigmoid(classification).detach().cpu().numpy()
+        return inputs, pred, probability, X, Y, frame_probability, classification
+    else:
+        return inputs,pred,probability, X, Y, frame_probability
