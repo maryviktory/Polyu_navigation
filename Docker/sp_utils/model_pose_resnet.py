@@ -171,11 +171,6 @@ class PoseResNet(nn.Module):
             extra.NUM_DECONV_KERNELS,
         )
 
-        self.deconv_layers_second_head = self._make_deconv_layer(
-            extra.NUM_DECONV_LAYERS,
-            extra.NUM_DECONV_FILTERS,
-            extra.NUM_DECONV_KERNELS,
-        )
 
         self.final_layer = nn.Conv2d(
             in_channels=extra.NUM_DECONV_FILTERS[-1],
@@ -184,14 +179,21 @@ class PoseResNet(nn.Module):
             stride=1,
             padding=1 if extra.FINAL_CONV_KERNEL == 3 else 0
         )
+        if self.cfg.TRAIN.three_heads == True:
+            self.deconv_layers_second_head = self._make_deconv_layer(
+                extra.NUM_DECONV_LAYERS,
+                extra.NUM_DECONV_FILTERS,
+                extra.NUM_DECONV_KERNELS,
+            )
 
-        self.final_layer_second_head = nn.Conv2d(
-            in_channels=extra.NUM_DECONV_FILTERS[-1],
-            out_channels=cfg.MODEL.NUM_JOINTS,
-            kernel_size=extra.FINAL_CONV_KERNEL,
-            stride=1,
-            padding=1 if extra.FINAL_CONV_KERNEL == 3 else 0
-        )
+            self.final_layer_second_head = nn.Conv2d(
+                in_channels=extra.NUM_DECONV_FILTERS[-1],
+                out_channels=cfg.MODEL.NUM_JOINTS,
+                kernel_size=extra.FINAL_CONV_KERNEL,
+                stride=1,
+                padding=1 if extra.FINAL_CONV_KERNEL == 3 else 0
+            )
+
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:

@@ -464,10 +464,10 @@ def main():
 
         else:
             test_dir = config.TEST.data_dir_w_out_labels
-            test_dir = config.TEST.sweep_data_dir
+            test_dir = config.TEST.Windows_data_dir
             if config.TRAIN.SWEEP_TRJ_PLOT:
                 test_dir = config.TEST.sweep_data_dir
-            for patient in ["US_probe_output"]: #Empty_frames
+            for patient in ["HO_YIN_long"]: #Empty_frames
                 test_dir_patient = os.path.join(test_dir,patient,"Images")
                 test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
 

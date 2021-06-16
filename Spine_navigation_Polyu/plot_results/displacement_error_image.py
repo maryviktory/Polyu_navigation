@@ -90,7 +90,7 @@ def plot_path(probability, X, Y,color_ext,labels = None) :
     # plt.show()
     return path, index
 
-folder = "\human experiments\\Ho YIN\\3"
+folder = "trial high fps\\4_v005_robot_fps_26"
 data_path = "D:\spine navigation Polyu 2021\\robot_trials_output\%s\Move_thread_output0.csv"%folder
 
 
@@ -171,7 +171,7 @@ if classes ==True:
         class_3 = np.append(class_3, array[2])
 
 
-# path,index = plot_path(frame_probability,X_im,Y_im,"r")
+path,index = plot_path(frame_probability,X_im,Y_im,"r")
 
 t = np.linspace(0, len(X_robot), len(X_robot))
 

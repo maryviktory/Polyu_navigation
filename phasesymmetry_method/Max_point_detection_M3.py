@@ -1,13 +1,22 @@
 import cv2
 import numpy as np
 from scipy import ndimage
-import phasesym
-from operator import itemgetter
+import phasesymmetry_method.phasesym as phasesym
+
+import FCN.sp_utils as utils
+import os
+
+# from operator import itemgetter
 
 #cap = cv2.VideoCapture("phantomBwater.wmv")
 video_path = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Phantom_scan\Phantom_scan_4.avi" #phantom test scan
 # video_path = "test_ZiHao.mp4"
+image_path = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\phantom_scans\phantom_sweep_4\Images"
 Labels_path = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\phantom_scans\phantom_sweep_4\Labels_heatmaps"
+label_list = [os.path.join(Labels_path , item) for item in os.listdir(Labels_path )]
+image_list = [os.path.join(image_path , item) for item in os.listdir(image_path )]
+
+
 
 
 cap = cv2.VideoCapture(video_path) # "test_ZiHao.mp4"
@@ -42,18 +51,26 @@ def find_centroid(c):
         cX, cY = 0, 0
     return cX,cY
 
-
+acc = utils.AverageMeter()
+dist_error = utils.AverageMeter()
 #mask = mask[30 : crop_img.shape[0], 30 : crop_img.shape[1]]
-while True:
-    ret, frame = cap.read()
+# while True:
+for image,label in zip(image_list,label_list):
+    frame = cv2.imread(image)
+    # ret, frame = cap.read()
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    label = cv2.imread(label)
+    label = cv2.cvtColor(label, cv2.COLOR_BGR2GRAY)
     # print(frame)
     #________Water_____#
     frame = frame[90:h-90, 30:w-30]
+    label = label[90:h - 90, 30:w - 30]
     # frame = frame[150:(h - 150), 350:(w - 350)]
     # frame = frame
     hnew = h -90-90
     wnew = w-30 - 30
+    print()
+    empty_image = np.zeros((frame.shape[0], frame.shape[1]), np.uint8)
     centroid_X = wnew / 2
     X = []
     centroid_Y = hnew / 2
@@ -227,6 +244,7 @@ while True:
 
     cv2.circle(result_img, (centroid_X,centroid_Y), 15, (0, 255, 0), -1)
     cv2.circle(frame, (centroid_X,centroid_Y), 15, (0, 255, 0), -1)
+
     #cv2.circle(result_img , extBot, 8, (255, 255, 0), -1)
     #cv2.drawContours(result_img,hull, -1, (155, 255, 255), 5)
     #cv2.line(result_img, (x1, 0), (x1, y1), (25, 125, 0), lineThickness)
@@ -248,11 +266,13 @@ while True:
     # cv2.line(th2, (x1, 0),(x1,y1), (25, 125, 0), lineThickness)
 
 ##################______________IMSHOW_______###########
-    frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
-    result_img = cv2.resize(result_img, (0, 0), fx=0.5, fy=0.5)
-    contr = cv2.resize(contr, (0, 0), fx=0.5, fy=0.5)
-    f = cv2.resize(f, (0, 0), fx=0.5, fy=0.5)
+    # frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+    # result_img = cv2.resize(result_img, (0, 0), fx=0.5, fy=0.5)
+    # contr = cv2.resize(contr, (0, 0), fx=0.5, fy=0.5)
+    # f = cv2.resize(f, (0, 0), fx=0.5, fy=0.5)
     # edges = cv2.resize(edges, (0, 0), fx=0.5, fy=0.5)
+
+
     #cv2.imshow('PS', PS_f)
 
     #th2 = cv2.resize(th2, (0, 0), fx=0.5, fy=0.5)
@@ -260,18 +280,65 @@ while True:
     #cv2.imshow("Result", np.hstack([frame, result_img]))
     #cv2.imshow('erosion',erosion)
     #cv2.imshow('dilation',dilation)
+
+    ##########____Calculate accuracy with labels___############
+    ksize = (101, 101)
+    sigma = 20
+    heatmap = np.zeros([label.shape[0], label.shape[1]])
+    x, y = np.arange(label.shape[0]), np.arange(label.shape[1])
+
+    gx = np.exp(-(x - centroid_X) ** 2 / (2 * sigma ** 2))
+    gy = np.exp(-(y - centroid_Y) ** 2 / (2 * sigma ** 2))
+    g = np.outer(gx, gy)
+    # g /= np.sum(g)   # normalize, if you want that
+    heatmap = heatmap + g * 255
+
+
+    cv2.circle(empty_image, (centroid_X, centroid_Y), 15, 255, -1)
+
+    empty_image2=empty_image
+
+    label = np.expand_dims(label, axis=0)
+    label = np.expand_dims(label, axis=0)
+
+
+    empty_image = np.expand_dims(empty_image, axis=0)
+    empty_image = np.expand_dims(empty_image, axis=0)
+
+
+    acc_functional, avg_acc, cnt, pred, target, dists = utils.accuracy(empty_image,
+                                                                       label,
+                                                                       thr=0.5)
+    acc.update(avg_acc, cnt)
+
+    # real_distance = utils.real_distance_error_calculation(dists, config)
+    if dists != -1:
+    #
+        dist_error.update(dists)
+
+
+
+    cv2.imshow('empty im_', empty_image2)
     cv2.imshow('original',frame)
     cv2.imshow('result',result_img)
+    cv2.imshow('resulted heatmap', heatmap)
+    cv2.imshow("label",np.squeeze(label))
+    cv2.imshow('empty im', np.squeeze(empty_image))
     #cv2.imshow('contrast', contr)
     #cv2.imshow('result', filtered_contours)
 
 
     k = cv2.waitKey(30) & 0xff
     if k == 27:
+        print("Accuracy mean {}".format(acc.avg))
+        print("Distance mean {}".format(dist_error.avg))
         break
 
 
     i = i + 1
+
+print("Accuracy mean {}".format(acc.avg))
+print("Distance mean {}".format(dist_error.avg))
 
 cv2.waitKey(0)
 cap.release()

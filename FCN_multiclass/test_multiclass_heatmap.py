@@ -2,6 +2,7 @@ import FCN_multiclass.sp_utils as utils
 from FCN_multiclass.sp_utils.config import config
 import logging
 import os
+import pandas
 import torch
 from torch import nn
 import torchvision as tv
@@ -14,8 +15,9 @@ import pandas as pd
 import os
 import keyboard
 import time
-from FCN_multiclass.sp_utils.run_test_without_labels import run_test_without_labels_multiclass
-from FCN_multiclass.sp_utils import smooth
+from FCN_multiclass.sp_utils import save_video
+# from FCN_multiclass.sp_utils.run_test_without_labels import run_test_without_labels_multiclass
+# from FCN_multiclass.sp_utils import smooth
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter(config.TEST.save_dir + 'output_original_.avi', fourcc, 3.0,
 #                               (1280, 480))  # for two images of size 480*640
@@ -69,6 +71,12 @@ def get_label_from_image(label_image):
     pixel_sum = np.sum(label_array)
 
     return int(pixel_sum > 0)
+
+
+
+
+
+
 
 
 
@@ -496,6 +504,194 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
             plt.show()
 
 
+def run_test_multitask_without_labels(model,testdata,patient,device, logger,conf):
+    model.eval()
+    # print(model)
+    probability = np.zeros(0)
+    X = np.zeros(0)
+    Y = np.zeros(0)
+    pred = np.zeros(0)
+    inputs = np.zeros(0)
+    c_sacrum_prob = np.zeros(0)
+    c_lumbar_prob = np.zeros(0)
+    c_thoracic_prob = np.zeros(0)
+    c_gap_prob = np.zeros(0)
+
+    pd_frame = pd.DataFrame(columns=['GAP Prob', "Sacrum Prob", "Lumbar Prob",
+                             "Thoracic Prob", "Heatmap Prob"])
+
+
+    time_inference = utils.AverageMeter()
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    file = open('LOG1.txt', 'w')
+    out = cv2.VideoWriter(config.TEST.save_dir + '_original_%s.avi' % (patient), fourcc, 3.0,
+                          (640, 480))  # for two images of size 480*640
+    model.to(device)
+    with torch.no_grad():
+        for data in testdata:
+            # logger.info("data file is {}".format(data))
+            time_start = time.time()
+            input_data = Image.open(data)
+            # print(np.array(data))
+            # print("Image.open reads:",np.array(input_data).shape)
+            input_data= input_data.convert("RGB")
+            nonnull = np.argwhere(np.asarray(input_data)!=0)
+            # print(nonnull)
+            file.write(str(np.asarray(input_data)))
+
+
+            # print("input data", list(input_data.getdata()))
+            # logger.info("size of the input image {}".format(input_data.size))
+            input_data= utils.trans_norm(input_data, conf.TEST.input_im_size)
+
+            tensor_image = input_data.unsqueeze_(0)
+            # logger.info("tensor of the input image {}".format(tensor_image.shape))
+
+            inputs= tensor_image.to(device)
+            # print("inputs",inputs.shape, inputs)
+            # print(inputs)
+            start_time_one = time.time()
+
+            logps, multiclass = model.forward(inputs)
+            # logps = model.forward(inputs)
+            time_one = time.time() - start_time_one
+            # print("time one:",time_one)
+            # print(logps)
+
+            prob_tensor = logps
+            p_map = np.squeeze(prob_tensor.to("cpu").numpy())
+            # logger.info("probability of spinous in frame {}".format(np.amax(p_map)))
+
+            #### Final point prediction
+            pred, _ = utils.get_max_preds(logps.detach().cpu().numpy())
+            # prediction of the final point in dimentions of heatmap. Transfer it to image size
+            pred = pred * config.TEST.input_im_size / config.TEST.heatmap_size
+            frame_probability = np.amax(p_map)
+            # print("frame probability", frame_probability)
+            probability = np.append(probability, frame_probability)
+            X = np.append(X, pred[0][0][0])
+            Y = np.append(Y, config.TEST.input_im_size-pred[0][0][1])
+            # logger.info("coordinates X {}, Y{}".format(pred[0][0][0],config.TEST.input_im_size-pred[0][0][1]))
+
+            p_map = np.multiply(p_map, 255)
+            p_map_image = tv.transforms.ToPILImage()(p_map)
+            p_map = tv.transforms.Resize((conf.TEST.input_im_size, conf.TEST.input_im_size))(p_map_image)
+
+            inputs = utils.img_denorm(input_data)
+            inputs = tv.transforms.ToPILImage()(inputs)
+
+
+            #####___MULTICLASS___####
+            num_classes = multiclass.shape[1]
+            prob = torch.sigmoid(multiclass)
+
+            c1 = prob[0, 0]
+            c2 = prob[0, 1]
+            c3 = prob[0, 2]
+
+            if num_classes == 3:
+                c4 = 0
+                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c1.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c2.to("cpu").numpy()))
+                c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c3.to("cpu").numpy()))
+
+            # print("c1_array",c1_prob)
+
+            if num_classes == 4:
+                c4 = prob[0, 3]
+                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c2.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c4.to("cpu").numpy()))
+                c_gap_prob = np.append(c_gap_prob, np.squeeze(c1.to("cpu").numpy()))
+
+            pd_frame = pd_frame.append(
+                {'GAP Prob': c1, "Sacrum Prob": c2, "Lumbar Prob": c3,
+                 "Thoracic Prob": c4, "Heatmap Prob": frame_probability}, ignore_index=True)
+
+            if conf.TEST.PLOT:
+
+
+                plt.subplot(1, 2, 1)
+                plt.imshow(inputs)
+                plt.subplot(1, 2, 2)
+                plt.imshow(p_map)
+                plt.scatter(x=pred[0][0][0], y=pred[0][0][1], c='r', s=40)
+
+                xs = X
+                ys = Y
+                zs = probability
+                fig = plt.figure()
+                ax = fig.add_subplot(111, projection='3d')
+                ax.scatter(xs, ys, zs, c = "#1f77b4",marker="o")
+
+                ax.set_xlabel('X Label')
+                ax.set_ylabel('Y Label')
+                ax.set_zlabel('Z Label')
+
+
+
+
+
+                plt.show()
+
+            if config.TEST.VIDEO == True:
+
+                save_video(out,inputs, pred, frame_probability, patient, config,target=None, labels=None)
+
+            if keyboard.is_pressed('c'):
+                print("time avg", time_inference.avg)
+                out.release()
+                file.close()
+                os._exit(0)
+
+            time_inference.update(time.time()- time_start)
+        print("time avg", time_inference.avg)
+
+
+
+        pd_frame.to_csv(os.path.join("D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\HO_YIN_long_model_20.csv"))
+
+        print(len(c_thoracic_prob))
+        print(len(probability))
+
+        plt.figure()
+        ax1 = plt.subplot(5, 1, 1)
+        # ax1.set_title("CNN probabilities")
+        plt.xlabel('Frames', fontsize=8)
+        plt.ylabel("Sacrum prob.", fontsize=8)
+        ax1.plot(c_sacrum_prob)
+
+        ax2 = plt.subplot(5, 1, 2)
+        # ax2.set_title("Labels")
+        plt.ylabel("Gap prob", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax2.plot(c_gap_prob)
+
+        ax3 = plt.subplot(5, 1, 3)
+        # ax2.set_title("Labels")
+        plt.ylabel("Lumbar prob.", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax3.plot(c_lumbar_prob)
+
+        ax4 = plt.subplot(5, 1, 4)
+        # ax2.set_title("Labels")
+        plt.ylabel("Thoracic prob.", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax4.plot(c_thoracic_prob)
+
+        ax5 = plt.subplot(5, 1, 5)
+        # ax2.set_title("Labels")
+        plt.ylabel("Heatmap prob.", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax5.plot(probability)
+
+
+
+        plt.show()
+        # if config.TRAIN.SWEEP_TRJ_PLOT:
+        #     plot_path(probability,X,Y,"b")
+
+
 def main():
 
     try:
@@ -514,7 +710,7 @@ def main():
             config.TEST.sweep_data_dir = config.TEST.Windows_sweep_data_dir
             config.TEST.save_dir = config.TEST.Windows_save_dir
 
-        model = utils.model_pose_resnet.get_pose_net(config.TEST.MODEL_FILE, is_train=False)
+        model = utils.model_pose_resnet.get_pose_net(config,config.TEST.MODEL_FILE, is_train=False)
         logger.info('=> loading model from {}'.format(config.TEST.MODEL_FILE))
         model.load_state_dict(
             torch.load(config.TEST.MODEL_FILE, map_location=torch.device('cpu'))['model_state_dict'])
@@ -542,21 +738,22 @@ def main():
 
             model.to(device)
 
-            for patient in ["sweep9001","sweep18001","sweep20001"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
+            for patient in ["","sweep9001","sweep18001","sweep20001"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
                 patient_dir = os.path.join(test_dir,patient)
                 test_dataloader = utils.load_test_data(patient_dir, '', config)
                 val_acc = run_val_multiclass(model, test_dataloader,patient_dir, device, criterion,logger,config,patient)
 
         else:
-            test_dir = config.TEST.data_dir_w_out_labels
+            test_dir = config.TEST.data_dir
             if config.TRAIN.SWEEP_TRJ_PLOT:
                 test_dir = config.TEST.sweep_data_dir
-            for patient in ["sweep018"]: #Empty_frames
+            for patient in ["HO_YIN_long","sweep018"]: #Empty_frames
                 test_dir_patient = os.path.join(test_dir,patient)
-                # test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
+                logger.info("patient dir {}".format(test_dir_patient))
+                test_list = [os.path.join(test_dir_patient, "Images",item) for item in os.listdir(os.path.join(test_dir_patient,"Images"))]
 
-                run_test_without_labels_multiclass(model, test_dir_patient,patient, device, logger,config)
-
+                # run_test_without_labels_multiclass(model, test_dir_patient,patient, device, logger,config)
+                run_test_multitask_without_labels(model, test_list,patient, device, logger,config)
 
     except KeyboardInterrupt:
         # out.release()

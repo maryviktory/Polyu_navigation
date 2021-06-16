@@ -107,7 +107,7 @@ config.TEST.enable_transform = False
 
 
 config.TEST.data_dir = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_train_dataset_heatmaps/data_19subj_2"
-config.TEST.Windows_data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_2"
+config.TEST.Windows_data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset"
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Heatmaps_spine"
 # config.TEST.sweep_data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/DATA_toNas_for CNN_IPCAI/data set patients images/Maria_T/Images" #images_subset
 config.TEST.sweep_data_dir = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_dataset_heatmaps_all"

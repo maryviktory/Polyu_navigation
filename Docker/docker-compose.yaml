@@ -19,7 +19,7 @@ services:
        command: >
           sh -c "cd /workspace &&
 
-                  python3 run_train_multiclass_polyu_3heads.py --lr 0.0001 --imagenet 1 --update_weights 1 --epoch 101 --weight_decay 0.0 --weight_loss 500 --batch_size 12 "
+                  python3 run_train_multiclass_polyu.py --lr 0.0001 --imagenet 1 --update_weights 1  --batch_size 12 "
 
 #                 python3 run_train_multiclass_polyu.py --lr 0.0001 --imagenet 1 --epoch 101 --weight_decay 0.001 --batch_size 12
 

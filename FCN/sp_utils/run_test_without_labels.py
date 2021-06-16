@@ -9,6 +9,7 @@ import torchvision as tv
 import os
 import keyboard
 import time
+import pandas as pd
 
 # np.set_printoptions(threshold=sys.maxsize)
 def run_test_without_labels(model,testdata,patient,device, logger,conf):
@@ -25,6 +26,11 @@ def run_test_without_labels(model,testdata,patient,device, logger,conf):
     # out = cv2.VideoWriter(config.TEST.save_dir + '_original_%s.avi' % (patient), fourcc, 3.0,
     #                       (1280, 480))  # for two images of size 480*640
     model.to(device)
+
+    pd_frame = pd.DataFrame(columns=['Heatmap Prob'])
+
+
+
     with torch.no_grad():
         for data in testdata:
             # logger.info("data file is {}".format(data))
@@ -76,6 +82,9 @@ def run_test_without_labels(model,testdata,patient,device, logger,conf):
             inputs = utils.img_denorm(input_data)
             inputs = tv.transforms.ToPILImage()(inputs)
 
+            pd_frame = pd_frame.append({'Heatmap Prob': frame_probability},
+                                       ignore_index=True)
+
             if conf.TEST.PLOT:
 
 
@@ -99,20 +108,29 @@ def run_test_without_labels(model,testdata,patient,device, logger,conf):
 
                 plt.show()
 
-            if config.TEST.VIDEO == True:
-
-                save_video(out,inputs, pred, frame_probability, patient, target=None, labels=None)
-
-            if keyboard.is_pressed('c'):
-                print("time avg", time_inference.avg)
-                out.release()
-                file.close()
-                os._exit(0)
+            # if config.TEST.VIDEO == True:
+            #
+            #     save_video(out,inputs, pred, frame_probability, patient, target=None, labels=None)
+            #
+            # if keyboard.is_pressed('c'):
+            #     print("time avg", time_inference.avg)
+            #     out.release()
+            #     file.close()
+            #     os._exit(0)
 
             time_inference.update(time.time()- time_start)
         print("time avg", time_inference.avg)
+
+
+        pd_frame.to_csv("D:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Ho YIN\\1\FCN\FCN_only.csv")
+
+
         if config.TRAIN.SWEEP_TRJ_PLOT:
             plot_path(probability,X,Y,"b")
+
+
+
+
 
 def plot_path(probability, X, Y,color_ext,labels = None) :
     print("Plotting path")
