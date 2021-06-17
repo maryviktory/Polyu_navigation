@@ -25,24 +25,32 @@ config.maximum_distance = 2 #meters
 # config.IMAGE.FCN = False
 
 config.default_distance = 0.3
-config.VELOCITY_up = 0.003 #0.003
+config.VELOCITY_up = 0.008 #0.003
 # config.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
 # print("robot in config")
 
 config.FORCE = edict()
-config.FORCE.Kp_on_measurement = False
+
 config.FORCE.Fref_first_move = 10 #Force [N]
-config.FORCE.Fref = 10 #Force [N]
+config.FORCE.Fref = 7 #Force [N]
 config.FORCE.Fmax = 30 #Force [N]
 config.FORCE.Fcrit = 35 #Force [N]
 config.FORCE.K_delta = 0.0005
 config.FORCE.Kf = 0.0004 #0.002  Kunal - 0.0004
+
+#NOTE: PID control
+config.FORCE.Kp_on_measurement = True
+config.FORCE.Kf = 0.0004  # 0.002  Kunal - 0.0004
+config.FORCE.Kd = 0.0000
+config.FORCE.Ki = 0.0000
+config.FORCE.velocity_output_limits = 0.005
+
+
 config.FORCE.Kz = 0.6
 config.FORCE.v = 0.01 #move first point
 config.FORCE.a = 0.01 #move first point
 config.FORCE.thr = 0.004
-config.FORCE.K_torque = 0.07 #0.07
-
+config.FORCE.K_torque = 0.07 #0.07 for 10 HZ
 
 config.FORCE.Kalman_force = False
 config.FORCE.Kalman_R = 0.001
@@ -50,7 +58,6 @@ config.FORCE.Kalman_Q = 1e-5
 config.FORCE.moving_average_filter = True
 config.FORCE.moving_average_filter_N = 7
 config.FORCE.adaptive_Kp = False
-
 
 
 config.IMAGE = edict()
@@ -145,13 +152,14 @@ config.MODE.median_filter = False
 config.Median_kernel_size = 31
 
 
-config.MODE.subject_mode = "human" #"human" #phantom
+config.MODE.subject_mode = "phantom" #"human" #phantom
 
 if config.MODE.subject_mode == "human":
     config.default_distance = 1.5  # meters
     config.FORCE.Kf = 0.0003  # 0.002  Kunal - 0.0004
     config.FORCE.Kd = 0.0000
     config.FORCE.Ki = 0.0000
+    config.FORCE.K_torque = 0.07  # 0.07
     config.FORCE.velocity_output_limits = 0.0015
 
     config.FORCE.Fref_first_move = 15  # Force [N]
@@ -167,6 +175,9 @@ if config.MODE.subject_mode == "human":
 
     config.FORCE.moving_average_filter = True
     config.FORCE.moving_average_filter_N = 15
+
+
+
 
 
 config.TRAIN = edict()

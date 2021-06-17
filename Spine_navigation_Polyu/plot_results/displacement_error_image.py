@@ -90,21 +90,20 @@ def plot_path(probability, X, Y,color_ext,labels = None) :
     # plt.show()
     return path, index
 
-folder = "\human experiments\\Ho YIN\\3"
+folder = "\\trial high fps\\2_v004_robot_fps_20\\normal_fps"
 data_path = "D:\spine navigation Polyu 2021\\robot_trials_output\%s\Move_thread_output0.csv"%folder
 
-
-image = cv2.imread(os.path.join(os.path.split(data_path)[0],"outputP0.bmp"))
-image_height, width = image.shape[:2]
-
+try:
+    image = cv2.imread(os.path.join(os.path.split(data_path)[0],"outputP0.bmp"))
+    image_height, width = image.shape[:2]
+except:
+    print("no image")
 
 
 frame = pd.read_csv(data_path)
 frame_IFL = pd.read_csv("D:\IROS 2020 TUM\DATASETs\Dataset\Force_integration_DB\complete_df_from Maria\Ardit_F15.csv")
 # print(frame["X"])
-X_mid = 640/2
-X_im = frame["X_im"]
-Y_im = frame["Y_im"]
+
 timestamp = frame["timestamp"] - frame["timestamp"][0]
 Y_robot = frame["Y"]
 X_robot = frame ["X"]
@@ -112,6 +111,33 @@ Z_robot = frame["Z"]
 X_force = frame["Fx"]
 Y_force = frame["Fy"]
 Z_force = frame["Fz"]
+
+
+t = np.linspace(0, len(Z_force), len(Z_force))
+
+
+plt.figure()
+plt.plot(t,Z_force)
+
+plt.title(" Z force")
+
+
+print("Z_force")
+print("MEAN:",np.mean(Z_force[:400]))
+print("STD",np.std(Z_force[:400]))
+print("Z_force")
+print("MEAN:",np.mean(Z_force[400:]))
+print("STD",np.std(Z_force[400:]))
+
+
+# plt.show()
+
+
+
+
+X_mid = 640/2
+X_im = frame["X_im"]
+Y_im = frame["Y_im"]
 frame_probability = frame["Frame_Probability"]
 # frame_probability_sacrum = frame["Frame_Probability_sacrum"]
 X_tcp = frame["X_tcp"]
@@ -176,18 +202,18 @@ if classes ==True:
 t = np.linspace(0, len(X_robot), len(X_robot))
 
 
-plt.figure()
-plt.plot(t,Z_force)
-
-plt.title(" Z force")
-
-
-print("Z_force")
-print("MEAN:",np.mean(Z_force[:400]))
-print("STD",np.std(Z_force[:400]))
-print("Z_force")
-print("MEAN:",np.mean(Z_force[400:]))
-print("STD",np.std(Z_force[400:]))
+# plt.figure()
+# plt.plot(t,Z_force)
+#
+# plt.title(" Z force")
+#
+#
+# print("Z_force")
+# print("MEAN:",np.mean(Z_force[:400]))
+# print("STD",np.std(Z_force[:400]))
+# print("Z_force")
+# print("MEAN:",np.mean(Z_force[400:]))
+# print("STD",np.std(Z_force[400:]))
 
 
 # # print('z_FORCE',np.array(Z_force))
