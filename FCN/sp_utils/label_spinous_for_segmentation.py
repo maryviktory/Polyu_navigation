@@ -5,7 +5,7 @@ import cv2
 
 patients_dataset_file = "C:\\Users\maryv\PycharmProjects\Polyu_navigation\FCN\dataset_patients.txt"
 data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\phantom_scans"
-label_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
+label_dir = data_dir
 
 # data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/DATA_toNas_for CNN_IPCAI/data set patients images"
 # data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/Force_integration_DB/New_Patients"
@@ -20,6 +20,7 @@ def open_file(name_file):
 
 
 patient_name = open_file(patients_dataset_file)
+patient_name = "phantom_sweep_4","sweep"
 
 for patient in patient_name:
 
@@ -40,12 +41,11 @@ for patient in patient_name:
 
     image_list = []
     path = os.path.join(label_dir, patient)
-    if not os.path.exists(os.path.join(label_dir, patient, 'Labels')):
-
-        os.mkdir(os.path.join(label_dir, patient))
-        os.mkdir(os.path.join(path, 'Labels'))
-    if not os.path.exists(os.path.join(label_dir, patient, 'Images')):
-        os.mkdir(os.path.join(path, 'Images'))
+    if not os.path.exists(os.path.join(label_dir, patient, 'Labels_heatmaps')):
+        # os.mkdir(os.path.join(label_dir, patient))
+        os.mkdir(os.path.join(path,'Labels_heatmaps'))
+    # if not os.path.exists(os.path.join(label_dir, patient, 'Images')):
+    #     os.mkdir(os.path.join(path, 'Images'))
 
 
 
@@ -89,8 +89,8 @@ for patient in patient_name:
 
 
         # print(os.path.join(label_dir,patient,'Labels', image_name))
-        cv2.imwrite(os.path.join(label_dir,patient,'Labels', image_name), heatmap)
-        cv2.imwrite(os.path.join(label_dir, patient,'Images', image_name), image)
+        cv2.imwrite(os.path.join(label_dir,patient,'Labels_heatmaps', image_name), heatmap)
+        # cv2.imwrite(os.path.join(label_dir, patient,'Images', image_name), image)
 
         # put text and highlight the center
         # cv2.circle(image, (x0_0, y0_0), 5, 0, -1)

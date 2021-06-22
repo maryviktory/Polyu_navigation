@@ -7,10 +7,7 @@ from scipy.signal import butter, filtfilt
 from datetime import datetime
 from scipy.interpolate import interp1d
 import pandas as pd
-# from pykalman import KalmanFilter
-from filterpy.kalman import KalmanFilter
-from filterpy.common import Q_discrete_white_noise
-from Spine_navigation_Polyu.utils.functions import Kalman_filter_x_im
+
 def variance(data):
     # Number of observations
     n = len(data)
@@ -138,7 +135,7 @@ def main():
     t = index_point_array[:,0]
     label_x = index_point_array[:,2]
     # print(z, len(z))
-    Q = 90 # process variance #1e-5
+    Q = 1e-5 # process variance #1e-5
 
     # allocate space for arrays
     xhat=np.zeros(sz)      # a posteri estimate of x
@@ -147,60 +144,32 @@ def main():
     Pminus=np.zeros(sz)    # a priori error estimate
     K=np.zeros(sz)         # gain or blending factor
 
-    R = 500 # estimate of measurement variance, change to see effect
+    R = 0.001 # estimate of measurement variance, change to see effect
     # print("variance",R)
     # intial guesses
     xhat[0] = 224/2
-
-    P[0] = 0
-    nth_list = [x for x in range(1,len(z))][0::5]
-    # t = [x for x in range(1,len(z))]
-    print(nth_list)
-    B = 50
-    # for k in range(1,n_iter):
-    # filt = Kalman_filter_x_im()
+    P[0] = 0.0
 
     for k in range(1,n_iter):
-        # xhatminus = np.append(xhatminus, xhat[-1])  # +B*0.01
-        # Pminus = np.append(Pminus, P[-1] + Q)
-        # filt.predict_stage()
-
         # R = variance(z[:k])
 
         # print("variance", R)
         # time update
-        xhatminus[k] = xhat[k-1]#+B*0.01
+        xhatminus[k] = xhat[k-1]
         Pminus[k] = P[k-1]+Q
-        # print(P[k-1],P[-1])
-        # print("xhatminus",xhatminus[k])
-        if k in nth_list:
-            # K = np.append(K, Pminus[-1] / (Pminus[-1] + R))
-            # # print("K[k]",K[k])
-            # xhat = np.append(xhat, (xhatminus[-1] + K[-1] * (z[k] - xhatminus[-1])))
-            # P = np.append(P, (1 - K[-1]) * Pminus[-1])
 
-            # print(k)
-            # measurement update
-            K[k] = Pminus[k]/( Pminus[k]+R )
-            # print("K[k]",K[k])
-            xhat[k] = xhatminus[k]+K[k]*(z[k]-xhatminus[k])
-            P[k] = (1-K[k])*Pminus[k]
-            # print("xhat",xhat[k])
-            # filt.update_with_measurement(mes)
-        else:
-            # xhat = np.append(xhat, xhatminus[-1])
+        # measurement update
+        K[k] = Pminus[k]/( Pminus[k]+R )
+        xhat[k] = xhatminus[k]+K[k]*(z[k]-xhatminus[k])
+        P[k] = (1-K[k])*Pminus[k]
+        # print(z[k])
 
-            # filt.xhat = np.append(filt.xhat,filt.xhatminus[-1])
-            xhat[k] = xhatminus[k]
-    print(xhat[:100])
-    print(len(xhat))
-        # print(xhat)
     t2 = np.linspace(0,len(X_label),len(X_label))
     plt.figure()
     plt.plot(z,t,'k+',label='noisy measurements')
     plt.plot(xhat,t,'b-',label='a posteri estimate')
     # plt.plot(label_x,t,'ro',label = "labels")
-    # plt.plot(X_label,t2,'rx',label = "labels")
+    plt.plot(X_label,t2,'rx',label = "labels")
     # plt.axhline(x,color='g',label='truth value')
     plt.legend()
     plt.title('Estimate vs. iteration step', fontweight='bold')
@@ -208,44 +177,6 @@ def main():
     plt.ylabel('Iteration')
     plt.show()
 
-
-
-
-def make_ca_filter(dt, std):
-    cafilter = KalmanFilter(dim_x=3, dim_z=1)
-    cafilter.x = np.array([224/2, 0., 0.])
-    cafilter.P *= 3
-    cafilter.R *= std
-    cafilter.Q = Q_discrete_white_noise(dim=3, dt=dt, var=0.02)
-    cafilter.F = np.array([[1, dt, 0.5*dt*dt],
-                           [0, 1,         dt],
-                           [0, 0,          1]])
-    cafilter.H = np.array([[1., 0, 0]])
-    return cafilter
-
-def initialize_const_accel(f):
-    f.x = np.array([0., 0., 0.])
-    f.P = np.eye(3) * 3
-
-def make_cv_filter(dt, std):
-    cvfilter = KalmanFilter(dim_x = 2, dim_z=1)
-    cvfilter.x = np.array([0., 0.])
-    cvfilter.P *= 3
-    cvfilter.R *= std**2
-    cvfilter.F = np.array([[1, dt],
-                           [0,  1]], dtype=float)
-    cvfilter.H = np.array([[1, 0]], dtype=float)
-    cvfilter.Q = Q_discrete_white_noise(dim=2, dt=dt, var=0.02)
-    return cvfilter
-
-def initialize_filter(kf, std_R=None):
-    """ helper function - we will be reinitialing the filter
-    many times.
-    """
-    kf.x.fill(0.)
-    kf.P = np.eye(kf.dim_x) * .1
-    if std_R is not None:
-        kf.R = np.eye(kf.dim_z) * std_R
 
 
 if __name__ == '__main__':

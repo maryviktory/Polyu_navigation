@@ -52,7 +52,7 @@ config.MODEL.PRETRAINED_NAS = "SpinousProcessData/FCN_PWH_train_dataset_heatmaps
 config.MODEL.Imagenet_pretrained = "C:\\Users\Administrator\Documents\dataset_multiclass_FCN\pretrained model\\resnet18-5c106cde.pth"
 
 config.MODEL.NUM_JOINTS = 1
-config.MODEL.num_classes = 4
+config.MODEL.num_classes = 2
 config.MODEL.IMAGE_SIZE = [256, 256]  # width * height, ex: 192 * 256
 config.MODEL.EXTRA = MODEL_EXTRAS[config.MODEL.NAME]
 
@@ -75,7 +75,7 @@ config.DATASET.PATH_NAS = 'SpinousProcessData/FCN_PWH_train_dataset_heatmaps/dat
 
 # train
 config.TRAIN = edict()
-config.TRAIN.three_heads = True
+config.TRAIN.three_heads = False
 config.TRAIN.POLYAXON = False
 config.TRAIN.BATCH_SIZE = 12
 config.TRAIN.VAL_BATCH_SIZE = 12
@@ -85,7 +85,7 @@ config.TRAIN.UPDATE_WEIGHTS = True
 config.TRAIN.LR = 0.001
 config.TRAIN.LR_heatmap = 0.0006
 config.TRAIN.LR_cl = 0.01
-config.TRAIN.END_EPOCH = 50
+config.TRAIN.END_EPOCH = 70
 config.TRAIN.SWEEP_TRJ_PLOT = True
 config.TRAIN.adaptive_weights = False
 #EXTRA

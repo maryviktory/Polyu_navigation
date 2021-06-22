@@ -64,7 +64,7 @@ config.IMAGE = edict()
 config.IMAGE.K_im_out = 0.5
 config.IMAGE.K_im_near = 0.2
 config.IMAGE.Kalman_R = 500# estimate of measurement variance, change to see effect
-config.IMAGE.Kalman_Q = 50  # process variance #1e-5
+config.IMAGE.Kalman_Q = 0.5  # process variance #1e-5 #50
 
 config.IMAGE.JSON_WS = {
     "Command": "Us_Config",
@@ -75,7 +75,7 @@ config.IMAGE.JSON_WS = {
 }
 
 config.IMAGE.LOCAL_HOST = "ws://localhost:4100"
-config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\human_best_model_exp40184.pt"
+config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\24subj_best_model_human_FCN_spinous.pt" #, human_best_model_exp40184.pt
 config.IMAGE.Windows_MODEL_FILE_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\best_model_exp49560_phantom_6scans.pt"
 config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM= "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_3class_3heads_model75.pt"
 config.IMAGE.PROBE_SIZE = 0.08 #old wifi probe 48mm, new probe 80 mm = 0.08m
@@ -152,19 +152,19 @@ config.MODE.median_filter = False
 config.Median_kernel_size = 31
 
 
-config.MODE.subject_mode = "phantom" #"human" #phantom
+config.MODE.subject_mode = "human" #"human" #phantom
 
 if config.MODE.subject_mode == "human":
     config.default_distance = 1.5  # meters
     config.FORCE.Kf = 0.0003  # 0.002  Kunal - 0.0004
-    config.FORCE.Kd = 0.0000
-    config.FORCE.Ki = 0.0000
-    config.FORCE.K_torque = 0.07  # 0.07
-    config.FORCE.velocity_output_limits = 0.0015
+    config.FORCE.Kd = 0.00003
+    config.FORCE.Ki = 0.00003
+    config.FORCE.K_torque = 0.1  # 0.07
+    config.FORCE.velocity_output_limits = 0.002
 
     config.FORCE.Fref_first_move = 15  # Force [N]
     config.FORCE.Fref = 15 #Force [N]
-    config.VELOCITY_up = 0.0015 #0.003
+    config.VELOCITY_up = 0.004 #0.003
 
     config.MODE.PID_control = True
     config.FORCE.Kp_on_measurement = True
@@ -176,8 +176,26 @@ if config.MODE.subject_mode == "human":
     config.FORCE.moving_average_filter = True
     config.FORCE.moving_average_filter_N = 15
 
+else:
+    config.FORCE.Kf = 0.0003  # 0.002  Kunal - 0.0004
+    config.FORCE.Kd = 0.0000
+    config.FORCE.Ki = 0.0000
+    config.FORCE.K_torque = 0.1  # 0.07
+    config.FORCE.velocity_output_limits = 0.002
 
+    config.FORCE.Fref_first_move = 10  # Force [N]
+    config.FORCE.Fref = 10  # Force [N]
+    config.VELOCITY_up = 0.0045  # 0.003
 
+    config.FORCE.Kp_on_measurement = True
+    config.MODE.PID_control = True
+
+    config.FORCE.Kalman_force = False
+    config.FORCE.Kalman_R = 0.001
+    config.FORCE.Kalman_Q = 1e-5
+
+    config.FORCE.moving_average_filter = True
+    config.FORCE.moving_average_filter_N = 15
 
 
 config.TRAIN = edict()

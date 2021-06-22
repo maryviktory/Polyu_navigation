@@ -1,9 +1,9 @@
-class_num from DataLoader 4
+class_num from DataLoader 2
 batch size 12
 weights True
 weights loss 500
 Model: data_19subj_15train_no_sacrum_lab/pretrained model/model_best_resnet_fixed_False_pretrained_True_Multiclass_spine_4classes_exp6106.pt
-LR: 1e-05
+LR: 0.0001
 Imagenet: True
 => init deconv weights from normal distribution
 => init 0.weight as normal(0, 0.001)
@@ -22,1093 +22,753 @@ Imagenet: True
 => init 8.weight as normal(0, 0.001)
 => init 8.bias as 0
 Loading imagenet pretrained model
-Epoch-0 lr: 1e-05
-Epoch-0 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 0/99
+Epoch-0 lr: 0.0001
+Epoch-0 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 0/69
 ----------
-epoch time: 176.10819911956787
-Classification Train Accuracy 0 epoch: 0.856961824805956
-Total validation loss 0.7079193785721225, total accuracy 0.8930604413163321
-Classification Validation, epoch: 0, Accuracy 0.8383321141185077 , loss: 0.5014742488331749 
-Heatmap Validation (epoch 0),Accuracy 0.9477887685141565 , loss: 0.00041289026166438944 
-loss classification 0.3602310677380451, loss heatmap 0.0008870730036908371 
-Train Total Loss: 0.8038 Train Heatmap Acc: 0.7884 Val Heatmap Acc: 0.9478
-best val class at epoch: 0tensor(0.8383, device='cuda:0', dtype=torch.float64)
-best val mean at epoch: 0tensor(0.8931, device='cuda:0', dtype=torch.float64)
+epoch time: 91.96571445465088
+Classification Train Accuracy 0 epoch: 0.9448687682266351
+Total validation loss 0.8240640114344765, total accuracy 0.8863541292049479
+Classification Validation, epoch: 0, Accuracy 0.8308986277113767 , loss: 0.503002895239727 
+Heatmap Validation (epoch 0),Accuracy 0.9418096306985192 , loss: 0.0006421222247908097 
+loss classification 0.12731979958344103, loss heatmap 0.0008592001582912836 
+Train Total Loss: 0.5569 Train Heatmap Acc: 0.9034 Val Heatmap Acc: 0.9418
+best val class at epoch: 0tensor(0.8309, device='cuda:0', dtype=torch.float64)
+best val mean at epoch: 0tensor(0.8864, device='cuda:0', dtype=torch.float64)
 best val heatmap at epoch: 0
-Epoch-1 lr: 1e-05
-Epoch-1 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 1/99
+Epoch-1 lr: 0.0001
+Epoch-1 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 1/69
 ----------
-epoch time: 398.95245814323425
-Classification Train Accuracy 1 epoch: 0.9494693489624584
-Total validation loss 0.9276566078866973, total accuracy 0.8750925303460827
-Classification Validation, epoch: 1, Accuracy 0.7940014630577908 , loss: 0.7414618976743778 
-Heatmap Validation (epoch 1),Accuracy 0.9561835976343745 , loss: 0.0003723894209566209 
-loss classification 0.14087758935901204, loss heatmap 0.0003353421312798457 
-Train Total Loss: 0.3085 Train Heatmap Acc: 0.9871 Val Heatmap Acc: 0.9562
+epoch time: 203.32779955863953
+Classification Train Accuracy 1 epoch: 0.9898625190945701
+Total validation loss 0.5151681402923259, total accuracy 0.9585034827288035
+Classification Validation, epoch: 1, Accuracy 0.9517485613103143 , loss: 0.206639527330942 
+Heatmap Validation (epoch 1),Accuracy 0.9652584041472927 , loss: 0.000617057221782719 
+loss classification 0.027382213057276998, loss heatmap 0.00030418453569104435 
+Train Total Loss: 0.1795 Train Heatmap Acc: 0.9989 Val Heatmap Acc: 0.9653
+best val class at epoch: 1tensor(0.9517, device='cuda:0', dtype=torch.float64)
+best val mean at epoch: 1tensor(0.9585, device='cuda:0', dtype=torch.float64)
 best val heatmap at epoch: 1
-Epoch-2 lr: 1e-05
-Epoch-2 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 2/99
-----------
-epoch time: 621.6459844112396
-Classification Train Accuracy 2 epoch: 0.9618248059559639
-Total validation loss 0.5486300074425202, total accuracy 0.9124438092046143
-Classification Validation, epoch: 2, Accuracy 0.8732991953182151 , loss: 0.3933509535834073 
-Heatmap Validation (epoch 2),Accuracy 0.9515884230910134 , loss: 0.00031055810852917095 
-loss classification 0.10418189821750665, loss heatmap 0.0002476505007214192 
-Train Total Loss: 0.2280 Train Heatmap Acc: 0.9935 Val Heatmap Acc: 0.9516
-best val class at epoch: 2tensor(0.8733, device='cuda:0', dtype=torch.float64)
-best val mean at epoch: 2tensor(0.9124, device='cuda:0', dtype=torch.float64)
-Epoch-3 lr: 1e-05
-Epoch-3 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 3/99
-----------
-epoch time: 845.1936228275299
-Classification Train Accuracy 3 epoch: 0.9698505728919161
-Total validation loss 0.5864733918007237, total accuracy 0.9122945305245717
-Classification Validation, epoch: 3, Accuracy 0.8734455010972935 , loss: 0.4375877326333605 
-Heatmap Validation (epoch 3),Accuracy 0.9511435599518498 , loss: 0.0002977713205070404 
-loss classification 0.08507227592838008, loss heatmap 0.00020916660480263177 
-Train Total Loss: 0.1897 Train Heatmap Acc: 0.9959 Val Heatmap Acc: 0.9511
-best val class at epoch: 3tensor(0.8734, device='cuda:0', dtype=torch.float64)
-Epoch-4 lr: 1e-05
-Epoch-4 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 4/99
-----------
-epoch time: 1067.8551013469696
-Classification Train Accuracy 4 epoch: 0.9757114947990918
-Total validation loss 0.5860330946993862, total accuracy 0.914238244952414
-Classification Validation, epoch: 4, Accuracy 0.8709583028529627 , loss: 0.43962740084025587 
-Heatmap Validation (epoch 4),Accuracy 0.9575181870518654 , loss: 0.0002928113862210494 
-loss classification 0.069112601226131, loss heatmap 0.00017852551108640447 
-Train Total Loss: 0.1584 Train Heatmap Acc: 0.9986 Val Heatmap Acc: 0.9575
-best val mean at epoch: 4tensor(0.9142, device='cuda:0', dtype=torch.float64)
-best val heatmap at epoch: 4
-Epoch-5 lr: 1e-05
-Epoch-5 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 5/99
-----------
-epoch time: 1291.4418549537659
-Classification Train Accuracy 5 epoch: 0.9781931464174455
-Total validation loss 0.5445524137114579, total accuracy 0.9151469026564256
-Classification Validation, epoch: 5, Accuracy 0.8814923189465984 , loss: 0.4041315208430366 
-Heatmap Validation (epoch 5),Accuracy 0.9488014863662529 , loss: 0.00028084178522935744 
-loss classification 0.06154667232623012, loss heatmap 0.00015602035785158827 
-Train Total Loss: 0.1396 Train Heatmap Acc: 0.9981 Val Heatmap Acc: 0.9488
-best val class at epoch: 5tensor(0.8815, device='cuda:0', dtype=torch.float64)
-best val mean at epoch: 5tensor(0.9151, device='cuda:0', dtype=torch.float64)
-Epoch-6 lr: 1e-05
-Epoch-6 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 6/99
-----------
-epoch time: 1515.2924449443817
-Classification Train Accuracy 6 epoch: 0.9795659749722794
-Total validation loss 0.6941858984865379, total accuracy 0.9017131853881513
-Classification Validation, epoch: 6, Accuracy 0.8591075347476226 , loss: 0.5381624300025828 
-Heatmap Validation (epoch 6),Accuracy 0.94431883602868 , loss: 0.00031204693803453645 
-loss classification 0.058084876592365886, loss heatmap 0.00013742343703866412 
-Train Total Loss: 0.1268 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9443
-Epoch-7 lr: 1e-05
-Epoch-7 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 7/99
-----------
-epoch time: 1737.4635879993439
-Classification Train Accuracy 7 epoch: 0.9825756375732615
-Total validation loss 0.6145142186631545, total accuracy 0.9134950761830278
-Classification Validation, epoch: 7, Accuracy 0.8790051207022678 , loss: 0.4745276791168341 
-Heatmap Validation (epoch 7),Accuracy 0.947985031663788 , loss: 0.00027997307736928837 
-loss classification 0.04967353588175603, loss heatmap 0.00013342784103107823 
-Train Total Loss: 0.1164 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9480
-Epoch-8 lr: 1e-05
-Epoch-8 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 8/99
-----------
-epoch time: 1959.807895898819
-Classification Train Accuracy 8 epoch: 0.9816780189027932
-Total validation loss 0.6366333143711675, total accuracy 0.9104076802455687
-Classification Validation, epoch: 8, Accuracy 0.8800292611558157 , loss: 0.4923342645217783 
-Heatmap Validation (epoch 8),Accuracy 0.9407860993353216 , loss: 0.0002885980981717928 
-loss classification 0.05237694896466463, loss heatmap 0.00012374618214624223 
-Train Total Loss: 0.1143 Train Heatmap Acc: 0.9990 Val Heatmap Acc: 0.9408
-Epoch-9 lr: 1e-05
-Epoch-9 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 9/99
-----------
-epoch time: 2181.388104200363
-Classification Train Accuracy 9 epoch: 0.9834732562437298
-Total validation loss 0.8131107474948609, total accuracy 0.8801020857436704
-Classification Validation, epoch: 9, Accuracy 0.8428675932699342 , loss: 0.6469145909410895 
-Heatmap Validation (epoch 9),Accuracy 0.9173365782174067 , loss: 0.000332392317168892 
-loss classification 0.045802606248676526, loss heatmap 0.000111613363022785 
-Train Total Loss: 0.1016 Train Heatmap Acc: 0.9991 Val Heatmap Acc: 0.9173
-Epoch-10 lr: 1e-05
-Epoch-10 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 10/99
-----------
-epoch time: 2402.9427676200867
-Classification Train Accuracy 10 epoch: 0.9847404826020381
-Total validation loss 0.5580338457331876, total accuracy 0.9197812168862765
-Classification Validation, epoch: 10, Accuracy 0.8848573518653987 , loss: 0.42200626986136697 
-Heatmap Validation (epoch 10),Accuracy 0.9547050819071542 , loss: 0.0002720551498396454 
-loss classification 0.044545782705591064, loss heatmap 0.0001083876627941749 
-Train Total Loss: 0.0987 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9547
-best val class at epoch: 10tensor(0.8849, device='cuda:0', dtype=torch.float64)
-best val mean at epoch: 10tensor(0.9198, device='cuda:0', dtype=torch.float64)
-Epoch-11 lr: 1e-05
-Epoch-11 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 11/99
-----------
-epoch time: 2626.9751534461975
-Classification Train Accuracy 11 epoch: 0.9869581287290775
-Total validation loss 0.8787400212452317, total accuracy 0.8825261036210468
-Classification Validation, epoch: 11, Accuracy 0.8370153621068033 , loss: 0.7218083748715824 
-Heatmap Validation (epoch 11),Accuracy 0.9280368451352902 , loss: 0.0003138632931748379 
-loss classification 0.04088050894579788, loss heatmap 0.00010232417406474041 
-Train Total Loss: 0.0920 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9280
-Epoch-12 lr: 1e-05
-Epoch-12 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 12/99
-----------
-epoch time: 2848.8283393383026
-Classification Train Accuracy 12 epoch: 0.9868525265325518
-Total validation loss 0.5081795363246525, total accuracy 0.9226930585231921
-Classification Validation, epoch: 12, Accuracy 0.8905632772494514 , loss: 0.38431640703785663 
-Heatmap Validation (epoch 12),Accuracy 0.9548228397969328 , loss: 0.00024772625779057847 
-loss classification 0.03749058520277116, loss heatmap 9.027677435829846e-05 
-Train Total Loss: 0.0826 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9548
-best val class at epoch: 12tensor(0.8906, device='cuda:0', dtype=torch.float64)
-best val mean at epoch: 12tensor(0.9227, device='cuda:0', dtype=torch.float64)
-Epoch-13 lr: 1e-05
-Epoch-13 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 13/99
-----------
-epoch time: 3072.655761241913
-Classification Train Accuracy 13 epoch: 0.987802946301283
-Total validation loss 0.6040156767659138, total accuracy 0.916263706499596
-Classification Validation, epoch: 13, Accuracy 0.8854425749817119 , loss: 0.473795117494114 
-Heatmap Validation (epoch 13),Accuracy 0.9470848380174801 , loss: 0.00026044112347099795 
-loss classification 0.03809294533210461, loss heatmap 9.323821244597538e-05 
-Train Total Loss: 0.0847 Train Heatmap Acc: 0.9995 Val Heatmap Acc: 0.9471
-Epoch-14 lr: 1e-05
-Epoch-14 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 14/99
-----------
-epoch time: 3295.0427227020264
-Classification Train Accuracy 14 epoch: 0.9887005649717514
-Total validation loss 0.651516707940964, total accuracy 0.9072337868644025
-Classification Validation, epoch: 14, Accuracy 0.8683247988295538 , loss: 0.5106269742613171 
-Heatmap Validation (epoch 14),Accuracy 0.9461427748992511 , loss: 0.0002817794671715079 
-loss classification 0.03460814846657504, loss heatmap 8.703868000944069e-05 
-Train Total Loss: 0.0781 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9461
-Epoch-15 lr: 1e-05
-Epoch-15 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 15/99
-----------
-epoch time: 3517.0943179130554
-Classification Train Accuracy 15 epoch: 0.9888589682665399
-Total validation loss 0.6809792840620077, total accuracy 0.9065272538829473
-Classification Validation, epoch: 15, Accuracy 0.8763716166788589 , loss: 0.5536413753789046 
-Heatmap Validation (epoch 15),Accuracy 0.9366828910870357 , loss: 0.00025467581490802273 
-loss classification 0.03336144431501843, loss heatmap 8.427469236917522e-05 
-Train Total Loss: 0.0755 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9367
-Epoch-16 lr: 1e-05
-Epoch-16 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 16/99
-----------
-epoch time: 3739.2747774124146
-Classification Train Accuracy 16 epoch: 0.9892813770526426
-Total validation loss 0.6364786591701168, total accuracy 0.9109813505883337
-Classification Validation, epoch: 16, Accuracy 0.8728602779809803 , loss: 0.5111154421031278 
-Heatmap Validation (epoch 16),Accuracy 0.9491024231956873 , loss: 0.00025072643855311407 
-loss classification 0.03384386851044289, loss heatmap 7.924728974113863e-05 
-Train Total Loss: 0.0735 Train Heatmap Acc: 0.9995 Val Heatmap Acc: 0.9491
-Epoch-17 lr: 1e-05
-Epoch-17 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 17/99
-----------
-epoch time: 3961.3441078662872
-Classification Train Accuracy 17 epoch: 0.9888589682665399
-Total validation loss 0.6874767006909974, total accuracy 0.912896178296567
-Classification Validation, epoch: 17, Accuracy 0.880175566934894 , loss: 0.5537937073240223 
-Heatmap Validation (epoch 17),Accuracy 0.9456167896582401 , loss: 0.00026736598555096 
-loss classification 0.03241818342230219, loss heatmap 8.052392802632583e-05 
-Train Total Loss: 0.0727 Train Heatmap Acc: 0.9992 Val Heatmap Acc: 0.9456
-Epoch-18 lr: 1e-05
-Epoch-18 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 18/99
-----------
-epoch time: 4183.606431484222
-Classification Train Accuracy 18 epoch: 0.9897037858387454
-Total validation loss 0.462986409850393, total accuracy 0.9253003797694338
-Classification Validation, epoch: 18, Accuracy 0.8877834674469642 , loss: 0.330737037927598 
-Heatmap Validation (epoch 18),Accuracy 0.9628172920919034 , loss: 0.00026449874409934985 
-loss classification 0.031439263635764506, loss heatmap 7.630700645656534e-05 
-Train Total Loss: 0.0696 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9628
-best val mean at epoch: 18tensor(0.9253, device='cuda:0', dtype=torch.float64)
-best val heatmap at epoch: 18
-Epoch-19 lr: 1e-05
-Epoch-19 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 19/99
-----------
-epoch time: 4407.320556163788
-Classification Train Accuracy 19 epoch: 0.9900733935265853
-Total validation loss 0.6503816012553097, total accuracy 0.910341301090777
-Classification Validation, epoch: 19, Accuracy 0.8763716166788589 , loss: 0.5124339207239897 
-Heatmap Validation (epoch 19),Accuracy 0.9443109855026951 , loss: 0.000275895360033898 
-loss classification 0.02916581402099991, loss heatmap 7.21961772319781e-05 
-Train Total Loss: 0.0653 Train Heatmap Acc: 0.9993 Val Heatmap Acc: 0.9443
-Epoch-20 lr: 5e-06
-Epoch-20 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 20/99
-----------
-epoch time: 4629.231956481934
-Classification Train Accuracy 20 epoch: 0.9912878187866307
-Total validation loss 0.6601243127213344, total accuracy 0.9086388022574443
-Classification Validation, epoch: 20, Accuracy 0.8734455010972935 , loss: 0.5258879986049001 
-Heatmap Validation (epoch 20),Accuracy 0.9438321034175953 , loss: 0.000268472626655778 
-loss classification 0.02466251754483919, loss heatmap 5.961198763121679e-05 
-Train Total Loss: 0.0545 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9438
-Epoch-21 lr: 5e-06
-Epoch-21 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 21/99
-----------
-epoch time: 4850.757845878601
-Classification Train Accuracy 21 epoch: 0.9935054649136702
-Total validation loss 0.546982415325692, total accuracy 0.9171766340397962
-Classification Validation, epoch: 21, Accuracy 0.8891002194586687 , loss: 0.4208264516628848 
-Heatmap Validation (epoch 21),Accuracy 0.9452530486209237 , loss: 0.00025231192728996635 
-loss classification 0.019094567856350744, loss heatmap 5.6907285563432915e-05 
-Train Total Loss: 0.0475 Train Heatmap Acc: 0.9991 Val Heatmap Acc: 0.9453
-Epoch-22 lr: 5e-06
-Epoch-22 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 22/99
-----------
-epoch time: 5072.075606107712
-Classification Train Accuracy 22 epoch: 0.9920270341623105
-Total validation loss 0.7120490032084099, total accuracy 0.9022722745418333
-Classification Validation, epoch: 22, Accuracy 0.8795903438185809 , loss: 0.5740456542217426 
-Heatmap Validation (epoch 22),Accuracy 0.9249542052650858 , loss: 0.0002760066941701735 
-loss classification 0.022920347850940433, loss heatmap 5.6617105657483654e-05 
-Train Total Loss: 0.0512 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9250
-Epoch-23 lr: 5e-06
-Epoch-23 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 23/99
-----------
-epoch time: 5294.228852272034
-Classification Train Accuracy 23 epoch: 0.9926078462432018
-Total validation loss 0.509919158947266, total accuracy 0.9163059578734764
-Classification Validation, epoch: 23, Accuracy 0.8994879297732261 , loss: 0.38500816357589784 
-Heatmap Validation (epoch 23),Accuracy 0.9331239859737266 , loss: 0.000249821991706379 
-loss classification 0.02162364589577211, loss heatmap 5.4838422741047015e-05 
-Train Total Loss: 0.0490 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9331
-best val class at epoch: 23tensor(0.8995, device='cuda:0', dtype=torch.float64)
-Epoch-24 lr: 5e-06
-Epoch-24 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 24/99
-----------
-epoch time: 5517.712025165558
-Classification Train Accuracy 24 epoch: 0.9929774539310418
-Total validation loss 0.5534403646670792, total accuracy 0.9116901874244641
-Classification Validation, epoch: 24, Accuracy 0.8893928310168252 , loss: 0.4276296178425711 
-Heatmap Validation (epoch 24),Accuracy 0.933987543832103 , loss: 0.00025162149391461775 
-loss classification 0.021062128720546143, loss heatmap 5.413976465935627e-05 
-Train Total Loss: 0.0481 Train Heatmap Acc: 0.9995 Val Heatmap Acc: 0.9340
-Epoch-25 lr: 5e-06
-Epoch-25 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 25/99
-----------
-epoch time: 5739.785313129425
-Classification Train Accuracy 25 epoch: 0.9920798352605734
-Total validation loss 0.5887549564120189, total accuracy 0.9107897564055102
-Classification Validation, epoch: 25, Accuracy 0.8896854425749818 , loss: 0.4620901990697056 
-Heatmap Validation (epoch 25),Accuracy 0.9318940702360385 , loss: 0.000253329517901308 
-loss classification 0.022501624046161926, loss heatmap 5.253906974478738e-05 
-Train Total Loss: 0.0488 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9319
-Epoch-26 lr: 5e-06
-Epoch-26 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 26/99
-----------
-epoch time: 5962.269196033478
-Classification Train Accuracy 26 epoch: 0.992871851734516
-Total validation loss 0.5691937842427367, total accuracy 0.9148841703801126
-Classification Validation, epoch: 26, Accuracy 0.89407461594733 , loss: 0.4446781316192241 
-Heatmap Validation (epoch 26),Accuracy 0.9356937248128953 , loss: 0.00024903130661438355 
-loss classification 0.02067569916584263, loss heatmap 5.041142601758182e-05 
-Train Total Loss: 0.0459 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9357
-Epoch-27 lr: 5e-06
-Epoch-27 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 27/99
-----------
-epoch time: 6183.9373281002045
-Classification Train Accuracy 27 epoch: 0.9938222715032472
-Total validation loss 0.8388649969662672, total accuracy 0.8956114564308824
-Classification Validation, epoch: 27, Accuracy 0.8775420629114851 , loss: 0.7016588419931523 
-Heatmap Validation (epoch 27),Accuracy 0.9136808499502796 , loss: 0.0002744123143746288 
-loss classification 0.017722927146763268, loss heatmap 4.801738106259847e-05 
-Train Total Loss: 0.0417 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9137
-Epoch-28 lr: 5e-06
-Epoch-28 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 28/99
-----------
-epoch time: 6406.93791270256
-Classification Train Accuracy 28 epoch: 0.9929774539310418
-Total validation loss 0.626171638182848, total accuracy 0.8972919667085628
-Classification Validation, epoch: 28, Accuracy 0.8898317483540601 , loss: 0.4859260630366967 
-Heatmap Validation (epoch 28),Accuracy 0.9047521850630654 , loss: 0.0002804911490991032 
-loss classification 0.020407107348682417, loss heatmap 5.1724710507456304e-05 
-Train Total Loss: 0.0463 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9048
-Epoch-29 lr: 5e-06
-Epoch-29 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 29/99
-----------
-epoch time: 6628.85643863678
-Classification Train Accuracy 29 epoch: 0.99424468028935
-Total validation loss 0.6907594801821161, total accuracy 0.9052358653299216
-Classification Validation, epoch: 29, Accuracy 0.8892465252377469 , loss: 0.5626825553219479 
-Heatmap Validation (epoch 29),Accuracy 0.9212252054220963 , loss: 0.0002561538486769102 
-loss classification 0.01688360898215379, loss heatmap 4.895221488199344e-05 
-Train Total Loss: 0.0414 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9212
-Epoch-30 lr: 5e-06
-Epoch-30 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 30/99
-----------
-epoch time: 6851.056968212128
-Classification Train Accuracy 30 epoch: 0.9929246528327789
-Total validation loss 0.6004950061845346, total accuracy 0.9164660341374791
-Classification Validation, epoch: 30, Accuracy 0.8844184345281639 , loss: 0.47698428519472535 
-Heatmap Validation (epoch 30),Accuracy 0.9485136337467941 , loss: 0.0002470214432604948 
-loss classification 0.01926538524324172, loss heatmap 4.811307669866675e-05 
-Train Total Loss: 0.0433 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9485
-Epoch-31 lr: 5e-06
-Epoch-31 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 31/99
-----------
-epoch time: 7072.908097267151
-Classification Train Accuracy 31 epoch: 0.9934526638154073
-Total validation loss 0.6501887345223736, total accuracy 0.9058037056856374
-Classification Validation, epoch: 31, Accuracy 0.8811997073884419 , loss: 0.5218137454127537 
-Heatmap Validation (epoch 31),Accuracy 0.930407703982833 , loss: 0.0002567499756227082 
-loss classification 0.01706217804439136, loss heatmap 4.7807628107029175e-05 
-Train Total Loss: 0.0410 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9304
-Epoch-32 lr: 5e-06
-Epoch-32 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 32/99
-----------
-epoch time: 7294.859745502472
-Classification Train Accuracy 32 epoch: 0.9936110671101959
-Total validation loss 0.7953199767878745, total accuracy 0.9021912510262059
-Classification Validation, epoch: 32, Accuracy 0.8681784930504756 , loss: 0.6656147168126904 
-Heatmap Validation (epoch 32),Accuracy 0.9362040090019362 , loss: 0.00025941051261089775 
-loss classification 0.01830772367986045, loss heatmap 4.630706409249605e-05 
-Train Total Loss: 0.0415 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9362
-Epoch-33 lr: 5e-06
-Epoch-33 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 33/99
-----------
-epoch time: 7517.1870131492615
-Classification Train Accuracy 33 epoch: 0.9931358572258302
-Total validation loss 0.7021144670809474, total accuracy 0.9049772497461548
-Classification Validation, epoch: 33, Accuracy 0.8757863935625458 , loss: 0.5735179381009557 
-Heatmap Validation (epoch 33),Accuracy 0.9341681059297637 , loss: 0.0002571930585909895 
-loss classification 0.018359276249804917, loss heatmap 4.887145830293043e-05 
-Train Total Loss: 0.0428 Train Heatmap Acc: 0.9992 Val Heatmap Acc: 0.9342
-Epoch-34 lr: 5e-06
-Epoch-34 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 34/99
-----------
-epoch time: 7738.982495069504
-Classification Train Accuracy 34 epoch: 0.9944558846824013
-Total validation loss 0.6987840180251333, total accuracy 0.903804554216276
-Classification Validation, epoch: 34, Accuracy 0.8794440380395027 , loss: 0.5751537512095513 
-Heatmap Validation (epoch 34),Accuracy 0.9281650703930494 , loss: 0.00024726053608521297 
-loss classification 0.015246826507038517, loss heatmap 4.366671331506074e-05 
-Train Total Loss: 0.0371 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9282
-Epoch-35 lr: 5e-06
-Epoch-35 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 35/99
-----------
-epoch time: 7960.611323356628
-Classification Train Accuracy 35 epoch: 0.9933470616188816
-Total validation loss 0.8827576405459261, total accuracy 0.8832871241534361
-Classification Validation, epoch: 35, Accuracy 0.8343818580833944 , loss: 0.7510409235884526 
-Heatmap Validation (epoch 35),Accuracy 0.9321923902234779 , loss: 0.0002634334292726243 
-loss classification 0.019309713745023792, loss heatmap 4.576366637792771e-05 
-Train Total Loss: 0.0422 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9322
-Epoch-36 lr: 5e-06
-Epoch-36 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 36/99
-----------
-epoch time: 8182.923080921173
-Classification Train Accuracy 36 epoch: 0.9939806747980358
-Total validation loss 0.6670259361817821, total accuracy 0.9077266011923992
-Classification Validation, epoch: 36, Accuracy 0.876956839795172 , loss: 0.5446934228501646 
-Heatmap Validation (epoch 36),Accuracy 0.9384963625896264 , loss: 0.00024466502561261747 
-loss classification 0.016771318464044, loss heatmap 4.402801475613486e-05 
-Train Total Loss: 0.0388 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9385
-Epoch-37 lr: 5e-06
-Epoch-37 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 37/99
-----------
-epoch time: 8404.803709030151
-Classification Train Accuracy 37 epoch: 0.9942974813876128
-Total validation loss 0.7053773334741553, total accuracy 0.8987846147225635
-Classification Validation, epoch: 37, Accuracy 0.8772494513533285 , loss: 0.5706633684773489 
-Heatmap Validation (epoch 37),Accuracy 0.9203197780917984 , loss: 0.000269427929771447 
-loss classification 0.017927201382404535, loss heatmap 4.455472269811846e-05 
-Train Total Loss: 0.0402 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9203
-Epoch-38 lr: 5e-06
-Epoch-38 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 38/99
-----------
-epoch time: 8626.18455004692
-Classification Train Accuracy 38 epoch: 0.9940862769945614
-Total validation loss 0.5220102704567671, total accuracy 0.9155897768425294
-Classification Validation, epoch: 38, Accuracy 0.9000731528895393 , loss: 0.39605157067788044 
-Heatmap Validation (epoch 38),Accuracy 0.9311064007955197 , loss: 0.00025191740229934146 
-loss classification 0.01848386046900441, loss heatmap 4.361041820427061e-05 
-Train Total Loss: 0.0403 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9311
-best val class at epoch: 38tensor(0.9001, device='cuda:0', dtype=torch.float64)
-Epoch-39 lr: 5e-06
-Epoch-39 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 39/99
-----------
-epoch time: 8849.08050084114
-Classification Train Accuracy 39 epoch: 0.9938222715032472
-Total validation loss 0.6121146908554432, total accuracy 0.9026378188455426
-Classification Validation, epoch: 39, Accuracy 0.8902706656912949 , loss: 0.48305539052101154 
-Heatmap Validation (epoch 39),Accuracy 0.9150049719997903 , loss: 0.0002581186017242715 
-loss classification 0.01808206225463857, loss heatmap 4.403967484974226e-05 
-Train Total Loss: 0.0401 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9150
-Epoch-40 lr: 2.5e-06
-Epoch-40 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 40/99
-----------
-epoch time: 9070.63842868805
-Classification Train Accuracy 40 epoch: 0.9947726912719784
-Total validation loss 0.8011098556123113, total accuracy 0.8872203180724543
-Classification Validation, epoch: 40, Accuracy 0.8794440380395027 , loss: 0.6602881893862048 
-Heatmap Validation (epoch 40),Accuracy 0.8949965981054059 , loss: 0.0002816433342903516 
-loss classification 0.014723063104757152, loss heatmap 3.978601020860917e-05 
-Train Total Loss: 0.0346 Train Heatmap Acc: 0.9995 Val Heatmap Acc: 0.8950
-Epoch-41 lr: 2.5e-06
-Epoch-41 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 41/99
-----------
-epoch time: 9292.209969997406
-Classification Train Accuracy 41 epoch: 0.9948254923702412
-Total validation loss 0.7345983781122434, total accuracy 0.897796397939008
-Classification Validation, epoch: 41, Accuracy 0.8760790051207024 , loss: 0.608966103303674 
-Heatmap Validation (epoch 41),Accuracy 0.9195137907573137 , loss: 0.00025126455364384687 
-loss classification 0.0135953939605133, loss heatmap 3.831551600559035e-05 
-Train Total Loss: 0.0328 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9195
-Epoch-42 lr: 2.5e-06
-Epoch-42 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 42/99
-----------
-epoch time: 9513.974684000015
-Classification Train Accuracy 42 epoch: 0.9949838956650298
-Total validation loss 0.6429420746972017, total accuracy 0.9053697875311899
-Classification Validation, epoch: 42, Accuracy 0.8822238478419898 , loss: 0.5183262360553478 
-Heatmap Validation (epoch 42),Accuracy 0.9285157272203901 , loss: 0.0002492316753980258 
-loss classification 0.013465593028621265, loss heatmap 3.767138015115917e-05 
-Train Total Loss: 0.0323 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9285
-Epoch-43 lr: 2.5e-06
-Epoch-43 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 43/99
-----------
-epoch time: 9736.047208309174
-Classification Train Accuracy 43 epoch: 0.9948254923702412
-Total validation loss 0.7241595333555442, total accuracy 0.896882532393996
-Classification Validation, epoch: 43, Accuracy 0.8800292611558157 , loss: 0.5958272987527445 
-Heatmap Validation (epoch 43),Accuracy 0.9137358036321762 , loss: 0.0002566644700369291 
-loss classification 0.014400954449065514, loss heatmap 3.811604170092864e-05 
-Train Total Loss: 0.0335 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9137
-Epoch-44 lr: 2.5e-06
-Epoch-44 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 44/99
-----------
-epoch time: 9958.365213394165
-Classification Train Accuracy 44 epoch: 0.9954063044511325
-Total validation loss 0.6413951085307179, total accuracy 0.9034042932059085
-Classification Validation, epoch: 44, Accuracy 0.8776883686905633 , loss: 0.5159638210137893 
-Heatmap Validation (epoch 44),Accuracy 0.9291202177212537 , loss: 0.0002508625790201457 
-loss classification 0.014526001852129915, loss heatmap 3.6613081074731574e-05 
-Train Total Loss: 0.0328 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9291
-Epoch-45 lr: 2.5e-06
-Epoch-45 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 45/99
-----------
-epoch time: 10179.952463388443
-Classification Train Accuracy 45 epoch: 0.9959871165320238
-Total validation loss 0.7085139230433032, total accuracy 0.9016001165652835
-Classification Validation, epoch: 45, Accuracy 0.8871982443306511 , loss: 0.5811398017584577 
-Heatmap Validation (epoch 45),Accuracy 0.9160019887999159 , loss: 0.00025474824037037997 
-loss classification 0.011963987102229933, loss heatmap 3.6401511054555085e-05 
-Train Total Loss: 0.0302 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9160
-Epoch-46 lr: 2.5e-06
-Epoch-46 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 46/99
-----------
-epoch time: 10402.145183086395
-Classification Train Accuracy 46 epoch: 0.9948782934685041
-Total validation loss 0.7107738309777316, total accuracy 0.90970494235501
-Classification Validation, epoch: 46, Accuracy 0.881784930504755 , loss: 0.5858665502745061 
-Heatmap Validation (epoch 46),Accuracy 0.9376249542052649 , loss: 0.00024981456328230264 
-loss classification 0.01311101428990711, loss heatmap 3.575218887474587e-05 
-Train Total Loss: 0.0310 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9376
-Epoch-47 lr: 2.5e-06
-Epoch-47 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 47/99
-----------
-epoch time: 10623.81798672676
-Classification Train Accuracy 47 epoch: 0.9946670890754528
-Total validation loss 0.7066706612524727, total accuracy 0.90445305341432
-Classification Validation, epoch: 47, Accuracy 0.8784198975859547 , loss: 0.580136257892983 
-Heatmap Validation (epoch 47),Accuracy 0.9304862092426854 , loss: 0.00025306880645930717 
-loss classification 0.013461231427218178, loss heatmap 3.628681153323276e-05 
-Train Total Loss: 0.0316 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9305
-Epoch-48 lr: 2.5e-06
-Epoch-48 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 48/99
-----------
-epoch time: 10845.602789878845
-Classification Train Accuracy 48 epoch: 0.9950894978615554
-Total validation loss 0.8291830306325214, total accuracy 0.8970937701204423
-Classification Validation, epoch: 48, Accuracy 0.8728602779809803 , loss: 0.7056179143408287 
-Heatmap Validation (epoch 48),Accuracy 0.9213272622599044 , loss: 0.0002471302345680238 
-loss classification 0.01351995783570814, loss heatmap 3.608664095308111e-05 
-Train Total Loss: 0.0316 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9213
-Epoch-49 lr: 2.5e-06
-Epoch-49 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 49/99
-----------
-epoch time: 11067.382735013962
-Classification Train Accuracy 49 epoch: 0.9954591055493953
-Total validation loss 0.7279205301052595, total accuracy 0.9023240122072328
-Classification Validation, epoch: 49, Accuracy 0.8771031455742503 , loss: 0.6027129469972619 
-Heatmap Validation (epoch 49),Accuracy 0.9275448788402153 , loss: 0.00025041516461681967 
-loss classification 0.013051354006648695, loss heatmap 3.444116008203323e-05 
-Train Total Loss: 0.0303 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9275
-Epoch-50 lr: 2.5e-06
-Epoch-50 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 50/99
-----------
-epoch time: 11289.095665931702
-Classification Train Accuracy 50 epoch: 0.9953535033528697
-Total validation loss 0.7154030499362254, total accuracy 0.9093584539061945
-Classification Validation, epoch: 50, Accuracy 0.8847110460863205 , loss: 0.5918347331766475 
-Heatmap Validation (epoch 50),Accuracy 0.9340058617260685 , loss: 0.0002471366333715696 
-loss classification 0.013963508467155303, loss heatmap 3.512252156044863e-05 
-Train Total Loss: 0.0315 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9340
-Epoch-51 lr: 2.5e-06
-Epoch-51 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 51/99
-----------
-epoch time: 11510.452879667282
-Classification Train Accuracy 51 epoch: 0.9956175088441839
-Total validation loss 0.6986360724298372, total accuracy 0.8990578430812897
-Classification Validation, epoch: 51, Accuracy 0.8807607900512071 , loss: 0.5730052230567056 
-Heatmap Validation (epoch 51),Accuracy 0.9173548961113723 , loss: 0.00025126169240439474 
-loss classification 0.012534865927236221, loss heatmap 3.4699569435667836e-05 
-Train Total Loss: 0.0299 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9174
-Epoch-52 lr: 2.5e-06
-Epoch-52 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 52/99
-----------
-epoch time: 11732.005596637726
-Classification Train Accuracy 52 epoch: 0.9951951000580811
-Total validation loss 0.632706869750206, total accuracy 0.905581404288152
-Classification Validation, epoch: 52, Accuracy 0.8874908558888077 , loss: 0.5074971620166102 
-Heatmap Validation (epoch 52),Accuracy 0.9236719526874965 , loss: 0.00025041941751899474 
-loss classification 0.012823136223086026, loss heatmap 3.419901717164171e-05 
-Train Total Loss: 0.0299 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9237
-Epoch-53 lr: 2.5e-06
-Epoch-53 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 53/99
-----------
-epoch time: 11954.44029045105
-Classification Train Accuracy 53 epoch: 0.9957231110407095
-Total validation loss 0.7490196702365894, total accuracy 0.8973389368209347
-Classification Validation, epoch: 53, Accuracy 0.8819312362838333 , loss: 0.6224396481610058 
-Heatmap Validation (epoch 53),Accuracy 0.9127466373580361 , loss: 0.00025316004304628094 
-loss classification 0.012788872610991722, loss heatmap 3.332184027674266e-05 
-Train Total Loss: 0.0294 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9127
-Epoch-54 lr: 2.5e-06
-Epoch-54 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 54/99
-----------
-epoch time: 12177.68446445465
-Classification Train Accuracy 54 epoch: 0.9958815143354981
-Total validation loss 0.6727699623919067, total accuracy 0.9084784800064656
-Classification Validation, epoch: 54, Accuracy 0.8839795171909292 , loss: 0.5511041998864961 
-Heatmap Validation (epoch 54),Accuracy 0.932977442822002 , loss: 0.00024333152453646966 
-loss classification 0.011521608904822496, loss heatmap 3.3682101863041494e-05 
-Train Total Loss: 0.0284 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9330
-Epoch-55 lr: 2.5e-06
-Epoch-55 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 55/99
-----------
-epoch time: 12442.968271493912
-Classification Train Accuracy 55 epoch: 0.9941918791910871
-Total validation loss 0.681210792026323, total accuracy 0.904455786071195
-Classification Validation, epoch: 55, Accuracy 0.8766642282370154 , loss: 0.5593086394150787 
-Heatmap Validation (epoch 55),Accuracy 0.9322473439053747 , loss: 0.00024380430596888212 
-loss classification 0.013999554442280258, loss heatmap 3.5591292904143606e-05 
-Train Total Loss: 0.0318 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9322
-Epoch-56 lr: 2.5e-06
-Epoch-56 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 56/99
-----------
-epoch time: 12721.03286409378
-Classification Train Accuracy 56 epoch: 0.994931094566767
-Total validation loss 0.6226757785570695, total accuracy 0.9071192650912243
-Classification Validation, epoch: 56, Accuracy 0.8820775420629116 , loss: 0.4985488389702568 
-Heatmap Validation (epoch 56),Accuracy 0.9321609881195371 , loss: 0.00024825387964634853 
-loss classification 0.013163060983703541, loss heatmap 3.3977106262490455e-05 
-Train Total Loss: 0.0302 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9322
-Epoch-57 lr: 2.5e-06
-Epoch-57 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 57/99
-----------
-epoch time: 12998.874646425247
-Classification Train Accuracy 57 epoch: 0.9951951000580811
-Total validation loss 0.8845782021273122, total accuracy 0.8797872654858754
-Classification Validation, epoch: 57, Accuracy 0.8615947329919532 , loss: 0.74543746083786 
-Heatmap Validation (epoch 57),Accuracy 0.8979797979797974 , loss: 0.00027828148392459713 
-loss classification 0.01193599008124548, loss heatmap 3.2909285477617314e-05 
-Train Total Loss: 0.0284 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.8980
-Epoch-58 lr: 2.5e-06
-Epoch-58 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 58/99
-----------
-epoch time: 13278.244057178497
-Classification Train Accuracy 58 epoch: 0.9956703099424468
-Total validation loss 0.6477162511192575, total accuracy 0.9058661509631069
-Classification Validation, epoch: 58, Accuracy 0.8800292611558157 , loss: 0.522189306457509 
-Heatmap Validation (epoch 58),Accuracy 0.931703040770398 , loss: 0.00025105389023967814 
-loss classification 0.012508957403830921, loss heatmap 3.2692878898420566e-05 
-Train Total Loss: 0.0289 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9317
-Epoch-59 lr: 2.5e-06
-Epoch-59 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 59/99
-----------
-epoch time: 13555.43615078926
-Classification Train Accuracy 59 epoch: 0.9941390780928243
-Total validation loss 0.7115560266212313, total accuracy 0.9051223744048884
-Classification Validation, epoch: 59, Accuracy 0.8807607900512071 , loss: 0.5882326211634524 
-Heatmap Validation (epoch 59),Accuracy 0.9294839587585698 , loss: 0.0002466468121754821 
-loss classification 0.014275536006633945, loss heatmap 3.711260095392267e-05 
-Train Total Loss: 0.0328 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9295
-Epoch-60 lr: 1.25e-06
-Epoch-60 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 60/99
-----------
-epoch time: 13790.986249446869
-Classification Train Accuracy 60 epoch: 0.9958815143354981
-Total validation loss 0.8026348656891696, total accuracy 0.8922382140556842
-Classification Validation, epoch: 60, Accuracy 0.8696415508412583 , loss: 0.6738848425619801 
-Heatmap Validation (epoch 60),Accuracy 0.9148348772701101 , loss: 0.0002575000480329548 
-loss classification 0.011174212498953583, loss heatmap 3.194536299592001e-05 
-Train Total Loss: 0.0271 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9148
-Epoch-61 lr: 1.25e-06
-Epoch-61 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 61/99
-----------
-epoch time: 14014.065127849579
-Classification Train Accuracy 61 epoch: 0.9957759121389724
-Total validation loss 0.7767790603285737, total accuracy 0.8988291039079231
-Classification Validation, epoch: 61, Accuracy 0.8788588149231895 , loss: 0.6486577947869542 
-Heatmap Validation (epoch 61),Accuracy 0.9187993928926568 , loss: 0.00025624253512954853 
-loss classification 0.011525846392000995, loss heatmap 3.2415784966485604e-05 
-Train Total Loss: 0.0277 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9188
-Epoch-62 lr: 1.25e-06
-Epoch-62 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 62/99
-----------
-epoch time: 14237.011186599731
-Classification Train Accuracy 62 epoch: 0.9954063044511325
-Total validation loss 0.7190528292237748, total accuracy 0.897055249708558
-Classification Validation, epoch: 62, Accuracy 0.8832479882955377 , loss: 0.5921204184984058 
-Heatmap Validation (epoch 62),Accuracy 0.9108625111215781 , loss: 0.00025386482192295886 
-loss classification 0.012293662269027835, loss heatmap 3.275047421356679e-05 
-Train Total Loss: 0.0287 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9109
-Epoch-63 lr: 1.25e-06
-Epoch-63 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 63/99
-----------
-epoch time: 14475.176718950272
-Classification Train Accuracy 63 epoch: 0.995247901156344
-Total validation loss 0.8177642068124402, total accuracy 0.8953231175803579
-Classification Validation, epoch: 63, Accuracy 0.8716898317483541 , loss: 0.6884863142533888 
-Heatmap Validation (epoch 63),Accuracy 0.9189564034123616 , loss: 0.0002585557854602268 
-loss classification 0.013630969396436389, loss heatmap 3.293428836472576e-05 
-Train Total Loss: 0.0301 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9190
-Epoch-64 lr: 1.25e-06
-Epoch-64 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 64/99
-----------
-epoch time: 14751.909014940262
-Classification Train Accuracy 64 epoch: 0.9957759121389724
-Total validation loss 0.7462765935926851, total accuracy 0.8965720805586097
-Classification Validation, epoch: 64, Accuracy 0.8804681784930506 , loss: 0.6201063053882975 
-Heatmap Validation (epoch 64),Accuracy 0.9126759826241689 , loss: 0.00025234057530496674 
-loss classification 0.01037935623606325, loss heatmap 3.066911844112906e-05 
-Train Total Loss: 0.0257 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9127
-Epoch-65 lr: 1.25e-06
-Epoch-65 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 65/99
-----------
-epoch time: 15029.306516170502
-Classification Train Accuracy 65 epoch: 0.9967263319077037
-Total validation loss 0.6863067882112724, total accuracy 0.909773929737467
-Classification Validation, epoch: 65, Accuracy 0.8806144842721289 , loss: 0.5639773662928256 
-Heatmap Validation (epoch 65),Accuracy 0.938933375202805 , loss: 0.00024465884525397134 
-loss classification 0.00858149807805408, loss heatmap 2.8653847998349205e-05 
-Train Total Loss: 0.0229 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9389
-Epoch-66 lr: 1.25e-06
-Epoch-66 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 66/99
-----------
-epoch time: 15308.143767595291
-Classification Train Accuracy 66 epoch: 0.9960927187285495
-Total validation loss 0.7020959512280001, total accuracy 0.9043135328557624
-Classification Validation, epoch: 66, Accuracy 0.8810534016093636 , loss: 0.5769817556520878 
-Heatmap Validation (epoch 66),Accuracy 0.9275736641021612 , loss: 0.0002502283893322081 
-loss classification 0.011554906040810022, loss heatmap 3.0079725790860685e-05 
-Train Total Loss: 0.0266 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9276
-Epoch-67 lr: 1.25e-06
-Epoch-67 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 67/99
-----------
-epoch time: 15585.854602575302
-Classification Train Accuracy 67 epoch: 0.9961455198268123
-Total validation loss 0.7657018531835519, total accuracy 0.8963775977038253
-Classification Validation, epoch: 67, Accuracy 0.8782735918068765 , loss: 0.6406336575954593 
-Heatmap Validation (epoch 67),Accuracy 0.9144816036007742 , loss: 0.00025013639373646626 
-loss classification 0.010081969941229615, loss heatmap 2.9715960172470984e-05 
-Train Total Loss: 0.0249 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9145
-Epoch-68 lr: 1.25e-06
-Epoch-68 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 68/99
-----------
-epoch time: 15840.180900335312
-Classification Train Accuracy 68 epoch: 0.9947198901737155
-Total validation loss 0.647165245091091, total accuracy 0.9050846704400495
-Classification Validation, epoch: 68, Accuracy 0.8820775420629116 , loss: 0.5247623501385185 
-Heatmap Validation (epoch 68),Accuracy 0.9280917988171873 , loss: 0.0002448057921166831 
-loss classification 0.013010482755319241, loss heatmap 3.1599824778065e-05 
-Train Total Loss: 0.0288 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9281
-Epoch-69 lr: 1.25e-06
-Epoch-69 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 69/99
-----------
-epoch time: 16098.287074804306
-Classification Train Accuracy 69 epoch: 0.9958815143354981
-Total validation loss 0.7062119226966684, total accuracy 0.905760883851688
-Classification Validation, epoch: 69, Accuracy 0.8807607900512071 , loss: 0.5828944200678929 
-Heatmap Validation (epoch 69),Accuracy 0.9307609776521689 , loss: 0.00024663500673818346 
-loss classification 0.010959208171772244, loss heatmap 2.9963552189968305e-05 
-Train Total Loss: 0.0259 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9308
-Epoch-70 lr: 1.25e-06
-Epoch-70 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 70/99
-----------
-epoch time: 16375.104345560074
-Classification Train Accuracy 70 epoch: 0.995934315433761
-Total validation loss 0.8228558534312174, total accuracy 0.8911605556418902
-Classification Validation, epoch: 70, Accuracy 0.8722750548646673 , loss: 0.6905556311166038 
-Heatmap Validation (epoch 70),Accuracy 0.9100460564191131 , loss: 0.0002646004423786605 
-loss classification 0.010068576499573927, loss heatmap 3.0707525789493e-05 
-Train Total Loss: 0.0254 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9100
-Epoch-71 lr: 1.25e-06
-Epoch-71 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 71/99
-----------
-epoch time: 16650.793615341187
-Classification Train Accuracy 71 epoch: 0.9960399176302867
-Total validation loss 0.7787637508968425, total accuracy 0.8966894709036457
-Classification Validation, epoch: 71, Accuracy 0.8744696415508413 , loss: 0.6490658153630293 
-Heatmap Validation (epoch 71),Accuracy 0.9189093002564502 , loss: 0.00025939587423660617 
-loss classification 0.010273041739409116, loss heatmap 2.7275458388041655e-05 
-Train Total Loss: 0.0239 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9189
-Epoch-72 lr: 1.25e-06
-Epoch-72 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 72/99
-----------
-epoch time: 16927.103505134583
-Classification Train Accuracy 72 epoch: 0.9954063044511325
-Total validation loss 0.8229587996373631, total accuracy 0.8980433334485738
-Classification Validation, epoch: 72, Accuracy 0.8765179224579371 , loss: 0.6917674423137967 
-Heatmap Validation (epoch 72),Accuracy 0.9195687444392104 , loss: 0.00026238271871953947 
-loss classification 0.011764514913295615, loss heatmap 2.96494263525819e-05 
-Train Total Loss: 0.0266 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9196
-Epoch-73 lr: 1.25e-06
-Epoch-73 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 73/99
-----------
-epoch time: 17203.25787472725
-Classification Train Accuracy 73 epoch: 0.9960927187285495
-Total validation loss 0.6702098527089517, total accuracy 0.9095497092587086
-Classification Validation, epoch: 73, Accuracy 0.8779809802487198 , loss: 0.5464104615235945 
-Heatmap Validation (epoch 73),Accuracy 0.9411184382686972 , loss: 0.0002475987785878924 
-loss classification 0.011019718369157246, loss heatmap 2.9956487159011996e-05 
-Train Total Loss: 0.0260 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9411
-Epoch-74 lr: 1.25e-06
-Epoch-74 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 74/99
-----------
-epoch time: 17438.557186841965
-Classification Train Accuracy 74 epoch: 0.9953535033528697
-Total validation loss 0.7458593981523278, total accuracy 0.9006418575496885
-Classification Validation, epoch: 74, Accuracy 0.8765179224579371 , loss: 0.6184419134590086 
-Heatmap Validation (epoch 74),Accuracy 0.9247657926414399 , loss: 0.00025483497151194165 
-loss classification 0.011438182344786324, loss heatmap 3.159265477865735e-05 
-Train Total Loss: 0.0272 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9248
-Epoch-75 lr: 1.25e-06
-Epoch-75 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 75/99
-----------
-epoch time: 17660.91468858719
-Classification Train Accuracy 75 epoch: 0.9954591055493953
-Total validation loss 0.768658431256321, total accuracy 0.9080839245539374
-Classification Validation, epoch: 75, Accuracy 0.8800292611558157 , loss: 0.6404448776529198 
-Heatmap Validation (epoch 75),Accuracy 0.9361385879520591 , loss: 0.0002564271093739109 
-loss classification 0.011014745899784885, loss heatmap 3.005424227238762e-05 
-Train Total Loss: 0.0260 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9361
-Epoch-76 lr: 1.25e-06
-Epoch-76 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 76/99
-----------
-epoch time: 17898.568884134293
-Classification Train Accuracy 76 epoch: 0.9958287132372353
-Total validation loss 0.7865996106723372, total accuracy 0.9006115207512123
-Classification Validation, epoch: 76, Accuracy 0.8735918068763717 , loss: 0.6590146868466639 
-Heatmap Validation (epoch 76),Accuracy 0.9276312346260529 , loss: 0.0002551698482128343 
-loss classification 0.009555879623450425, loss heatmap 3.074857357440087e-05 
-Train Total Loss: 0.0249 Train Heatmap Acc: 0.9995 Val Heatmap Acc: 0.9276
-Epoch-77 lr: 1.25e-06
-Epoch-77 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 77/99
-----------
-epoch time: 18175.474771499634
-Classification Train Accuracy 77 epoch: 0.9959871165320238
-Total validation loss 0.7603973970512604, total accuracy 0.8993682891737895
-Classification Validation, epoch: 77, Accuracy 0.8771031455742503 , loss: 0.6339444127589773 
-Heatmap Validation (epoch 77),Accuracy 0.9216334327733287 , loss: 0.0002529059665905055 
-loss classification 0.009535331391578115, loss heatmap 2.84759293787657e-05 
-Train Total Loss: 0.0238 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9216
-Epoch-78 lr: 1.25e-06
-Epoch-78 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 78/99
-----------
-epoch time: 18450.353461027145
-Classification Train Accuracy 78 epoch: 0.9954063044511325
-Total validation loss 0.8187953719025313, total accuracy 0.8999659973255759
-Classification Validation, epoch: 78, Accuracy 0.8757863935625458 , loss: 0.6887100152264516 
-Heatmap Validation (epoch 78),Accuracy 0.924145601088606 , loss: 0.00026017071098221115 
-loss classification 0.011484703772177881, loss heatmap 3.059274610279187e-05 
-Train Total Loss: 0.0268 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9241
-Epoch-79 lr: 1.25e-06
-Epoch-79 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 79/99
-----------
-epoch time: 18727.751693725586
-Classification Train Accuracy 79 epoch: 0.9951951000580811
-Total validation loss 0.7418897234903072, total accuracy 0.9033667107988358
-Classification Validation, epoch: 79, Accuracy 0.8804681784930506 , loss: 0.6162896429250702 
-Heatmap Validation (epoch 79),Accuracy 0.926265243104621 , loss: 0.0002512001619797516 
-loss classification 0.011294415442579833, loss heatmap 3.1149300626540395e-05 
-Train Total Loss: 0.0269 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9263
-Epoch-80 lr: 6.25e-07
-Epoch-80 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 80/99
-----------
-epoch time: 19004.031538248062
-Classification Train Accuracy 80 epoch: 0.9964623264163894
-Total validation loss 0.8016326317509895, total accuracy 0.8996319881693472
-Classification Validation, epoch: 80, Accuracy 0.8730065837600586 , loss: 0.6720043847760243 
-Heatmap Validation (epoch 80),Accuracy 0.9262573925786358 , loss: 0.0002592564945820157 
-loss classification 0.009508386026020738, loss heatmap 2.743483206113944e-05 
-Train Total Loss: 0.0232 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9263
-Epoch-81 lr: 6.25e-07
-Epoch-81 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 81/99
-----------
-epoch time: 19256.242436885834
-Classification Train Accuracy 81 epoch: 0.9959871165320238
-Total validation loss 0.7278681736736863, total accuracy 0.9012256564301242
-Classification Validation, epoch: 81, Accuracy 0.8794440380395027 , loss: 0.6029953747740779 
-Heatmap Validation (epoch 81),Accuracy 0.9230072748207458 , loss: 0.00024974559787647804 
-loss classification 0.010104183410412117, loss heatmap 2.83675196251673e-05 
-Train Total Loss: 0.0243 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9230
-Epoch-82 lr: 6.25e-07
-Epoch-82 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 82/99
-----------
-epoch time: 19516.13463330269
-Classification Train Accuracy 82 epoch: 0.9954591055493953
-Total validation loss 0.7434374319871911, total accuracy 0.9071224696219484
-Classification Validation, epoch: 82, Accuracy 0.8781272860277982 , loss: 0.6174734482514656 
-Heatmap Validation (epoch 82),Accuracy 0.9361176532160985 , loss: 0.00025192797191846546 
-loss classification 0.01088798824317622, loss heatmap 3.000674086926193e-05 
-Train Total Loss: 0.0259 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9361
-Epoch-83 lr: 6.25e-07
-Epoch-83 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 83/99
-----------
-epoch time: 19793.054651260376
-Classification Train Accuracy 83 epoch: 0.9955647077459211
-Total validation loss 0.8228089257865445, total accuracy 0.9005826139315
-Classification Validation, epoch: 83, Accuracy 0.8721287490855889 , loss: 0.6951202671692125 
-Heatmap Validation (epoch 83),Accuracy 0.929036478777411 , loss: 0.0002553773263261729 
-loss classification 0.010389518105583997, loss heatmap 2.9448303850405716e-05 
-Train Total Loss: 0.0251 Train Heatmap Acc: 0.9995 Val Heatmap Acc: 0.9290
-Epoch-84 lr: 6.25e-07
-Epoch-84 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 84/99
-----------
-epoch time: 20068.654302597046
-Classification Train Accuracy 84 epoch: 0.9960927187285495
-Total validation loss 0.8015330967456243, total accuracy 0.8930446847497913
-Classification Validation, epoch: 84, Accuracy 0.8738844184345282 , loss: 0.6701961439966481 
-Heatmap Validation (epoch 84),Accuracy 0.9122049510650543 , loss: 0.0002626739057119111 
-loss classification 0.00888923227734408, loss heatmap 2.6156310638451107e-05 
-Train Total Loss: 0.0220 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9122
-Epoch-85 lr: 6.25e-07
-Epoch-85 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 85/99
-----------
-epoch time: 20344.843816280365
-Classification Train Accuracy 85 epoch: 0.9957759121389724
-Total validation loss 0.8735916342508732, total accuracy 0.8910866877629691
-Classification Validation, epoch: 85, Accuracy 0.8713972201901976 , loss: 0.7436359278389619 
-Heatmap Validation (epoch 85),Accuracy 0.9107761553357406 , loss: 0.00025991141485352494 
-loss classification 0.01149149565267242, loss heatmap 3.0061928261004567e-05 
-Train Total Loss: 0.0265 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9108
-Epoch-86 lr: 6.25e-07
-Epoch-86 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 86/99
-----------
-epoch time: 20621.418953180313
-Classification Train Accuracy 86 epoch: 0.9955647077459211
-Total validation loss 0.7845708591213398, total accuracy 0.8961531398524206
-Classification Validation, epoch: 86, Accuracy 0.8759326993416241 , loss: 0.6572821959175622 
-Heatmap Validation (epoch 86),Accuracy 0.9163735803632171 , loss: 0.0002545773290590231 
-loss classification 0.010283414949198447, loss heatmap 2.822815029598233e-05 
-Train Total Loss: 0.0244 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9164
-Epoch-87 lr: 6.25e-07
-Epoch-87 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 87/99
-----------
-epoch time: 20854.68580842018
-Classification Train Accuracy 87 epoch: 0.9959871165320238
-Total validation loss 0.7811054395405024, total accuracy 0.8951711119863268
-Classification Validation, epoch: 87, Accuracy 0.8768105340160937 , loss: 0.6526301026956224 
-Heatmap Validation (epoch 87),Accuracy 0.9135316899565601 , loss: 0.0002569506702887703 
-loss classification 0.010295510151098652, loss heatmap 2.721193039990757e-05 
-Train Total Loss: 0.0239 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9135
-Epoch-88 lr: 6.25e-07
-Epoch-88 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 88/99
-----------
-epoch time: 21076.45999598503
-Classification Train Accuracy 88 epoch: 0.9955647077459211
-Total validation loss 0.8222293978812215, total accuracy 0.8931003505496267
-Classification Validation, epoch: 88, Accuracy 0.8730065837600586 , loss: 0.6962645126621486 
-Heatmap Validation (epoch 88),Accuracy 0.9131941173391949 , loss: 0.00025192977263240333 
-loss classification 0.010731629636797286, loss heatmap 2.9566396683057832e-05 
-Train Total Loss: 0.0255 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9132
-Epoch-89 lr: 6.25e-07
-Epoch-89 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 89/99
-----------
-epoch time: 21299.12195134163
-Classification Train Accuracy 89 epoch: 0.995934315433761
-Total validation loss 0.7608079809828656, total accuracy 0.8973560534944526
-Classification Validation, epoch: 89, Accuracy 0.875347476225311 , loss: 0.6330979601204698 
-Heatmap Validation (epoch 89),Accuracy 0.9193646307635942 , loss: 0.00025542004067081645 
-loss classification 0.009956962297099201, loss heatmap 2.839309161713452e-05 
-Train Total Loss: 0.0242 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9194
-Epoch-90 lr: 6.25e-07
-Epoch-90 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 90/99
-----------
-epoch time: 21521.465881586075
-Classification Train Accuracy 90 epoch: 0.9953535033528697
-Total validation loss 0.7992967770012243, total accuracy 0.8944010454503912
-Classification Validation, epoch: 90, Accuracy 0.8760790051207024 , loss: 0.672700863432422 
-Heatmap Validation (epoch 90),Accuracy 0.9127230857800802 , loss: 0.00025319182417200527 
-loss classification 0.010218803962069966, loss heatmap 2.8752191257638448e-05 
-Train Total Loss: 0.0246 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9127
-Epoch-91 lr: 6.25e-07
-Epoch-91 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 91/99
-----------
-epoch time: 21743.142636537552
-Classification Train Accuracy 91 epoch: 0.995934315433761
-Total validation loss 0.8080673181253955, total accuracy 0.8937833463103426
-Classification Validation, epoch: 91, Accuracy 0.8730065837600586 , loss: 0.679555000427817 
-Heatmap Validation (epoch 91),Accuracy 0.9145601088606267 , loss: 0.00025702464048618173 
-loss classification 0.009973595247561456, loss heatmap 2.786330353059473e-05 
-Train Total Loss: 0.0239 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9146
-Epoch-92 lr: 6.25e-07
-Epoch-92 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 92/99
-----------
-epoch time: 21965.732320785522
-Classification Train Accuracy 92 epoch: 0.9957759121389724
-Total validation loss 0.8295182284532256, total accuracy 0.9000402270063529
-Classification Validation, epoch: 92, Accuracy 0.8794440380395027 , loss: 0.7032170219045311 
-Heatmap Validation (epoch 92),Accuracy 0.9206364159732031 , loss: 0.00025260241119378095 
-loss classification 0.010426336780518873, loss heatmap 2.9444001252613015e-05 
-Train Total Loss: 0.0251 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9206
-Epoch-93 lr: 6.25e-07
-Epoch-93 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 93/99
-----------
-epoch time: 22187.97373008728
-Classification Train Accuracy 93 epoch: 0.9974655472833834
-Total validation loss 0.7388280281478634, total accuracy 0.8976893505327425
-Classification Validation, epoch: 93, Accuracy 0.8790051207022678 , loss: 0.6146594165797444 
-Heatmap Validation (epoch 93),Accuracy 0.9163735803632171 , loss: 0.0002483372248735593 
-loss classification 0.006867675715897138, loss heatmap 2.521092545022428e-05 
-Train Total Loss: 0.0195 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9164
-Epoch-94 lr: 6.25e-07
-Epoch-94 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 94/99
-----------
-epoch time: 22409.654133558273
-Classification Train Accuracy 94 epoch: 0.9961983209250752
-Total validation loss 0.7374297335165231, total accuracy 0.8978741996952517
-Classification Validation, epoch: 94, Accuracy 0.881784930504755 , loss: 0.6108676243601929 
-Heatmap Validation (epoch 94),Accuracy 0.9139634688857483 , loss: 0.0002531242164647141 
-loss classification 0.009871569067143168, loss heatmap 2.853137320648131e-05 
-Train Total Loss: 0.0241 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9140
-Epoch-95 lr: 6.25e-07
-Epoch-95 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 95/99
-----------
-epoch time: 22632.533902406693
-Classification Train Accuracy 95 epoch: 0.9953535033528697
-Total validation loss 0.7780550138781828, total accuracy 0.8945965964820837
-Classification Validation, epoch: 95, Accuracy 0.876956839795172 , loss: 0.6497266361553417 
-Heatmap Validation (epoch 95),Accuracy 0.9122363531689954 , loss: 0.00025665675774903124 
-loss classification 0.011849520692176149, loss heatmap 3.130489516530413e-05 
-Train Total Loss: 0.0275 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9122
-Epoch-96 lr: 6.25e-07
-Epoch-96 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 96/99
-----------
-epoch time: 22854.59909749031
-Classification Train Accuracy 96 epoch: 0.9958815143354981
-Total validation loss 0.7796094962743246, total accuracy 0.894230832034388
-Classification Validation, epoch: 96, Accuracy 0.8762253108997806 , loss: 0.6521949043074964 
-Heatmap Validation (epoch 96),Accuracy 0.9122363531689954 , loss: 0.0002548291868595557 
-loss classification 0.009577132264957485, loss heatmap 2.7166415833553386e-05 
-Train Total Loss: 0.0232 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9122
-Epoch-97 lr: 6.25e-07
-Epoch-97 lr body 1e-05 lr_cl 0.01, lr_heat 0.0006
-Epoch 97/99
+Epoch-2 lr: 0.0001
+Epoch-2 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 2/69
+----------
+epoch time: 310.9623382091522
+Classification Train Accuracy 2 epoch: 0.9976392167754478
+Total validation loss 0.6654847891998797, total accuracy 0.9486522298385953
+Classification Validation, epoch: 2, Accuracy 0.9234174413457282 , loss: 0.45112109970718584 
+Heatmap Validation (epoch 2),Accuracy 0.9738870183314625 , loss: 0.00042872737664426336 
+loss classification 0.008331566803292098, loss heatmap 0.00021906562604637303 
+Train Total Loss: 0.1179 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9739
+best val heatmap at epoch: 2
+Epoch-3 lr: 0.0001
+Epoch-3 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 3/69
+----------
+epoch time: 415.38557982444763
+Classification Train Accuracy 3 epoch: 0.9922233023191223
+Total validation loss 0.5128340058196905, total accuracy 0.9514309338457191
+Classification Validation, epoch: 3, Accuracy 0.9380256750774679 , loss: 0.2533666711950771 
+Heatmap Validation (epoch 3),Accuracy 0.9648361926139702 , loss: 0.00051893467011838 
+loss classification 0.02007071006231971, loss heatmap 0.0002096797960846156 
+Train Total Loss: 0.1249 Train Heatmap Acc: 0.9990 Val Heatmap Acc: 0.9648
+Epoch-4 lr: 0.0001
+Epoch-4 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 4/69
+----------
+epoch time: 518.284811258316
+Classification Train Accuracy 4 epoch: 0.9980558255797805
+Total validation loss 0.726048059197536, total accuracy 0.9503956330096215
+Classification Validation, epoch: 4, Accuracy 0.9313855688357681 , loss: 0.47781840913664725 
+Heatmap Validation (epoch 4),Accuracy 0.9694056971834749 , loss: 0.000496459307392087 
+loss classification 0.006659232714420097, loss heatmap 0.00016938576154461795 
+Train Total Loss: 0.0914 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9694
+Epoch-5 lr: 0.0001
+Epoch-5 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 5/69
+----------
+epoch time: 620.4365887641907
+Classification Train Accuracy 5 epoch: 0.9955561727537842
+Total validation loss 0.7316078240890427, total accuracy 0.9528459887136291
+Classification Validation, epoch: 5, Accuracy 0.934041611332448 , loss: 0.511157401861451 
+Heatmap Validation (epoch 5),Accuracy 0.9716503660948104 , loss: 0.0004409008403865257 
+loss classification 0.013746550638903312, loss heatmap 0.00015896718885306517 
+Train Total Loss: 0.0932 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9717
+Epoch-6 lr: 0.0001
+Epoch-6 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 6/69
+----------
+epoch time: 723.1511833667755
+Classification Train Accuracy 6 epoch: 0.9980558255797805
+Total validation loss 0.7812855247442783, total accuracy 0.9512885021295823
+Classification Validation, epoch: 6, Accuracy 0.9349269588313414 , loss: 0.5868039583309195 
+Heatmap Validation (epoch 6),Accuracy 0.9676500454278231 , loss: 0.00038896313269225604 
+loss classification 0.004007064727556881, loss heatmap 0.0001448467616174432 
+Train Total Loss: 0.0764 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9677
+Epoch-7 lr: 0.0001
+Epoch-7 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 7/69
+----------
+epoch time: 825.8468344211578
+Classification Train Accuracy 7 epoch: 0.9991667823913345
+Total validation loss 0.7102648147430078, total accuracy 0.9534760642109026
+Classification Validation, epoch: 7, Accuracy 0.9384683488269145 , loss: 0.5152194923697229 
+Heatmap Validation (epoch 7),Accuracy 0.9684837795948907 , loss: 0.0003900906466229622 
+loss classification 0.002144985283675337, loss heatmap 0.00013680603783751592 
+Train Total Loss: 0.0705 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9685
+Epoch-8 lr: 0.0001
+Epoch-8 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 8/69
+----------
+epoch time: 928.6538441181183
+Classification Train Accuracy 8 epoch: 0.9994445215942229
+Total validation loss 1.8139202154450524, total accuracy 0.9142851606773694
+Classification Validation, epoch: 8, Accuracy 0.8610004426737494 , loss: 1.6086693485283778 
+Heatmap Validation (epoch 8),Accuracy 0.9675698786809894 , loss: 0.0004105017340221352 
+loss classification 0.0019831740339403803, loss heatmap 0.0001375442055165954 
+Train Total Loss: 0.0708 Train Heatmap Acc: 0.9995 Val Heatmap Acc: 0.9676
+Epoch-9 lr: 0.0001
+Epoch-9 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 9/69
+----------
+epoch time: 1030.1659038066864
+Classification Train Accuracy 9 epoch: 0.9948618247465629
+Total validation loss 0.6579440816306814, total accuracy 0.9591733594721641
+Classification Validation, epoch: 9, Accuracy 0.9344842850818946 , loss: 0.4689043391697562 
+Heatmap Validation (epoch 9),Accuracy 0.9838624338624337 , loss: 0.0003780794809130237 
+loss classification 0.015065256526998127, loss heatmap 0.0001403149262603198 
+Train Total Loss: 0.0852 Train Heatmap Acc: 0.9992 Val Heatmap Acc: 0.9839
+best val mean at epoch: 9tensor(0.9592, device='cuda:0', dtype=torch.float64)
+best val heatmap at epoch: 9
+Epoch-10 lr: 0.0001
+Epoch-10 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 10/69
+----------
+epoch time: 1134.7967727184296
+Classification Train Accuracy 10 epoch: 0.9997222607971115
+Total validation loss 0.9914718921559741, total accuracy 0.9428489239024872
+Classification Validation, epoch: 10, Accuracy 0.9278441788401948 , loss: 0.7907501587801449 
+Heatmap Validation (epoch 10),Accuracy 0.9578536689647796 , loss: 0.000401443473252333 
+loss classification 0.0009724427994426195, loss heatmap 0.00011215609597916037 
+Train Total Loss: 0.0571 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9579
+Epoch-11 lr: 0.0001
+Epoch-11 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 11/69
+----------
+epoch time: 1236.2809052467346
+Classification Train Accuracy 11 epoch: 0.9987501735870017
+Total validation loss 0.9353558327334811, total accuracy 0.9542093184634131
+Classification Validation, epoch: 11, Accuracy 0.9322709163346614 , loss: 0.7414385338890912 
+Heatmap Validation (epoch 11),Accuracy 0.9761477205921648 , loss: 0.0003878346162060941 
+loss classification 0.0038255359395043403, loss heatmap 0.00011680546496602626 
+Train Total Loss: 0.0622 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9761
+Epoch-12 lr: 0.0001
+Epoch-12 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 12/69
+----------
+epoch time: 1339.0897595882416
+Classification Train Accuracy 12 epoch: 0.998889043188446
+Total validation loss 0.711604105880061, total accuracy 0.9580750750405463
+Classification Validation, epoch: 12, Accuracy 0.9344842850818946 , loss: 0.5263925010680864 
+Heatmap Validation (epoch 12),Accuracy 0.9816658649991981 , loss: 0.00037042321081092063 
+loss classification 0.002981420604271098, loss heatmap 0.0001174382821191183 
+Train Total Loss: 0.0617 Train Heatmap Acc: 0.9994 Val Heatmap Acc: 0.9817
+Epoch-13 lr: 0.0001
+Epoch-13 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 13/69
+----------
+epoch time: 1440.8246383666992
+Classification Train Accuracy 13 epoch: 0.9994445215942229
+Total validation loss 0.38283837769690104, total accuracy 0.955822006187212
+Classification Validation, epoch: 13, Accuracy 0.9322709163346614 , loss: 0.20013141217510774 
+Heatmap Validation (epoch 13),Accuracy 0.9793730960397626 , loss: 0.00036541393277474035 
+loss classification 0.0017158228102086223, loss heatmap 9.978145845381349e-05 
+Train Total Loss: 0.0516 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9794
+Epoch-14 lr: 0.0001
+Epoch-14 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 14/69
+----------
+epoch time: 1543.747089624405
+Classification Train Accuracy 14 epoch: 0.9972226079711151
+Total validation loss 1.0906454846163987, total accuracy 0.944606630396803
+Classification Validation, epoch: 14, Accuracy 0.9181053563523683 , loss: 0.9165138962710438 
+Heatmap Validation (epoch 14),Accuracy 0.9711079044412376 , loss: 0.0003482631754102606 
+loss classification 0.00852700596202942, loss heatmap 0.00011281475152662296 
+Train Total Loss: 0.0649 Train Heatmap Acc: 0.9992 Val Heatmap Acc: 0.9711
+Epoch-15 lr: 0.0001
+Epoch-15 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 15/69
+----------
+epoch time: 1646.5162584781647
+Classification Train Accuracy 15 epoch: 0.9997222607971115
+Total validation loss 0.991159638699149, total accuracy 0.9522109892959826
+Classification Validation, epoch: 15, Accuracy 0.9305002213368747 , loss: 0.8033985688656737 
+Heatmap Validation (epoch 15),Accuracy 0.9739217572550904 , loss: 0.0003755221317755986 
+loss classification 0.0007186581282807478, loss heatmap 9.165707055831935e-05 
+Train Total Loss: 0.0465 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9739
+Epoch-16 lr: 0.0001
+Epoch-16 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 16/69
+----------
+epoch time: 1748.625111579895
+Classification Train Accuracy 16 epoch: 0.9997222607971115
+Total validation loss 0.874005620025227, total accuracy 0.9402486148612751
+Classification Validation, epoch: 16, Accuracy 0.9203187250996016 , loss: 0.6782791243545072 
+Heatmap Validation (epoch 16),Accuracy 0.9601785046229486 , loss: 0.0003914529885394823 
+loss classification 0.0013918612438434017, loss heatmap 9.911637073121484e-05 
+Train Total Loss: 0.0510 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9602
+Epoch-17 lr: 0.0001
+Epoch-17 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 17/69
+----------
+epoch time: 1850.688635110855
+Classification Train Accuracy 17 epoch: 0.9961116511595611
+Total validation loss 0.6118902991492435, total accuracy 0.9564503250426224
+Classification Validation, epoch: 17, Accuracy 0.9358123063302346 , loss: 0.4306825026130933 
+Heatmap Validation (epoch 17),Accuracy 0.9770883437550102 , loss: 0.0003624155905711802 
+loss classification 0.01310129894831207, loss heatmap 0.00010895526883852408 
+Train Total Loss: 0.0676 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9771
+Epoch-18 lr: 0.0001
+Epoch-18 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 18/69
+----------
+epoch time: 1952.2503459453583
+Classification Train Accuracy 18 epoch: 0.9999999999999999
+Total validation loss 0.7233236428117689, total accuracy 0.9533086668876841
+Classification Validation, epoch: 18, Accuracy 0.9362549800796813 , loss: 0.5381362815314275 
+Heatmap Validation (epoch 18),Accuracy 0.9703623536956869 , loss: 0.0003703747246603656 
+loss classification 0.0003410308280666109, loss heatmap 8.478408182076992e-05 
+Train Total Loss: 0.0427 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9704
+Epoch-19 lr: 0.0001
+Epoch-19 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 19/69
+----------
+epoch time: 2053.346580028534
+Classification Train Accuracy 19 epoch: 0.9999999999999999
+Total validation loss 0.8780706032299267, total accuracy 0.9451165675601265
+Classification Validation, epoch: 19, Accuracy 0.918548030101815 , loss: 0.7034504249862232 
+Heatmap Validation (epoch 19),Accuracy 0.9716851050184382 , loss: 0.00034924035630690413 
+loss classification 0.0001120785344083378, loss heatmap 8.155366530605991e-05 
+Train Total Loss: 0.0409 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9717
+Epoch-20 lr: 5e-05
+Epoch-20 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 20/69
+----------
+epoch time: 2155.9903354644775
+Classification Train Accuracy 20 epoch: 0.9999999999999999
+Total validation loss 0.7683659020469958, total accuracy 0.9565047969098432
+Classification Validation, epoch: 20, Accuracy 0.9309428950863214 , loss: 0.5965825828811605 
+Heatmap Validation (epoch 20),Accuracy 0.9820666987333652 , loss: 0.00034356663094160664 
+loss classification 6.655411997303269e-05, loss heatmap 6.4854598474396e-05 
+Train Total Loss: 0.0325 Train Heatmap Acc: 0.9991 Val Heatmap Acc: 0.9821
+Epoch-21 lr: 5e-05
+Epoch-21 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 21/69
+----------
+epoch time: 2258.974700450897
+Classification Train Accuracy 21 epoch: 0.9999999999999999
+Total validation loss 0.793163230852935, total accuracy 0.9528259097648206
+Classification Validation, epoch: 21, Accuracy 0.935369632580788 , loss: 0.6251099510729009 
+Heatmap Validation (epoch 21),Accuracy 0.9702821869488534 , loss: 0.0003361065638487216 
+loss classification 0.00014567751046260847, loss heatmap 5.9605264587757156e-05 
+Train Total Loss: 0.0299 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9703
+Epoch-22 lr: 5e-05
+Epoch-22 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 22/69
+----------
+epoch time: 2361.1962525844574
+Classification Train Accuracy 22 epoch: 0.9997222607971115
+Total validation loss 0.9534134852537912, total accuracy 0.9453022126660905
+Classification Validation, epoch: 22, Accuracy 0.9212040725984949 , loss: 0.7892022533991957 
+Heatmap Validation (epoch 22),Accuracy 0.9694003527336861 , loss: 0.00032842246729603523 
+loss classification 0.0005579151951435328, loss heatmap 6.0694077516628836e-05 
+Train Total Loss: 0.0309 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9694
+Epoch-23 lr: 5e-05
+Epoch-23 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 23/69
+----------
+epoch time: 2464.34650850296
+Classification Train Accuracy 23 epoch: 0.9999999999999999
+Total validation loss 0.7877458482288111, total accuracy 0.9498740168394881
+Classification Validation, epoch: 23, Accuracy 0.9344842850818946 , loss: 0.6152249974437975 
+Heatmap Validation (epoch 23),Accuracy 0.9652637485970817 , loss: 0.00034504170223586953 
+loss classification 9.349051841924077e-06, loss heatmap 6.433791414808983e-05 
+Train Total Loss: 0.0322 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9653
+Epoch-24 lr: 5e-05
+Epoch-24 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 24/69
+----------
+epoch time: 2566.877729177475
+Classification Train Accuracy 24 epoch: 0.9999999999999999
+Total validation loss 0.8703382086666773, total accuracy 0.949939252130487
+Classification Validation, epoch: 24, Accuracy 0.9269588313413014 , loss: 0.684561342031711 
+Heatmap Validation (epoch 24),Accuracy 0.9729196729196727 , loss: 0.0003715537357126124 
+loss classification 3.1724063259062807e-05, loss heatmap 5.8076236754660335e-05 
+Train Total Loss: 0.0291 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9729
+Epoch-25 lr: 5e-05
+Epoch-25 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 25/69
+----------
+epoch time: 2669.1591222286224
+Classification Train Accuracy 25 epoch: 0.9999999999999999
+Total validation loss 0.843374679545324, total accuracy 0.9532659485514731
+Classification Validation, epoch: 25, Accuracy 0.9349269588313414 , loss: 0.6589220558763149 
+Heatmap Validation (epoch 25),Accuracy 0.9716049382716048 , loss: 0.00036890524396843524 
+loss classification 3.739027257883969e-05, loss heatmap 5.315824035892714e-05 
+Train Total Loss: 0.0266 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9716
+Epoch-26 lr: 5e-05
+Epoch-26 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 26/69
+----------
+epoch time: 2771.233311891556
+Classification Train Accuracy 26 epoch: 0.9999999999999999
+Total validation loss 0.8064194048543375, total accuracy 0.952400642739288
+Classification Validation, epoch: 26, Accuracy 0.9331562638335547 , loss: 0.6340947631222384 
+Heatmap Validation (epoch 26),Accuracy 0.9716450216450214 , loss: 0.00034464929057445977 
+loss classification 7.245709152005527e-06, loss heatmap 5.98097209114414e-05 
+Train Total Loss: 0.0299 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9716
+Epoch-27 lr: 5e-05
+Epoch-27 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 27/69
+----------
+epoch time: 2873.55348777771
+Classification Train Accuracy 27 epoch: 0.9999999999999999
+Total validation loss 0.7241175983491963, total accuracy 0.9455174119406079
+Classification Validation, epoch: 27, Accuracy 0.934041611332448 , loss: 0.5309996883602395 
+Heatmap Validation (epoch 27),Accuracy 0.9569932125487678 , loss: 0.00038623581722361416 
+loss classification 4.010694787556584e-05, loss heatmap 5.919281256553397e-05 
+Train Total Loss: 0.0296 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9570
+Epoch-28 lr: 5e-05
+Epoch-28 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 28/69
+----------
+epoch time: 2974.7200701236725
+Classification Train Accuracy 28 epoch: 0.9994445215942229
+Total validation loss 1.0176794581204296, total accuracy 0.9493921007754562
+Classification Validation, epoch: 28, Accuracy 0.935369632580788 , loss: 0.8346037483869413 
+Heatmap Validation (epoch 28),Accuracy 0.9634145689701243 , loss: 0.0003661514249207281 
+loss classification 0.0016762517694820318, loss heatmap 5.7874117498545665e-05 
+Train Total Loss: 0.0306 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9634
+Epoch-29 lr: 5e-05
+Epoch-29 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 29/69
+----------
+epoch time: 3076.961578607559
+Classification Train Accuracy 29 epoch: 0.9998611303985556
+Total validation loss 0.8460178538701766, total accuracy 0.9520991763798314
+Classification Validation, epoch: 29, Accuracy 0.9313855688357681 , loss: 0.6698438379021184 
+Heatmap Validation (epoch 29),Accuracy 0.9728127839238948 , loss: 0.0003523480340453164 
+loss classification 0.0012423876758153136, loss heatmap 5.726575398949323e-05 
+Train Total Loss: 0.0299 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9728
+Epoch-30 lr: 5e-05
+Epoch-30 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 30/69
+----------
+epoch time: 3179.4740335941315
+Classification Train Accuracy 30 epoch: 0.9999999999999999
+Total validation loss 0.9361522376418588, total accuracy 0.9563608055086584
+Classification Validation, epoch: 30, Accuracy 0.9358123063302346 , loss: 0.7706254847849564 
+Heatmap Validation (epoch 30),Accuracy 0.9769093046870823 , loss: 0.0003310534983652596 
+loss classification 0.00011112155637755734, loss heatmap 4.776008023282486e-05 
+Train Total Loss: 0.0240 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9769
+Epoch-31 lr: 5e-05
+Epoch-31 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 31/69
+----------
+epoch time: 3282.3381333351135
+Classification Train Accuracy 31 epoch: 0.9984724343841133
+Total validation loss 1.0367014393170833, total accuracy 0.9369347099869454
+Classification Validation, epoch: 31, Accuracy 0.9167773351040284 , loss: 0.8535636951474965 
+Heatmap Validation (epoch 31),Accuracy 0.9570920848698623 , loss: 0.0003662754856410237 
+loss classification 0.0050131545008061384, loss heatmap 5.4833109552729744e-05 
+Train Total Loss: 0.0324 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9571
+Epoch-32 lr: 5e-05
+Epoch-32 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 32/69
+----------
+epoch time: 3384.5611379146576
+Classification Train Accuracy 32 epoch: 0.9999999999999999
+Total validation loss 0.9745021065471974, total accuracy 0.9458659030704182
+Classification Validation, epoch: 32, Accuracy 0.9265161575918548 , loss: 0.7947339162735587 
+Heatmap Validation (epoch 32),Accuracy 0.9652156485489817 , loss: 0.0003595363768969401 
+loss classification 9.267777682328526e-05, loss heatmap 5.3214680540599706e-05 
+Train Total Loss: 0.0267 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9652
+Epoch-33 lr: 5e-05
+Epoch-33 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 33/69
+----------
+epoch time: 3487.1818509101868
+Classification Train Accuracy 33 epoch: 0.9999999999999999
+Total validation loss 1.3167265352618647, total accuracy 0.9453213760318673
+Classification Validation, epoch: 33, Accuracy 0.9207613988490483 , loss: 1.1431546894425213 
+Heatmap Validation (epoch 33),Accuracy 0.9698813532146864 , loss: 0.0003471436928033181 
+loss classification 0.0001593344546503526, loss heatmap 4.560183716292353e-05 
+Train Total Loss: 0.0230 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9699
+Epoch-34 lr: 5e-05
+Epoch-34 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 34/69
+----------
+epoch time: 3589.2762389183044
+Classification Train Accuracy 34 epoch: 0.9999999999999999
+Total validation loss 1.1271622038259608, total accuracy 0.9472443133244373
+Classification Validation, epoch: 34, Accuracy 0.9269588313413014 , loss: 0.9468449597720886 
+Heatmap Validation (epoch 34),Accuracy 0.967529795307573 , loss: 0.0003606344853493213 
+loss classification 3.381713586973818e-05, loss heatmap 5.075069820542181e-05 
+Train Total Loss: 0.0254 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9675
+Epoch-35 lr: 5e-05
+Epoch-35 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 35/69
+----------
+epoch time: 3692.0727071762085
+Classification Train Accuracy 35 epoch: 0.9999999999999999
+Total validation loss 1.143212240115105, total accuracy 0.9476771764952375
+Classification Validation, epoch: 35, Accuracy 0.9282868525896415 , loss: 0.9689398856864122 
+Heatmap Validation (epoch 35),Accuracy 0.9670675004008336 , loss: 0.00034854469770920595 
+loss classification 1.9592138859832017e-05, loss heatmap 4.426789354969729e-05 
+Train Total Loss: 0.0222 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9671
+Epoch-36 lr: 5e-05
+Epoch-36 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 36/69
+----------
+epoch time: 3793.8806681632996
+Classification Train Accuracy 36 epoch: 0.9999999999999999
+Total validation loss 1.3458109533248512, total accuracy 0.9332081699390242
+Classification Validation, epoch: 36, Accuracy 0.9052678176184152 , loss: 1.1639160786318468 
+Heatmap Validation (epoch 36),Accuracy 0.9611485222596333 , loss: 0.00036378974719347175 
+loss classification 7.155500979605582e-06, loss heatmap 4.404804232173047e-05 
+Train Total Loss: 0.0220 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9611
+Epoch-37 lr: 5e-05
+Epoch-37 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 37/69
+----------
+epoch time: 3896.416187763214
+Classification Train Accuracy 37 epoch: 0.9999999999999999
+Total validation loss 1.2821605792776205, total accuracy 0.9510909065357935
+Classification Validation, epoch: 37, Accuracy 0.9296148738379815 , loss: 1.1216518783153624 
+Heatmap Validation (epoch 37),Accuracy 0.9725669392336057 , loss: 0.00032101741125470135 
+loss classification 3.126032432078804e-05, loss heatmap 5.157972527476039e-05 
+Train Total Loss: 0.0258 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9726
+Epoch-38 lr: 5e-05
+Epoch-38 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 38/69
+----------
+epoch time: 3997.5323073863983
+Classification Train Accuracy 38 epoch: 0.9999999999999999
+Total validation loss 1.2258293655209966, total accuracy 0.9412021786191772
+Classification Validation, epoch: 38, Accuracy 0.9194333776007083 , loss: 1.056683318672619 
+Heatmap Validation (epoch 38),Accuracy 0.9629709796376461 , loss: 0.0003382921027204215 
+loss classification 5.9533215778290945e-06, loss heatmap 5.494902689810545e-05 
+Train Total Loss: 0.0275 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9630
+Epoch-39 lr: 5e-05
+Epoch-39 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 39/69
+----------
+epoch time: 4098.859912872314
+Classification Train Accuracy 39 epoch: 0.9993056519927787
+Total validation loss 0.9323649631038922, total accuracy 0.9483205758548829
+Classification Validation, epoch: 39, Accuracy 0.934041611332448 , loss: 0.7514403707507857 
+Heatmap Validation (epoch 39),Accuracy 0.9625995403773178 , loss: 0.00036184918739898486 
+loss classification 0.0021855463660920282, loss heatmap 4.592598465198965e-05 
+Train Total Loss: 0.0251 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9626
+Epoch-40 lr: 2.5e-05
+Epoch-40 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 40/69
+----------
+epoch time: 4201.109082460403
+Classification Train Accuracy 40 epoch: 0.9999999999999999
+Total validation loss 1.126441864121166, total accuracy 0.9474320983395794
+Classification Validation, epoch: 40, Accuracy 0.932713590084108 , loss: 0.9528587941529837 
+Heatmap Validation (epoch 40),Accuracy 0.9621506065950508 , loss: 0.0003471661392001962 
+loss classification 0.00010094234850400542, loss heatmap 4.2195942211756775e-05 
+Train Total Loss: 0.0212 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9622
+Epoch-41 lr: 2.5e-05
+Epoch-41 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 41/69
+----------
+epoch time: 4302.8784255981445
+Classification Train Accuracy 41 epoch: 0.9999999999999999
+Total validation loss 1.0321842114704538, total accuracy 0.9516780773863553
+Classification Validation, epoch: 41, Accuracy 0.9393536963258079 , loss: 0.86037918482546 
+Heatmap Validation (epoch 41),Accuracy 0.9640024584469028 , loss: 0.00034361005820482995 
+loss classification 1.6644527030474667e-05, loss heatmap 3.914733512700668e-05 
+Train Total Loss: 0.0196 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9640
+Epoch-42 lr: 2.5e-05
+Epoch-42 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 42/69
+----------
+epoch time: 4405.190557718277
+Classification Train Accuracy 42 epoch: 0.9999999999999999
+Total validation loss 0.9320544416250619, total accuracy 0.9556871440005568
+Classification Validation, epoch: 42, Accuracy 0.9451084550686144 , loss: 0.7621499644337444 
+Heatmap Validation (epoch 42),Accuracy 0.9662658329324991 , loss: 0.00033980894688168074 
+loss classification 0.00023834516793006116, loss heatmap 3.5260084394850854e-05 
+Train Total Loss: 0.0179 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9663
+Epoch-43 lr: 2.5e-05
+Epoch-43 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 43/69
+----------
+epoch time: 4506.870131492615
+Classification Train Accuracy 43 epoch: 0.9999999999999999
+Total validation loss 1.2905512997314117, total accuracy 0.9479109589114015
+Classification Validation, epoch: 43, Accuracy 0.9296148738379815 , loss: 1.1246067748180022 
+Heatmap Validation (epoch 43),Accuracy 0.9662070439848216 , loss: 0.0003318890456062622 
+loss classification 7.647287479416691e-05, loss heatmap 4.1597243469055573e-05 
+Train Total Loss: 0.0209 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9662
+Epoch-44 lr: 2.5e-05
+Epoch-44 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 44/69
+----------
+epoch time: 4608.914878368378
+Classification Train Accuracy 44 epoch: 0.9999999999999999
+Total validation loss 1.1714272234603704, total accuracy 0.9456025398699146
+Classification Validation, epoch: 44, Accuracy 0.9318282425852147 , loss: 1.0025503761862375 
+Heatmap Validation (epoch 44),Accuracy 0.9593768371546146 , loss: 0.0003377536971432467 
+loss classification 3.1161994085470294e-05, loss heatmap 3.44746532459027e-05 
+Train Total Loss: 0.0173 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9594
+Epoch-45 lr: 2.5e-05
+Epoch-45 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 45/69
+----------
+epoch time: 4710.4782547950745
+Classification Train Accuracy 45 epoch: 0.9999999999999999
+Total validation loss 1.2029081680781022, total accuracy 0.9469569373619837
+Classification Validation, epoch: 45, Accuracy 0.9309428950863214 , loss: 1.033725943233776 
+Heatmap Validation (epoch 45),Accuracy 0.9629709796376461 , loss: 0.00033836443480264995 
+loss classification 1.3167900904775573e-06, loss heatmap 3.70716216821039e-05 
+Train Total Loss: 0.0185 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9630
+Epoch-46 lr: 2.5e-05
+Epoch-46 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 46/69
+----------
+epoch time: 4812.39714050293
+Classification Train Accuracy 46 epoch: 0.9999999999999999
+Total validation loss 1.2878776242533527, total accuracy 0.9445396384639411
+Classification Validation, epoch: 46, Accuracy 0.9247454625940682 , loss: 1.1108129120891281 
+Heatmap Validation (epoch 46),Accuracy 0.964333814333814 , loss: 0.00035412942995762534 
+loss classification 2.704036634830067e-05, loss heatmap 3.836472124032751e-05 
+Train Total Loss: 0.0192 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9643
+Epoch-47 lr: 2.5e-05
+Epoch-47 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 47/69
+----------
+epoch time: 4913.966056346893
+Classification Train Accuracy 47 epoch: 0.9999999999999999
+Total validation loss 1.251629142825347, total accuracy 0.9472098831439246
+Classification Validation, epoch: 47, Accuracy 0.9318282425852147 , loss: 1.0711341446012757 
+Heatmap Validation (epoch 47),Accuracy 0.9625915237026345 , loss: 0.0003609899880585927 
+loss classification 7.096234893324149e-07, loss heatmap 3.4295412872421896e-05 
+Train Total Loss: 0.0171 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9626
+Epoch-48 lr: 2.5e-05
+Epoch-48 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 48/69
+----------
+epoch time: 5016.89392209053
+Classification Train Accuracy 48 epoch: 0.9999999999999999
+Total validation loss 1.3111311492434694, total accuracy 0.9502256007236085
+Classification Validation, epoch: 48, Accuracy 0.9278441788401948 , loss: 1.1513141053092024 
+Heatmap Validation (epoch 48),Accuracy 0.9726070226070224 , loss: 0.00031963408568899974 
+loss classification 2.2222881546920356e-06, loss heatmap 3.797304651594732e-05 
+Train Total Loss: 0.0190 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9726
+Epoch-49 lr: 2.5e-05
+Epoch-49 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 49/69
+----------
+epoch time: 5111.192307949066
+Classification Train Accuracy 49 epoch: 0.9999999999999999
+Total validation loss 1.035647096822303, total accuracy 0.9523386492509998
+Classification Validation, epoch: 49, Accuracy 0.9362549800796813 , loss: 0.8700304291325253 
+Heatmap Validation (epoch 49),Accuracy 0.9684223184223181 , loss: 0.0003312333294649325 
+loss classification 1.5090181834878075e-05, loss heatmap 3.551308914736185e-05 
+Train Total Loss: 0.0178 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9684
+Epoch-50 lr: 2.5e-05
+Epoch-50 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 50/69
+----------
+epoch time: 5201.653665065765
+Classification Train Accuracy 50 epoch: 0.9999999999999999
+Total validation loss 1.075199403116111, total accuracy 0.9548875685329867
+Classification Validation, epoch: 50, Accuracy 0.934041611332448 , loss: 0.9094966834111909 
+Heatmap Validation (epoch 50),Accuracy 0.9757335257335256 , loss: 0.00033140542679175656 
+loss classification 4.080194622094016e-06, loss heatmap 3.932295167328407e-05 
+Train Total Loss: 0.0197 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9757
+Epoch-51 lr: 2.5e-05
+Epoch-51 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 51/69
+----------
+epoch time: 5293.171560764313
+Classification Train Accuracy 51 epoch: 0.9999999999999999
+Total validation loss 1.1968730340896059, total accuracy 0.9512725433044158
+Classification Validation, epoch: 51, Accuracy 0.9322709163346614 , loss: 1.0290816017240574 
+Heatmap Validation (epoch 51),Accuracy 0.9702741702741701 , loss: 0.0003355828809253822 
+loss classification 1.0701986816312055e-06, loss heatmap 3.428264012674413e-05 
+Train Total Loss: 0.0171 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9703
+Epoch-52 lr: 2.5e-05
+Epoch-52 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 52/69
+----------
+epoch time: 5383.071274518967
+Classification Train Accuracy 52 epoch: 0.9999999999999999
+Total validation loss 1.1079027077472543, total accuracy 0.9489663759584077
+Classification Validation, epoch: 52, Accuracy 0.9335989375830014 , loss: 0.939301016027873 
+Heatmap Validation (epoch 52),Accuracy 0.964333814333814 , loss: 0.0003372033855484818 
+loss classification 6.099722862791629e-07, loss heatmap 3.4472135084057504e-05 
+Train Total Loss: 0.0172 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9643
+Epoch-53 lr: 2.5e-05
+Epoch-53 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 53/69
+----------
+epoch time: 5472.825050830841
+Classification Train Accuracy 53 epoch: 0.9999999999999999
+Total validation loss 1.1884483495457556, total accuracy 0.9528508753719023
+Classification Validation, epoch: 53, Accuracy 0.9344842850818946 , loss: 1.0151876021536745 
+Heatmap Validation (epoch 53),Accuracy 0.97121746566191 , loss: 0.0003465215074633413 
+loss classification 8.298129534890594e-07, loss heatmap 3.364256357475235e-05 
+Train Total Loss: 0.0168 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9712
+Epoch-54 lr: 2.5e-05
+Epoch-54 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 54/69
+----------
+epoch time: 5561.908177614212
+Classification Train Accuracy 54 epoch: 0.9999999999999999
+Total validation loss 1.2709928330276434, total accuracy 0.9526594280246338
+Classification Validation, epoch: 54, Accuracy 0.9322709163346614 , loss: 1.1028485012043752 
+Heatmap Validation (epoch 54),Accuracy 0.9730479397146061 , loss: 0.0003362886730091743 
+loss classification 2.1160095929293766e-06, loss heatmap 3.318368818390169e-05 
+Train Total Loss: 0.0166 Train Heatmap Acc: 0.9997 Val Heatmap Acc: 0.9730
+Epoch-55 lr: 2.5e-05
+Epoch-55 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 55/69
+----------
+epoch time: 5660.260088682175
+Classification Train Accuracy 55 epoch: 0.9999999999999999
+Total validation loss 1.265426322976115, total accuracy 0.9522167542751871
+Classification Validation, epoch: 55, Accuracy 0.9313855688357681 , loss: 1.099157984807346 
+Heatmap Validation (epoch 55),Accuracy 0.9730479397146061 , loss: 0.00033253667480575113 
+loss classification 1.385069856324077e-06, loss heatmap 3.5060855010093474e-05 
+Train Total Loss: 0.0175 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9730
+Epoch-56 lr: 2.5e-05
+Epoch-56 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 56/69
+----------
+epoch time: 5762.557824850082
+Classification Train Accuracy 56 epoch: 0.9999999999999999
+Total validation loss 1.2559808307138096, total accuracy 0.951476473455225
+Classification Validation, epoch: 56, Accuracy 0.934041611332448 , loss: 1.0911582404576483 
+Heatmap Validation (epoch 56),Accuracy 0.9689113355780021 , loss: 0.00032964518675528056 
+loss classification 2.6425714290215215e-07, loss heatmap 3.0339991704893215e-05 
+Train Total Loss: 0.0152 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9689
+Epoch-57 lr: 2.5e-05
+Epoch-57 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 57/69
+----------
+epoch time: 5864.304965496063
+Classification Train Accuracy 57 epoch: 0.9998611303985556
+Total validation loss 1.6913403248288241, total accuracy 0.9426238767872233
+Classification Validation, epoch: 57, Accuracy 0.9167773351040284 , loss: 1.519742255469764 
+Heatmap Validation (epoch 57),Accuracy 0.9684704184704183 , loss: 0.0003431961313918156 
+loss classification 0.0002609815930921609, loss heatmap 3.2086763372385877e-05 
+Train Total Loss: 0.0163 Train Heatmap Acc: 0.9996 Val Heatmap Acc: 0.9685
+Epoch-58 lr: 2.5e-05
+Epoch-58 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 58/69
+----------
+epoch time: 5966.34871006012
+Classification Train Accuracy 58 epoch: 0.9999999999999999
+Total validation loss 1.4317780646630334, total accuracy 0.9449988406163703
+Classification Validation, epoch: 58, Accuracy 0.9238601150951748 , loss: 1.2612142177945977 
+Heatmap Validation (epoch 58),Accuracy 0.9661375661375659 , loss: 0.00034112768308559475 
+loss classification 1.1320424924339054e-06, loss heatmap 3.925173831656827e-05 
+Train Total Loss: 0.0196 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9661
+Epoch-59 lr: 2.5e-05
+Epoch-59 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 59/69
+----------
+epoch time: 6068.451681137085
+Classification Train Accuracy 59 epoch: 0.9999999999999999
+Total validation loss 1.4065296657353759, total accuracy 0.9479136683983961
+Classification Validation, epoch: 59, Accuracy 0.9282868525896415 , loss: 1.2397950177317116 
+Heatmap Validation (epoch 59),Accuracy 0.9675404842071507 , loss: 0.0003334692796688542 
+loss classification 1.3360709813504263e-06, loss heatmap 3.3515142640739105e-05 
+Train Total Loss: 0.0168 Train Heatmap Acc: 0.9998 Val Heatmap Acc: 0.9675
+Epoch-60 lr: 1.25e-05
+Epoch-60 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 60/69
+----------
+epoch time: 6170.317602396011
+Classification Train Accuracy 60 epoch: 0.9999999999999999
+Total validation loss 1.4223126682983451, total accuracy 0.9465847688291246
+Classification Validation, epoch: 60, Accuracy 0.9251881363435148 , loss: 1.2585864165933422 
+Heatmap Validation (epoch 60),Accuracy 0.9679814013147343 , loss: 0.00032745249249621763 
+loss classification 2.3990261815278627e-06, loss heatmap 2.7610820823087097e-05 
+Train Total Loss: 0.0138 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9680
+Epoch-61 lr: 1.25e-05
+Epoch-61 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 61/69
+----------
+epoch time: 6272.060133695602
+Classification Train Accuracy 61 epoch: 0.9999999999999999
+Total validation loss 1.3910262372052844, total accuracy 0.9492657396707861
+Classification Validation, epoch: 61, Accuracy 0.9309428950863214 , loss: 1.22304387954302 
+Heatmap Validation (epoch 61),Accuracy 0.9675885842552507 , loss: 0.000335964695140033 
+loss classification 6.384328802481068e-07, loss heatmap 2.8970662574419577e-05 
+Train Total Loss: 0.0145 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9676
+Epoch-62 lr: 1.25e-05
+Epoch-62 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 62/69
+----------
+epoch time: 6374.381516695023
+Classification Train Accuracy 62 epoch: 0.9999999999999999
+Total validation loss 1.4634753444775008, total accuracy 0.9528964149814082
+Classification Validation, epoch: 62, Accuracy 0.9305002213368747 , loss: 1.2978455487474219 
+Heatmap Validation (epoch 62),Accuracy 0.9752926086259417 , loss: 0.0003312595939712975 
+loss classification 2.1668408943426547e-07, loss heatmap 2.7561082396918423e-05 
+Train Total Loss: 0.0138 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9753
+Epoch-63 lr: 1.25e-05
+Epoch-63 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 63/69
+----------
+epoch time: 6475.984212636948
+Classification Train Accuracy 63 epoch: 0.9999999999999999
+Total validation loss 1.6018845959706294, total accuracy 0.9500033855279537
+Classification Validation, epoch: 63, Accuracy 0.9269588313413014 , loss: 1.4370913184771195 
+Heatmap Validation (epoch 63),Accuracy 0.9730479397146061 , loss: 0.00032958653397582334 
+loss classification 3.1755947550771265e-07, loss heatmap 2.6792334714204328e-05 
+Train Total Loss: 0.0134 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9730
+Epoch-64 lr: 1.25e-05
+Epoch-64 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 64/69
+----------
+epoch time: 6578.025806427002
+Classification Train Accuracy 64 epoch: 0.9999999999999999
+Total validation loss 1.43293227326585, total accuracy 0.9497423485471294
+Classification Validation, epoch: 64, Accuracy 0.9287295263390881 , loss: 1.2656222358502927 
+Heatmap Validation (epoch 64),Accuracy 0.9707551707551706 , loss: 0.00033462006139697614 
+loss classification 3.468891418866755e-07, loss heatmap 2.4597935023194564e-05 
+Train Total Loss: 0.0123 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9708
+Epoch-65 lr: 1.25e-05
+Epoch-65 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 65/69
+----------
+epoch time: 6679.783015966415
+Classification Train Accuracy 65 epoch: 0.9999999999999999
+Total validation loss 1.4739142986308849, total accuracy 0.9470109141755887
+Classification Validation, epoch: 65, Accuracy 0.9278441788401948 , loss: 1.3087360016879426 
+Heatmap Validation (epoch 65),Accuracy 0.9661776495109826 , loss: 0.0003303565835681649 
+loss classification 4.967833095971391e-07, loss heatmap 2.8951674103556437e-05 
+Train Total Loss: 0.0145 Train Heatmap Acc: 1.0000 Val Heatmap Acc: 0.9662
+Epoch-66 lr: 1.25e-05
+Epoch-66 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 66/69
+----------
+epoch time: 6781.668536424637
+Classification Train Accuracy 66 epoch: 0.9999999999999999
+Total validation loss 1.5071181517297212, total accuracy 0.945904229801972
+Classification Validation, epoch: 66, Accuracy 0.9256308100929614 , loss: 1.3369917185216162 
+Heatmap Validation (epoch 66),Accuracy 0.9661776495109826 , loss: 0.00034025286211926555 
+loss classification 2.2866127019715966e-07, loss heatmap 2.813121339089716e-05 
+Train Total Loss: 0.0141 Train Heatmap Acc: 0.9999 Val Heatmap Acc: 0.9662
+Epoch-67 lr: 1.25e-05
+Epoch-67 lr body 0.0001 lr_cl 0.01, lr_heat 0.0006
+Epoch 67/69
 ----------

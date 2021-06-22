@@ -177,21 +177,21 @@ def main(config):
     else:
         optimizer = optim.Adam(model.parameters(), lr=config.TRAIN.LR)  # weight_decay=config.TRAIN.weight_decay
         #
-        optimizer = optim.Adam([
-                {"params": model.conv1.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.bn1.parameters(),"lr": config.TRAIN.LR},
-                {"params": model.relu.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.maxpool.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.layer1.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.layer2.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.layer3.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.layer4.parameters(), "lr": config.TRAIN.LR},
-                {"params": model.avgpool_class.parameters(), "lr": config.TRAIN.LR_cl},
-                {"params": model.fc_class.parameters(), "lr": config.TRAIN.LR_cl},
-                {"params": model.deconv_layers.parameters(), "lr": config.TRAIN.LR_heatmap},
-                {"params": model.final_layer.parameters(), "lr": config.TRAIN.LR_heatmap},
-
-            ], lr=config.TRAIN.LR)
+        # optimizer = optim.Adam([
+        #         {"params": model.conv1.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.bn1.parameters(),"lr": config.TRAIN.LR},
+        #         {"params": model.relu.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.maxpool.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.layer1.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.layer2.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.layer3.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.layer4.parameters(), "lr": config.TRAIN.LR},
+        #         {"params": model.avgpool_class.parameters(), "lr": config.TRAIN.LR_cl},
+        #         {"params": model.fc_class.parameters(), "lr": config.TRAIN.LR_cl},
+        #         {"params": model.deconv_layers.parameters(), "lr": config.TRAIN.LR_heatmap},
+        #         {"params": model.final_layer.parameters(), "lr": config.TRAIN.LR_heatmap},
+        #
+        #     ], lr=config.TRAIN.LR)
     model.to(device)
     print("Model on cuda: ", next(model.parameters()).is_cuda)
     # Decay LR by a factor of 0.1 every 3 epochs
@@ -390,10 +390,10 @@ def Parser():
     parser.add_argument('--batch_size', type=int, default=12, metavar='N',
                         help='input batch size for training (default: 64)')
 
-    parser.add_argument('--update_weights', action='store_false',  default=True,
+    parser.add_argument('--update_weights', type=int, default=1, metavar='N',
                         help='whether to train the networs from scratches or with fine tuning')
 
-    parser.add_argument('--imagenet',  action='store_true',  default=False,
+    parser.add_argument('--imagenet',  type=int, default=1, metavar='N',
                         help='whether to train the networs from scratches or with fine tuning')
 
     parser.add_argument('--lr', type=float, default=0.001, metavar='BS',
@@ -407,12 +407,16 @@ def update_config(config,args):
         config.DATASET.PATH = args.data_dir
     if args.batch_size:
         config.TRAIN.BATCH_SIZE = args.batch_size
-    if args.update_weights:
-        config.TRAIN.UPDATE_WEIGHTS = args.update_weights
+    if args.update_weights==1:
+        config.TRAIN.UPDATE_WEIGHTS = True
+    else:
+        config.TRAIN.UPDATE_WEIGHTS = False
     if args.lr:
         config.TRAIN.LR = args.lr
-    if args.imagenet:
-        config.MODEL.Imagenet_pretrained = args.imagenet
+    if args.imagenet==1:
+        config.MODEL.Imagenet_pretrained = True
+    else:
+        config.MODEL.Imagenet_pretrained = False
 if __name__ == '__main__':
     args = Parser()
     update_config(config,args)

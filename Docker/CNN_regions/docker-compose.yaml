@@ -7,11 +7,11 @@ services:
        tty: true        # docker run -t
        shm_size: 8G
        ports:
-       - 65080:6006
+       - 10000:6006 #65080
 #       user: "$(id -u):$(id -g)"
 #       gpus: all
        volumes:
-       - /storage/maryviktory/FCN_CNN:/workspace
+       - /storage/maryviktory/regions_train:/workspace
 #       - /media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_train_dataset_heatmaps/data_19subj_15train_no_sacrum_lab:/app/home/user/data/
 
 #    - /home/maryviktory/Documents/dataset_multiclass_FCN/output:/home/user/data/output
@@ -19,7 +19,10 @@ services:
        command: >
           sh -c "cd /workspace &&
 
-                  python3 run_train_multiclass_polyu.py --lr 0.0001 --imagenet 1 --update_weights 1  --batch_size 12 "
+
+                  python3 run_diff_nets_group_with_test.py --lr 0.01 --batch_size 12 &&
+                  python3 run_diff_nets_group_with_test.py --lr 0.001 --batch_size 12"
+
 
 #                 python3 run_train_multiclass_polyu.py --lr 0.0001 --imagenet 1 --epoch 101 --weight_decay 0.001 --batch_size 12
 
