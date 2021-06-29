@@ -14,8 +14,8 @@ config.Mode_Develop = True #Allows to launch code without robot
 config.IP_ADRESS = "192.168.0.100" # "158.132.172.194"
 config.FOV = 0.045 #Field of view of the robot
 config.alpha = 0.1
-config.robot_TCP = (0, 0, 0.315, 0, 0, 0) #306 for smaller holder
-config.robot_payload = 1 #KG
+config.robot_TCP = (0, 0, 0.38, 0, 0, 0) #306 for smaller holder#(0, 0, 0.315, 0, 0, 0)
+config.robot_payload = 1 #KG #1kg - for full mount
 
 config.w = 400
 config.hg = 360
@@ -152,7 +152,9 @@ config.MODE.median_filter = False
 config.Median_kernel_size = 31
 
 
-config.MODE.subject_mode = "human" #"human" #phantom
+config.MODE.subject_mode = "phantom" #"human" #phantom
+config.MODE.laboratory_setup = "GH" #S107
+
 
 if config.MODE.subject_mode == "human":
     config.default_distance = 1.5  # meters
@@ -180,12 +182,12 @@ else:
     config.FORCE.Kf = 0.0003  # 0.002  Kunal - 0.0004
     config.FORCE.Kd = 0.0000
     config.FORCE.Ki = 0.0000
-    config.FORCE.K_torque = 0.1  # 0.07
+    config.FORCE.K_torque = 0.07  # 0.07
     config.FORCE.velocity_output_limits = 0.002
 
     config.FORCE.Fref_first_move = 10  # Force [N]
     config.FORCE.Fref = 10  # Force [N]
-    config.VELOCITY_up = 0.0045  # 0.003
+    config.VELOCITY_up = 0.004  # 0.003
 
     config.FORCE.Kp_on_measurement = True
     config.MODE.PID_control = True
