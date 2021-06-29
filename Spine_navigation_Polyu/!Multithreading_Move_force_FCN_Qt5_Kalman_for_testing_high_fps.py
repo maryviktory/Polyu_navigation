@@ -1,6 +1,7 @@
 import math
 import GUI.Scolioscan_robotics_GUI_qt5 as GUI
 import sys
+import math3d as m3d
 import time
 from PIL import Image
 import torch.multiprocessing as mp
@@ -112,7 +113,7 @@ else:
     force_slot = int(np.argwhere(np.matmul(T_matrix, control_force) != 0))
     # print("force axis",force_slot)
     T_force = int(force_s[force_slot])
-
+    # print("T force",T_force)
     T_tool_image_x = 1 # x axis of tool is the opposite x axis of the image
     V_control = np.zeros(3)
     axis_up = 0 #X
@@ -401,6 +402,7 @@ class Force_Thread(Process):
         # filter_Kalman_force = Kalman_filter_x_im()
         time_start = time.time()
         array = np.zeros(6)
+        residue = ''
         while bool(self.threads_stopper.value) == False:
 
             # if i == 150:
@@ -412,16 +414,43 @@ class Force_Thread(Process):
             # if i == 1000:
             #     self.stop_movement = True
 
+            if config.MODE.laboratory_setup == "GH":
+                #NOTE: sneaky way to store residue from the incomplete package reseived and sum up with next one
+                # leftover(9.270000
+                # b' , -35.310001 , 25.540001 , -1.871000 , -1.213000 , 2.808000)'
+                # residue(9.270000
+                # sum response(9.270000, -35.310001, 25.540001, -1.871000, -1.213000, 2.808000)
 
+                response = s.recv(73)  # 512 #the message is aroubd 70 (all possitive - 67, all negative - 73)
+                # print(response)
+
+                try:
+                    # print("residue", residue)
+                    if residue != "":
+                        response = residue + response.decode("ascii")
+                        # print("sum response", response)
+                        val = response.split('(', 1)[1].split(')')
+                    else:
+                        val = response.decode("ascii").split('(', 1)[1].split(')')
+                    # print("response", response)
+                    # print("left over", val[1])
+                    array = [float(x) for x in val[0][0:-1].split(',')]
+                    residue = val[1]
+                except:
+                    print("Recevied incomplete package")
+
+
+            else:
+                #NOTE: just passive receive force information at around 30 fps with ocassionally brocken packages
             # tstart = time.time()
-            response = s.recv(256) #512
-            # print("socket response",response)
-            # response = bytearray(response)
-            try:
-                val = response.decode("ascii").split('(', 1)[1].split(')')[0]
-                array = [float(x) for x in val[0:-1].split(',')]
-            except:
-                print("Recevied incomplete package")
+                response = s.recv(256) #512
+                # print("socket response",response)
+                # response = bytearray(response)
+                try:
+                    val = response.decode("ascii").split('(', 1)[1].split(')')[0]
+                    array = [float(x) for x in val[0:-1].split(',')]
+                except:
+                    print("Recevied incomplete package")
 
 
 
@@ -655,6 +684,17 @@ class Move_Thread(Process):
         pid = PID(Kp, Kd, Ki, setpoint=config.FORCE.Fref)
         pid.output_limits = (-limit,limit)
 
+        #####NOTE:____for coordinate rotations for new setup___
+        m4 = np.zeros((4, 4))
+        m4_rotate = np.zeros((4, 4))
+        m4_rotate[:3, :3] = [-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1]
+        m4_rotate[:3, 3] = 0, 0, 0
+        m4_rotate[3, 3] = 1
+
+        csys = m3d.Transform()
+        rotVec = np.zeros((1, 3), np.float32)
+
+
         #NOTE: start separate thread to record robot position and images at a higher fps
         robot_record_thread = Robot_record(self.robot,self.q_im_raw,self.threads_stopper)
         robot_record_thread.start()
@@ -858,6 +898,27 @@ class Move_Thread(Process):
                         vel_im = 0.0
                 # print("vel_im: ",vel_im)
 
+                if config.MODE.laboratory_setup == "GH":
+                    #####NOTE: Coordinates adaptation for the new setup in GH lab,
+                    ###___robot is operating now in a new direction,
+                    ###___which is a rotation around Z (up axis) for 180 deg
+                    ###___result: coordinates of new setup expressed in previous coordinate system
+                    ###___previously: x - towards patient, z - up, y - left
+
+                    tr = csys.inverse * m3d.Transform(pos_curr)
+                    R = tr.orient.array
+                    t = tr.pos.array
+                    m4[:3, :3] = R
+                    m4[:3, 3] = t
+                    m4[3, 3] = 1
+
+                    result_m4 = np.dot(m4_rotate.transpose(), m4)
+                    result_m4 = np.dot(result_m4, m4_rotate)
+                    # print(result_m4)
+                    rotVec, _ = cv2.Rodrigues(result_m4[:3, :3], rotVec)
+                    pos_curr = np.append(result_m4[:3, 3], rotVec.T)
+
+
                 # force_curr_full = self.q_Full_Force[:]
                 pd_frame = pd_frame.append({'timestamp': time.time(),"X_im":x_scaled,"Y_im": y_scaled,"Frame_Probability":frame_probability, "X_tcp":T_points_intcp[0,3],"Y_tcp":T_points_intcp[1,3],"Z_tcp":T_points_intcp[2,3],'X': pos_curr[0],'Y': pos_curr[1],'Z': pos_curr[2],'Rx': pos_curr[3],
                                         'Ry': pos_curr[4],'Rz': pos_curr[5], "Fx": force_curr_full[0],"Fy": force_curr_full[1],"Fz": force_curr_full[2],
@@ -876,6 +937,29 @@ class Move_Thread(Process):
                     image = save_video_original(self.out2, inputs)
             else:
                 # force_curr_full = self.q_Full_Force[:]
+
+
+                if config.MODE.laboratory_setup == "GH":
+                    #####Coordinates adaptation for the new setup in GH lab,
+                    ###___robot is operating now in a new direction,
+                    ###___which is a rotation around Z (up axis) for 180 deg
+                    ###___result: coordinates of new setup expressed in previous coordinate system
+                    ###___previously: x - towards patient, z - up, y - left
+
+                    tr = csys.inverse * m3d.Transform(pos_curr)
+                    R = tr.orient.array
+                    t = tr.pos.array
+                    m4[:3, :3] = R
+                    m4[:3, 3] = t
+                    m4[3, 3] = 1
+
+                    result_m4 = np.dot(m4_rotate.transpose(), m4)
+                    result_m4 = np.dot(result_m4, m4_rotate)
+                    # print(result_m4)
+                    rotVec, _ = cv2.Rodrigues(result_m4[:3, :3], rotVec)
+                    pos_curr = np.append(result_m4[:3, 3], rotVec.T)
+
+
                 pd_frame = pd_frame.append(
                     {'timestamp': time.time(), "X_im":0,"Y_im":0,"Frame_Probability":0,"X_tcp": T_points_intcp[0, 3], "Y_tcp": T_points_intcp[1, 3],
                      "Z_tcp": T_points_intcp[2, 3], 'X': pos_curr[0], 'Y': pos_curr[1], 'Z': pos_curr[2],
@@ -1004,18 +1088,19 @@ class Move_Thread(Process):
         first_pose = self.first_record_point[:]
         print(first_pose)
 
-        first_pose[0] += 0.002
+        first_pose[0] += 0.001
         T_b_init = self.robot.get_pose()
         T_point = self.robot.get_pose()
         T_points_intcp = np.linalg.inv(T_b_init.matrix) * T_point.matrix
 
         # robot.movep(self.position[0], acc=a, vel=v, wait=True, relative=False, threshold=None)
-        self.robot.movep(first_pose, acc=config.FORCE.a, vel=config.FORCE.v, wait=True, relative=False, threshold=None)
+        # self.robot.movep(first_pose, acc=config.FORCE.a, vel=config.FORCE.v, wait=True, relative=False, threshold=None)
+        self.robot.z_t += 0.002
         print('robot in 0 position')
         move_first = True
         Fz_1 = self.q_Force.value
         while move_first ==True:
-            # print("GO")
+            print("GO")
             if bool(self.threads_stopper.value) == False:
                 Fz_1_prev = Fz_1
                 Fz_1 = self.q_Force.value
@@ -1079,6 +1164,9 @@ class Robot_record(Thread):
         self.num = 0
         # self.robot = urx.Robot(config.IP_ADRESS, use_rt=True)
 
+
+
+
     def run(self):
         # print(self.robot.rtmon.getTCF())
 
@@ -1089,9 +1177,46 @@ class Robot_record(Thread):
         self.out_high_fps = cv2.VideoWriter(os.path.join(config.IMAGE.SAVE_PATH, 'output_hight_fps.avi'), fourcc, 5.0,
                                     (640, 480))
         time_start = time.time()
+
+
+
+        ####____for coordinates rotation___####
+        m4 = np.zeros((4, 4))
+        csys = m3d.Transform()
+        rotVec = np.zeros((1, 3), np.float32)
+        ###___rotation around Z for 180 deg___####
+        m4_rotate = np.zeros((4, 4))
+        m4_rotate[:3, :3] = [-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1] #rotation around Z
+        m4_rotate[:3, 3] = 0, 0, 0
+        m4_rotate[3, 3] = 1
+
+
+
         while True:
             if bool(self.threads_stopper.value) == False:
                 TCP = self.robot.rtmon.getTCF()
+
+                if config.MODE.laboratory_setup == "GH":
+                    #####Coordinates adaptation for the new setup in GH lab,
+                    ###___robot is operating now in a new direction,
+                    ###___which is a rotation around Z (up axis) for 180 deg
+                    ###___result: coordinates of new setup expressed in previous coordinate system
+                    ###___previously: x - towards patient, z - up, y - left
+
+                    tr = csys.inverse * m3d.Transform(TCP)
+                    R = tr.orient.array
+                    t = tr.pos.array
+                    m4[:3, :3] = R
+                    m4[:3, 3] = t
+                    m4[3, 3] = 1
+
+                    result_m4 = np.dot(m4_rotate.transpose(), m4)
+                    result_m4 = np.dot(result_m4, m4_rotate)
+                    # print(result_m4)
+                    rotVec, _ = cv2.Rodrigues(result_m4[:3, :3], rotVec)
+                    TCP = np.append(result_m4[:3, 3], rotVec.T)
+
+
                 FORCE = self.robot.rtmon.getTCFForce()
                 arr = (np.frombuffer(self.q_im_raw.get_obj())).astype('uint8')
                 # make it two-dimensional
@@ -1117,7 +1242,7 @@ class Robot_record(Thread):
                 time_thread = time.time() - time_start
                 if time_thread != 0:
                     fps_im = self.num / time_thread
-                print("Total time {},fps Robot record thread {}, average time per cycle {}".format(time_thread, fps_im,
+                    print("Total time {},fps Robot record thread {}, average time per cycle {}".format(time_thread, fps_im,
                                                                                                    1 / fps_im))
                 break
 
