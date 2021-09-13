@@ -8,7 +8,7 @@ import pandas
 import os
 from PIL import Image
 
-classes_num = 4
+classes_num = 3
 
 def processing_thread(model, input_list, label_list):
     inputs, labels = utils.list2batch(input_list, label_list)
@@ -26,11 +26,12 @@ def processing_thread(model, input_list, label_list):
     c2_array = np.squeeze(c2.to("cpu").numpy())
 
 
-    if classes_num ==3:
+    if classes_num ==3: #['Thoracic', 'Lumbar', 'Sacrum']
         c3 = prob[0, 2]
         c3_array = np.squeeze(c3.to("cpu").numpy())
 
         return c1_array.tolist(), c2_array.tolist(),c3_array.tolist()
+
 
 
     if classes_num ==4:
@@ -46,6 +47,9 @@ def processing_thread(model, input_list, label_list):
     if labels is not None:
         labels = float(labels.to("cpu").item())
     else:
+        return c1_array.tolist(), c2_array.tolist()
+
+    if classes_num==2:
         return c1_array.tolist(), c2_array.tolist()
 
     return c1_array.tolist(), c2_array.tolist(), labels
@@ -67,9 +71,9 @@ transformation = transforms.Compose([transforms.Resize(256),
                                                  transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                       std=[0.229, 0.224, 0.225])])
 
-test_dir = "D:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Ho YIN\\1"
-model_path = "D:\spine navigation Polyu 2021\DATASET_polyu\models_CNN\\trials\\3_epoch11_0894_class_4_CNN.pt"
-csv_path = "D:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Ho YIN\\1\\HOYIN_CNN_model_3.csv"
+test_dir = "E:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\Long Yin Lam"
+model_path = "E:\spine navigation Polyu 2021\DATASET_polyu\models_CNN\\trials\\5_epoch20_091_class_3_CNN.pt"
+csv_path = "E:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Long Yin Lam\\Long_Yin_model_5_CNN.csv"
 
 
 pd_frame = pandas.DataFrame(columns=['GAP Prob',"Sacrum Prob", "Lumbar Prob","Thoracic Prob"])
@@ -125,9 +129,9 @@ else:
                 p_c3.append(c3)
                 p_c4.append(c4)
 
-            elif classes_num==3:
+            elif classes_num==3: #['Thoracic', 'Lumbar', 'Sacrum']
 
-                c1, c2 = processing_thread(model, tensor_list, label_list=None)
+                c1, c2,c3 = processing_thread(model, tensor_list, label_list=None)
                 p_c1.append(c1)
                 p_c2.append(c2)
                 p_c3.append(c3)

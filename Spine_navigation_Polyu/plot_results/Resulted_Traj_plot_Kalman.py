@@ -75,8 +75,8 @@ def plot_traj(X,X_label,probability,name):
     # plot_path(probability, X, Y,'r')
     # plot_path(probability_label, X_label, Y_label, "b")
 def data_extraction():
-    traj_path = "D:\IROS 2020 TUM\Spine navigation vertebrae tracking\FCN_spine_point_regression\Dataset_Heatmaps_all_subjects\Maria_T\Maria_T.csv"
-    data_path_heatmap = "D:\IROS 2020 TUM\Spine navigation vertebrae tracking\FCN_spine_point_regression\Spinous_positions_sweeps\Maria_T.npz"
+    traj_path = "E:\IROS 2020 TUM\Spine navigation vertebrae tracking\FCN_spine_point_regression\Dataset_Heatmaps_all_subjects\Maria_T\Maria_T.csv"
+    data_path_heatmap = "E:\IROS 2020 TUM\Spine navigation vertebrae tracking\FCN_spine_point_regression\Spinous_positions_sweeps\Maria_T.npz"
     csv_dframe = pd.read_csv(traj_path, delimiter=";")
 
     try:

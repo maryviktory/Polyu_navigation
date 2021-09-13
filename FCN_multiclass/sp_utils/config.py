@@ -101,8 +101,8 @@ config.TEST.Windows = True
 config.TEST.BATCH_SIZE = 1
 # Test Model
 config.TEST.PLOT = False #plots each frame
-config.TEST.VIDEO = True #record video with detected point and label
-config.TEST.PLOT_VIDEO = True #plot each frame of the video
+config.TEST.VIDEO = False #record video with detected point and label
+config.TEST.PLOT_VIDEO = False #plot each frame of the video
 config.TEST.labels_exist = False #True if the sweep is labelled
 config.TRAIN.SWEEP_TRJ_PLOT = False
 config.TEST.SAVE_NPZ_FILE = False
@@ -112,27 +112,27 @@ config.TEST.enable_transform = False
 config.TEST.THRESHOLD = 0.5
 
 config.TEST.data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_multiclass_heatmap "
-config.TEST.Windows_data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset"
+config.TEST.Windows_data_dir = "E:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset"
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Heatmaps_spine"
 # config.TEST.sweep_data_dir = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/DATA_toNas_for CNN_IPCAI/data set patients images/Maria_T/Images" #images_subset
 config.TEST.sweep_data_dir = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_dataset_heatmaps_all"
-config.TEST.Windows_sweep_data_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
+config.TEST.Windows_sweep_data_dir = "E:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Dataset_Heatmaps_all_subjects"
 # config.TEST.data_dir_w_out_labels = "/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Spinous_and_Gap_without_labels"
 config.TEST.data_dir_w_out_labels = "/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/small_test"
-config.TEST.Windows_data_dir_w_out_labels = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
+config.TEST.Windows_data_dir_w_out_labels = "E:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_dataset_heatmaps_all"
 
 config.TEST.save_dir = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_train_dataset_heatmaps/output"
 #"/media/maryviktory/My Passport/IROS 2020 TUM/Spine navigation vertebrae tracking/FCN_spine_point_regression/Spinous_positions_sweeps"
-config.TEST.Windows_save_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\output"
+config.TEST.Windows_save_dir = "E:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\output"
 config.TEST.MODEL_FILE = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/models_FCN/best_model_exp40184.pt"
-config.TEST.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\\20_epoch32_best_mean_3_class.pt"
+config.TEST.Windows_MODEL_FILE = "E:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\\20_epoch32_best_mean_3_class.pt"
 #"D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_multiclass_heatmap\\best_model_3class_no_gap_lr0001_val0.89.pt"
 #"D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\human_best_model_exp40184.pt"
 #'/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/models_FCN/best_model_exp36817.pt'
 #"/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/models/best_model.pt"
 config.TEST.data_npz = "/media/maryviktory/My Passport/spine navigation Polyu 2021/DATASET_polyu/FCN_PWH_train_dataset_heatmaps/output"
-config.TEST.Windows_data_npz="D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\output"
+config.TEST.Windows_data_npz="E:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\output"
 
 config.TEST.PROBE_SIZE = 80 #old wifi probe 48mm, new probe 80
 config.TEST.ORIGINAL_IMAGE_SIZE = 640 #width, IFL - 480, Polyu - 640

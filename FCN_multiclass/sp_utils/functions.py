@@ -136,8 +136,8 @@ def img_denorm(img):
     return (res)
 
 def smooth(signal, N=30):
-    N = 2  # Filter order
-    Wn = 0.05  # Cutoff frequency
+    N = 1  # Filter order
+    Wn = 0.3  # Cutoff frequency
     B, A = butter(N, Wn, output='ba')
     # Second, apply the filter
     filt = filtfilt(B, A, signal)

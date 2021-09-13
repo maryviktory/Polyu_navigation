@@ -7,7 +7,7 @@ import logging
 import argparse
 import FCN_multiclass.sp_utils as utils
 from FCN_multiclass.sp_utils.config import config
-
+import numpy as np
 num_classes = 4
 
 def main(polyaxon):
@@ -33,15 +33,15 @@ def main(polyaxon):
 
     else:
         # test_dir = "/media/maryviktory/My Passport/IPCAI 2020 TUM/CNN/data_all(15patients train, 4 test)/test"
-        test_dir = "D:\spine navigation Polyu 2021\DATASET_polyu\FCN_PWH_train_dataset_heatmaps\data_19subj_multiclass_heatmap\\test"
-        model_path = "/media/maryviktory/My Passport/IROS 2020 TUM/DATASETs/Dataset/PWH_sweeps/models/model_best_resnet_fixed_False_pretrained_True_data_19subj_2_exp_36776.pt"
+        test_dir = "E:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\sweep018\Classes"
+        model_path = "E:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\\4class_19subj_model60.pt"
 
     # print(polyaxon)
     # print("model path: ",model_path)
     print("test dir: ",test_dir)
 
     # model = ModelLoader_types(num_classes, model_path, model_type="classification")
-    model = utils.model_pose_resnet.get_pose_net(config.TEST.Windows_MODEL_FILE, is_train=False)
+    model = utils.model_pose_resnet_old.get_pose_net(config.TEST.Windows_MODEL_FILE, is_train=False)
     print('=> loading model from {}'.format(config.TEST.Windows_MODEL_FILE))
     model.load_state_dict(
         torch.load(config.TEST.Windows_MODEL_FILE, map_location=torch.device('cpu'))['model_state_dict'])
@@ -266,6 +266,9 @@ def main(polyaxon):
                 input_data = Image.open(data).convert(mode="RGB")
                 if input_data is None:
                     return input_data
+
+                # input_data.show()
+
                 tensor_image = transformation(input_data).unsqueeze_(0)
                 image_batch, _ = utils.list2batch([tensor_image], None)
 
@@ -274,13 +277,21 @@ def main(polyaxon):
                 # print(prob)
                 # print('prob',prob)
                 # print('i',i)
-
-                prob_gap = prob[0, 0]
-                prob_lumbar = prob[0, 1]
-                prob_sacrum = prob[0, 2]
-                prob_thoracic = prob[0,3]
-                # print(prob_gap)
                 # print(prob)
+                max_index = np.argmax(prob)
+
+                prob = np.zeros((4))
+
+
+                prob[max_index] = 1
+                # print(prob)
+                prob_gap = prob[0]
+                prob_lumbar = prob[1]
+                prob_sacrum = prob[2]
+                prob_thoracic = prob[3]
+
+                # print(prob_gap)
+                # print(np.around(prob))
 
                 # print('prob vert',prob_vertebra)
                 # if round(prob_vertebra) == i:
@@ -345,6 +356,7 @@ def main(polyaxon):
                     n_thoracic_sacrum += 1
 
                 n_total += 1
+                # print(n_gap_gap)
 
         n_correct = n_gap_gap + n_lumbar_lumbar + n_sacrum_sacrum +n_thoracic_thoracic
 

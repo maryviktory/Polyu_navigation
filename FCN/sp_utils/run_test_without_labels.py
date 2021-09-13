@@ -27,9 +27,35 @@ def run_test_without_labels(model,testdata,patient,device, logger,conf):
     #                       (1280, 480))  # for two images of size 480*640
     model.to(device)
 
-    pd_frame = pd.DataFrame(columns=['Heatmap Prob'])
 
+    if config.TEST.Kalman_postpocess == True:
+        pd_frame = pd.DataFrame(columns=['Frame_Probability', "X_im","x_filt"])
+    else:
+        pd_frame = pd.DataFrame(columns=['Frame_Probability', "X_im"])
+    val_loss = 0
+    acc = utils.AverageMeter()
+    dist_error = utils.AverageMeter()
+    dist_error_calculated = utils.AverageMeter()
+    model.eval()
+    probability = np.zeros(0)
+    probability_label = np.zeros(0)
+    X = np.zeros(0)
+    Y = np.zeros(0)
+    X_label = np.zeros(0)
+    Y_label = np.zeros(0)
 
+    # NOTE: initialization of Kalman filter parameters
+
+    xhat = np.zeros(0)  # a posteri estimate of x
+    P = np.zeros(0)  # a posteri error estimate
+    xhatminus = np.zeros(0)  # a priori estimate of x
+    Pminus = np.zeros(0)  # a priori error estimate
+    K = np.zeros(0)
+    # config.IMAGE.Kalman_R = 500  # estimate of measurement variance, change to see effect
+    xhat = np.append(xhat, 112)
+    P = np.append(P, 0)
+    # config.IMAGE.Kalman_Q = 50  # process variance #1e-5
+    x_filt = np.zeros(0)
 
     with torch.no_grad():
         for data in testdata:
@@ -82,8 +108,32 @@ def run_test_without_labels(model,testdata,patient,device, logger,conf):
             inputs = utils.img_denorm(input_data)
             inputs = tv.transforms.ToPILImage()(inputs)
 
-            pd_frame = pd_frame.append({'Heatmap Prob': frame_probability},
-                                       ignore_index=True)
+            # pd_frame = pd_frame.append({'Frame_Probability': frame_probability,"X_im":pred[0][0][0]},
+            #                            ignore_index=True)
+
+
+            if config.TEST.Kalman_postpocess==True:
+                xhatminus = np.append(xhatminus, xhat[-1])  # +B*0.01
+                Pminus = np.append(Pminus, P[-1] + config.TEST.Kalman_Q)
+
+                if np.amax(p_map) > 0.5:
+                    # num_continuos_absent_points = 0
+                    # NOTE: measurement fuse/update state only occurs when the point is valid (>threshold)
+                    K = np.append(K, Pminus[-1] / (Pminus[-1] + config.TEST.Kalman_R))
+                    # print("K[k]",K[k])
+                    xhat = np.append(xhat, (xhatminus[-1] + K[-1] * (pred[0][0][0] - xhatminus[-1])))
+                    P = np.append(P, (1 - K[-1]) * Pminus[-1])
+                else:
+                    xhat = np.append(xhat, xhatminus[-1])
+                    # num_continuos_absent_points = num_continuos_absent_points + 1
+                x_filt = np.append(x_filt,xhat[-1])
+
+                pd_frame = pd_frame.append({'Frame_Probability': frame_probability, "X_im": pred[0][0][0], "x_filt":
+                xhat[-1]},ignore_index = True)
+            else:
+                pd_frame = pd_frame.append({'Frame_Probability': frame_probability, "X_im": pred[0][0][0]},
+                                           ignore_index=True)
+
 
             if conf.TEST.PLOT:
 
@@ -121,9 +171,17 @@ def run_test_without_labels(model,testdata,patient,device, logger,conf):
             time_inference.update(time.time()- time_start)
         print("time avg", time_inference.avg)
 
+        plt.figure()
 
-        pd_frame.to_csv("D:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Ho YIN\\1\FCN\FCN_only.csv")
+        ax5 = plt.subplot(5, 1, 5)
+        # ax2.set_title("Labels")
+        plt.ylabel("Heatmap prob.", fontsize=8)
+        plt.xlabel('Frames', fontsize=8)
+        ax5.plot(probability)
+        pd_frame.to_csv("E:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Tsz Yui To\output.csv")
 
+        plt.figure()
+        plt.plot(x_filt)
 
         if config.TRAIN.SWEEP_TRJ_PLOT:
             plot_path(probability,X,Y,"b")

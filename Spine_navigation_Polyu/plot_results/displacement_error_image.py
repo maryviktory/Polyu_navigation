@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 from scipy.signal import butter, filtfilt
 import cv2
 import os
@@ -24,7 +25,7 @@ def undrift(signal,N=1):
 
     return undrifted
 
-def plot_path(probability, X, Y,color_ext,labels = None) :
+def plot_path(probability, X,color_ext,labels = None) :
     print("Plotting path")
     fig = plt.figure()
 
@@ -36,7 +37,7 @@ def plot_path(probability, X, Y,color_ext,labels = None) :
     zs = 0
     for i in range(0, len(X)):
         xs = X[i]
-        ys = Y[i]
+        # ys = Y[i]
 
         if probability[i] > 0.5 and X[i] != 0:  # Spinous
             color = color_ext
@@ -61,16 +62,20 @@ def plot_path(probability, X, Y,color_ext,labels = None) :
     # ax.plot(320,0, 320,zs, 'g--', label='line 1', linewidth=2)
     t = np.linspace(0, zs, zs)
 
+
+
     fig4 = plt.figure()
     ax4 = plt.gca()
     ax4.set_aspect((320 / len(probability)) * 5)
     ax4.set_xlim(0, 640)
-    ax4.plot(smooth(path), index,label = "X image coordinate")
+    ax4.set_ylim(0, len(probability))
+    ax4.plot(smooth(path), index,label = "X image")
     x = [320,320]
     y = [0,len(probability)]
     ax4.plot(x,y,'g--',label = "middle line")
     ax4.set_xlabel('X image smoothed')
     ax4.set_ylabel('step')
+
 
     fig3 = plt.figure()
     ax1 = plt.gca()  # you first need to get the axis handle
@@ -83,28 +88,34 @@ def plot_path(probability, X, Y,color_ext,labels = None) :
     # ax1.plot(probability,t_p)
     ax.set_xlabel(' X coordinate')
     ax.set_ylabel(' step')
-    ax.legend()
-    ax1.legend()
-    ax4.legend()
+    ax.legend(fontsize=18,loc='upper center')
+    ax1.legend(fontsize=18,loc='upper center')
+    ax4.legend(fontsize=18,loc='upper center')
     # ax2.legend()
     # plt.show()
     return path, index
 
-folder = "trial high fps\\4_v005_robot_fps_26"
-data_path = "D:\spine navigation Polyu 2021\\robot_trials_output\%s\Move_thread_output0.csv"%folder
-
-
-image = cv2.imread(os.path.join(os.path.split(data_path)[0],"outputP0.bmp"))
+folder = "human experiments\Tsz Yui To\\1"
+data_path = "E:\spine navigation Polyu 2021\\robot_trials_output\%s\Move_thread_output0.csv"%folder
+image_path = os.path.join(os.path.split(data_path)[0],"output_high_fpsP0.bmp")
+image_path =  "E:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Chung Yan Kam\\2\output_hight_fpsP0.bmp"
+image = cv2.imread(image_path)
+print(os.path.join(os.path.split(data_path)[0],"output_high_fpsP0.bmp"))
 image_height, width = image.shape[:2]
 
+font = {'family' : 'normal',
+        # 'weight' : 'bold',
+        'size'   : 16}
 
+matplotlib.rc('font', **font)
 
 frame = pd.read_csv(data_path)
-frame_IFL = pd.read_csv("D:\IROS 2020 TUM\DATASETs\Dataset\Force_integration_DB\complete_df_from Maria\Ardit_F15.csv")
+# frame_IFL = pd.read_csv("D:\IROS 2020 TUM\DATASETs\Dataset\Force_integration_DB\complete_df_from Maria\Ardit_F15.csv")
 # print(frame["X"])
 X_mid = 640/2
 X_im = frame["X_im"]
 Y_im = frame["Y_im"]
+X_im_filt = frame["x_filt"]
 timestamp = frame["timestamp"] - frame["timestamp"][0]
 Y_robot = frame["Y"]
 X_robot = frame ["X"]
@@ -117,17 +128,34 @@ frame_probability = frame["Frame_Probability"]
 X_tcp = frame["X_tcp"]
 Y_tcp = frame["Y_tcp"]
 Z_tcp = frame["Z_tcp"]
+Mx=frame["Mx"]
+Rx=frame["Rx"]
+My=frame["My"]
+Ry=frame["Ry"]
+Mz=frame["Mz"]
+Rz=frame["Rz"]
+
+
+data_path_manual ="E:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Tsz Yui To\output_manual_3.csv"
+frame_manual = pd.read_csv(data_path_manual)
+X_im = frame_manual["X_im"]*640/224
+frame_probability = frame_manual["Frame_Probability"]
+X_im_filt = frame_manual["x_filt"]*640/224
+
+# Z_tcp = X_robot
+#
+# X_tcp = Y_robot
 
 
 # force_X_IFL = np.array(frame_IFL["Force X (N)"].str.replace(',', '.'))
 # force_Y_IFL = frame_IFL["Force Y (N)"].str.replace(',', '.')
 # force_Z_IFL = np.array(frame_IFL["Force Z (N)"])
-force_X_IFL = frame_IFL["x_force"][240:]
-force_Y_IFL = frame_IFL["y_force"][240:]
-force_Z_IFL = frame_IFL["z_force"][400:]
-
-print("mean IFL Z force", np.mean(force_Z_IFL))
-print("std IFL Z force", np.std(force_Z_IFL))
+# force_X_IFL = frame_IFL["x_force"][240:]
+# force_Y_IFL = frame_IFL["y_force"][240:]
+# force_Z_IFL = frame_IFL["z_force"][400:]
+#
+# print("mean IFL Z force", np.mean(force_Z_IFL))
+# print("std IFL Z force", np.std(force_Z_IFL))
 
 # for index, row in frame_IFL.iterrows():
 #     # print(row["class_num"])
@@ -171,15 +199,98 @@ if classes ==True:
         class_3 = np.append(class_3, array[2])
 
 
-path,index = plot_path(frame_probability,X_im,Y_im,"r")
+path,index = plot_path(frame_probability,X_im,"r")
 
-t = np.linspace(0, len(X_robot), len(X_robot))
+path_2,index_2 = plot_path(frame_probability,X_im_filt,"r")
+
+
+delta_X_filt = abs(X_im_filt - X_mid)
+
+print("MEAN delta_X_filt", np.mean(delta_X_filt))
+print("STD delta_X_filt", np.std(delta_X_filt))
+print("Min delta_X_filt", np.min(delta_X_filt))
+print("MAX delta_X_filt", np.max(delta_X_filt))
+
+
+delta_X = abs(X_im - X_mid)
+print("MEAN delta_X", np.mean(delta_X))
+print("STD delta_X", np.std(delta_X))
+print("Min delta_X", np.min(delta_X))
+print("MAX delta_X", np.max(delta_X))
+
+
+
+
+fig = plt.figure()
+ax = plt.gca()  # you first need to get the axis handle
+# ax1.set_aspect((320/zs)*5)
+ax.plot(delta_X, label = "Delta X image")
+ax.set_ylim(0, 640/2)
+ax.set_ylabel('delta Xim')
+ax.set_xlabel('step')
 
 
 plt.figure()
-plt.plot(t,Z_force)
+ax = plt.gca()  # you first need to get the axis handle
+# ax1.set_aspect((320/zs)*5)
+ax.plot(delta_X_filt, label = "Delta X image")
+ax.set_ylim(0, 640/2)
+ax.set_ylabel('delta Xim')
+ax.set_xlabel('step')
 
-plt.title(" Z force")
+
+t = np.linspace(0, len(X_robot), len(X_robot))
+t2 = np.linspace(0, len(Mx), len(Mx))
+
+
+# plt.figure()
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect((np.max(Rx)*image_height)/(640*len(Rx))) #sets the height to width ratio to 1.5. #(image_height/480)*0.05/len(X_robot))
+
+# ax.plot(Rx,t2)
+# ax.set_xlabel("Rx")
+# ax.set_xlim(-2,2)
+
+
+# plt.figure()
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect((np.max(Ry)*image_height*0.5)/(640*len(Rx))) #sets the height to width ratio to 1.5. #(image_height/480)*0.05/len(X_robot))
+
+# ax.plot(-Ry,t2)
+# ax.set_xlabel("Ry")
+# ax.set_xlim(-1.4,-0.9)
+# ax.set_ylim(0,len(Rx))
+
+#
+# plt.figure()
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect((np.max(Rx)*image_height)/(640*len(Rx))) #sets the height to width ratio to 1.5. #(image_height/480)*0.05/len(X_robot))
+
+# ax.plot(Rz,t2)
+# ax.set_xlabel("Rz")
+# ax.set_xlim(-2,2)
+
+# plt.figure()
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect((np.max(Mx)*image_height*4)/(640*len(Mx))) #sets the height to width ratio to 1.5. #(image_height/480)*0.05/len(X_robot))
+
+# ax.plot(smooth(Mx,3),t2)
+# ax.set_xlabel("Mx")
+# ax.set_ylim(0,len(Rx))
+
+# plt.figure()
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect((np.max(Mx)*image_height)/(640*len(Mx))) #sets the height to width ratio to 1.5. #(image_height/480)*0.05/len(X_robot))
+#
+# ax.plot(smooth(My,5),t2)
+# ax.set_xlabel("My")
+
+# plt.figure()
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect((np.max(Mx)*image_height)/(640*len(Mx))) #sets the height to width ratio to 1.5. #(image_height/480)*0.05/len(X_robot))
+#
+# ax.plot(smooth(Mz,5),t2)
+# ax.set_xlabel("Mz")
 
 
 print("Z_force")
@@ -238,32 +349,41 @@ try:
 
 
 
-    plt.figure()
-    plt.plot(t, Z_Force_filt)
-    plt.title(" Z force kalman filt")
-    plt.ylim(min(Z_Force_filt),max(Z_Force_filt))
-
-    velocity = frame["velocity_force"]
-    plt.figure()
-    plt.plot(t,velocity)
-    plt.title("Velocity Force")
-
-    velocity = frame["velocity_force"]
-    plt.figure()
-    plt.plot(t, velocity)
-    plt.title("Velocity Force")
-
-    ax = plt.gca()
-    ax.set_aspect((320 / len(X_filt)) * 5)
-    ax.plot(t, index)
-    ax.set_xlabel('X_im_unfilt')
-    ax.set_xlim(0, 640)
+    # plt.figure()
+    # plt.plot(t, Z_Force_filt)
+    # plt.title(" Z force kalman filt")
+    # plt.ylim(min(Z_Force_filt),max(Z_Force_filt))
+    #
+    # velocity = frame["velocity_force"]
+    # plt.figure()
+    # plt.plot(t,velocity)
+    # plt.title("Velocity Force")
+    #
+    # velocity = frame["velocity_force"]
+    # plt.figure()
+    # plt.plot(t, velocity)
+    # plt.title("Velocity Force")
+    #
+    # ax = plt.gca()
+    # ax.set_aspect((320 / len(X_filt)) * 5)
+    # ax.plot(t, index)
+    # ax.set_xlabel('X_im_unfilt')
+    # ax.set_xlim(0, 640)
 
 except:
     print("no X_filt")
 
 
 delta_X = abs(X_im - X_mid)
+
+print("MEAN Xim", np.mean(X_im))
+print("STD Xim", np.std(X_im))
+
+#
+# delta_X_filt = abs(X_im_filt - X_mid)
+#
+print("MEAN Xim", np.mean(X_im_filt))
+print("STD Xim", np.std(X_im_filt))
 
 # plt.figure()
 # plt.plot(t,frame_probability)
@@ -319,49 +439,59 @@ if classes == True:
 
 
 
-
+plt.locator_params(axis='y', nbins=5)
+plt.locator_params(axis='x', nbins=3)
 plt.figure()
 # plt.plot(timestamp,smooth(delta_X))
 ax = plt.gca() #you first need to get the axis handle
-ax.set_aspect((image_height/480)*0.08/len(X_robot)) #sets the height to width ratio to 1.5.
+ax.set_aspect((np.max(X_tcp)*image_height*5)/(640*len(X_tcp))) #sets the height to width ratio to 1.5. #(image_height/480)*0.05/len(X_robot))
 # plt.plot(smooth(-Y_robot),Z_robot)
 ax.plot(smooth(-X_tcp),t)
 ax.set_xlabel('X_tcp')
 ax.set_ylabel('step')
-ax.set_xlim(-0.08,0.08)
-
-plt.figure()
-# plt.plot(timestamp,smooth(delta_X))
-ax = plt.gca() #you first need to get the axis handle
-ax.set_aspect(3*0.08/len(X_robot)) #sets the height to width ratio to 1.5.
-# plt.plot(smooth(-Y_robot),Z_robot)
-ax.plot(smooth(-X_tcp),t)
-ax.set_xlabel('X_tcp')
-ax.set_ylabel('step')
-ax.set_xlim(-0.08,0.08)
+# ax.set_xlim(-0.01,0.025)
+ax.set_ylim(0,len(X_tcp))
+ax.set_xticks(np.round(np.linspace(-0.04, 0.03, 3), 2))
 
 
+# ax.set_ylim(0,len(X_tcp))
+
+# plt.figure()
+# # plt.plot(timestamp,smooth(delta_X))
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect(3*0.08/len(X_robot)) #sets the height to width ratio to 1.5.
+# # plt.plot(smooth(-Y_robot),Z_robot)
+# ax.plot(smooth(-X_tcp),t)
+# ax.set_xlabel('X_tcp')
+# ax.set_ylabel('step')
+# ax.set_xlim(-0.08,0.08)
 
 
-plt.figure()
-# plt.plot(timestamp,smooth(delta_X))
-ax = plt.gca() #you first need to get the axis handle
-ax.set_aspect((image_height/480)*0.05/len(Z_tcp)) #sets the height to width ratio to 1.5.
-# plt.plot(smooth(-Y_robot),Z_robot)
-ax.plot(smooth(Z_tcp),t)
-ax.set_xlabel('Z_tcp')
-ax.set_ylabel('step')
-ax.set_xlim(0,0.1)
 
-plt.figure()
-# plt.plot(timestamp,smooth(delta_X))
-ax = plt.gca() #you first need to get the axis handle
-ax.set_aspect(3*0.05/len(Z_tcp)) #sets the height to width ratio to 1.5.
-# plt.plot(smooth(-Y_robot),Z_robot)
-ax.plot(smooth(Z_tcp),t)
-ax.set_xlabel('Z_tcp')
-ax.set_ylabel('step')
-ax.set_xlim(0,0.1)
+
+# plt.figure()
+# # plt.plot(timestamp,smooth(delta_X))
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect((np.max(Z_tcp)*image_height*5)/(640*len(Z_tcp))) #sets the height to width ratio to 1.5. #(image_height/640)*0.1/len(Z_tcp)
+# # plt.plot(smooth(-Y_robot),Z_robot)
+# ax.plot(smooth(-Z_tcp),t)
+# ax.set_xlabel('Z_tcp')
+# ax.set_ylabel('step')
+# ax.set_xlim(-0.05,0.05)
+# # ax.set_ylim(0,len(Z_tcp))
+
+
+
+
+# plt.figure()
+# # plt.plot(timestamp,smooth(delta_X))
+# ax = plt.gca() #you first need to get the axis handle
+# ax.set_aspect(5*0.05/len(Z_tcp)) #sets the height to width ratio to 1.5.
+# # plt.plot(smooth(-Y_robot),Z_robot)
+# ax.plot(smooth(Z_tcp),t)
+# ax.set_xlabel('Z_tcp')
+# ax.set_ylabel('step')
+# ax.set_xlim(0.04,0.12)
 
 #
 # plt.figure()
@@ -386,13 +516,5 @@ ax.set_xlim(0,0.1)
 # plt.plot(t,X_force)
 # plt.title(" X force")
 #
-
-
-
-
-
-
-
-
 
 plt.show()

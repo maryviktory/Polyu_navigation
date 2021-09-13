@@ -103,6 +103,10 @@ class AverageMeter(object):
 
 
 def calc_dists(preds, target, normalize):
+
+    '''To put it simply, OKS plays the same role that IoU plays in object detection.
+    It is calculated from the distance between predicted points and ground truth points normalized by the scale of the person. '''
+
     preds = preds.astype(np.float32)
     print(preds)
     target = target.astype(np.float32)
