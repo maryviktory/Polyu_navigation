@@ -17,6 +17,6 @@ Since the input for the network is only the images containing the spinous proces
 
 When all the sweeps are processed the dataset can be split to train, val, test with "sp_utils/create_data_sets_heatmaps.py".
 
-The dataset now is ready for training with "run_train_polyu.py". The training can be performed locally or with use of Polyaxon, otherwise you might choose using docker to load on a server, then use Dockerfile from "Docker" folder and launch the 
+The dataset now is ready for training with "run_train_polyu.py". The training can be performed locally or with use of Polyaxon, otherwise you might choose using docker to load on a server, then use Dockerfile from "Docker" folder and launch the "Docker/FCN_one_class/run_train.py"
 
 
