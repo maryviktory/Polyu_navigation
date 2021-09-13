@@ -1,6 +1,0 @@
-phantom
-phantom_sweep_3
-phantom_sweep_4
-phantom_sweep_6
-phantom_sweep_7
-phantom_sweep_8
