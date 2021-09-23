@@ -23,12 +23,14 @@ When all the sweeps are processed the dataset can be split to train, val, test w
 The dataset now is ready for training with "run_train_polyu.py". The training can be performed locally or with use of Polyaxon, otherwise you might choose using docker to load on a server, then use Dockerfile from "Docker" folder and launch the "Docker/FCN_one_class/run_train.py"
 
 ## "FCN_multiclass"
-This is a two headed network for localization and classification tasks.
+This is a two headed network for localization and classification tasks - ```run_train_multiclass_polyu.py```
+
 ![alt text](https://github.com/maryviktory/Polyu_navigation/blob/master/region_network_two_heads.png?raw=true)
 
-```run_train_multiclass_polyu.py```
+
 The dataset looks as follows:
-```-train #(ultrasound images)
+```
+-train #(ultrasound images)
  -Sacrum
  -Thoracic
  -Lumbar
@@ -49,8 +51,8 @@ $ (if you launch docker-compose.yaml with all parameters specified inside, just 
 $docker-compose run --rm cms
 $ (to use tensorboard - example)
 $cd \workspace
-$ tensorboard --bind_all --logdir=./data_19subj_15train_no_sacrum_lab/runs/```
-
+$ tensorboard --bind_all --logdir=./data_19subj_15train_no_sacrum_lab/runs/
+```
 
 ###Robotic navigation
 The script is based on multiprocessing classes which are controlled by GUI. 
