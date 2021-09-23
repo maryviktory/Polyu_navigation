@@ -22,12 +22,12 @@ The dataset now is ready for training with "run_train_polyu.py". The training ca
 ## "Docker" folder
 Containes Dockerfile to build a Docker image. The docker-compose.yaml is a convenient way to build Docker image with specific parameters and sequncially launch .py scripts inside this image. The docker folder contains scripts for spinous process localization (FCN_one_class) and multitask training for 2 heads (localization + classication, run_train_multiclass_polyu.py) as well as experimental script for 3 heads (localization of spinous process, sacrum and classification) -  run_train_multiclass_polyu_3heads.py
 
-$ (if you launch docker container through terminal)
+```$ (if you launch docker container through terminal)
 $docker run -it --shm-size 8G -p 10000:6006 --name docker_container_fcn_cnn --gpus all -v /storage/maryviktory/FCN_CNN:/workspace maryviktory:fcn_cnn
 $ (if you launch docker-compose.yaml with all parameters specified inside, just run, the container will be removed after the execution and the outputs will be saved in "runs" folder)
 $docker-compose run --rm cms
 $ (to use tensorboard - example)
 $cd \workspace
-$ tensorboard --bind_all --logdir=./data_19subj_15train_no_sacrum_lab/runs/
+$ tensorboard --bind_all --logdir=./data_19subj_15train_no_sacrum_lab/runs/```
 
 
