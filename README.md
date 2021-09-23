@@ -54,12 +54,12 @@ $cd \workspace
 $ tensorboard --bind_all --logdir=./data_19subj_15train_no_sacrum_lab/runs/
 ```
 
-###Robotic navigation
+## Robotic navigation
 The script is based on multiprocessing classes which are controlled by GUI. 
 *class Window* is a GUI, which starts the processes on the button "move" click.
 *Move_thread* is the main thread, which collect the information from *Force_Thread*, which received the data from force sensor at 32fps, and from *FCN_thread*, which yields the spinous process location on the images received from the websocket communication process *get_image_fun*. All received information is used for the robotic velocity calculation and send the command with correspondent move. The tread also includes Kalman filtering of the spinous process locations. 
 
-###US_probe_communication
+## US_probe_communication
 
 Is used to stream raw data from USB Ultrasound probe to python script through WebSocket using multiprocessing. The image is reconstructed with openCV and sent to another process for FCN processing. 
 
