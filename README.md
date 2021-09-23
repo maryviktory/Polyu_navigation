@@ -23,7 +23,10 @@ When all the sweeps are processed the dataset can be split to train, val, test w
 The dataset now is ready for training with "run_train_polyu.py". The training can be performed locally or with use of Polyaxon, otherwise you might choose using docker to load on a server, then use Dockerfile from "Docker" folder and launch the "Docker/FCN_one_class/run_train.py"
 
 ## "FCN_multiclass"
-This is a two headed network for localization and classification tasks. ```run_train_multiclass_polyu.py```
+This is a two headed network for localization and classification tasks.
+![alt text](https://github.com/maryviktory/Polyu_navigation/blob/master/region_network_two_heads.png?raw=true)
+
+```run_train_multiclass_polyu.py```
 The dataset looks as follows:
 ```-train #(ultrasound images)
  -Sacrum
