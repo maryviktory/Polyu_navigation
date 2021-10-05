@@ -1,6 +1,7 @@
 import FCN_multiclass.sp_utils as utils
 from FCN_multiclass.sp_utils.config import config
 import logging
+from FCN_multiclass.sp_utils.functions import smooth
 import os
 import pandas
 import torch
@@ -176,8 +177,8 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
 
             if num_classes == 4:
                 c4 = prob[0, 3]
-                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c2.to("cpu").numpy()))
-                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c2.to("cpu").numpy()))
                 c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c4.to("cpu").numpy()))
                 c_gap_prob = np.append(c_gap_prob,np.squeeze(c1.to("cpu").numpy()))
 
@@ -409,7 +410,7 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
         # ax1.set_title("CNN probabilities")
         plt.xlabel('Frames', fontsize=8)
         plt.ylabel("Sacrum prob.", fontsize=8)
-        ax1.plot(c_sacrum_prob)
+        ax1.plot(smooth(c_sacrum_prob))
 
         ax2 = plt.subplot(6, 1, 2)
         # ax2.set_title("Labels")
@@ -421,13 +422,13 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
         # ax2.set_title("Labels")
         plt.ylabel("Lumbar prob.", fontsize=8)
         plt.xlabel('Frames', fontsize=8)
-        ax3.plot(c_lumbar_prob)
+        ax3.plot(smooth(c_lumbar_prob))
 
         ax4 = plt.subplot(6, 1, 4)
         # ax2.set_title("Labels")
         plt.ylabel("Thoracic prob.", fontsize=8)
         plt.xlabel('Frames', fontsize=8)
-        ax4.plot(c_thoracic_prob)
+        ax4.plot(smooth(c_thoracic_prob))
 
         ax5 = plt.subplot(6, 1, 5)
         # ax2.set_title("Labels")
@@ -439,7 +440,7 @@ def run_val_multiclass(model, valloader,patient_dir, device, criterion,logger,co
         # ax2.set_title("Labels")
         plt.ylabel("Probabilities heatmap", fontsize=8)
         plt.xlabel('Frames', fontsize=8)
-        ax6.plot(probability)
+        ax6.plot(smooth(probability))
 
 
         plt.show()
@@ -587,26 +588,48 @@ def run_test_multitask_without_labels(model,testdata,patient,device, logger,conf
 
             c1 = prob[0, 0]
             c2 = prob[0, 1]
-            c3 = prob[0, 2]
+
+            if num_classes == 2:
+                c3 = 0
+                c4 = 0
+                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c1.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c2.to("cpu").numpy()))
+                c_thoracic_prob = np.append(c_thoracic_prob, c3)
+
+                c_gap_prob = np.append(c_gap_prob, c4)
+
+                pd_frame = pd_frame.append(
+                    {'GAP Prob': c1.to("cpu").numpy(), "Sacrum Prob": c2.to("cpu").numpy(),
+                     "Lumbar Prob": c3,
+                     "Thoracic Prob": c4, "Heatmap Prob": frame_probability}, ignore_index=True)
 
             if num_classes == 3:
+                c3 = prob[0, 2]
                 c4 = 0
                 c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c1.to("cpu").numpy()))
                 c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c2.to("cpu").numpy()))
                 c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c3.to("cpu").numpy()))
 
+                c_gap_prob = np.append(c_gap_prob, c4)
+
+                pd_frame = pd_frame.append(
+                    {'GAP Prob': c1.to("cpu").numpy(), "Sacrum Prob": c2.to("cpu").numpy(),
+                     "Lumbar Prob": c3.to("cpu").numpy(),
+                     "Thoracic Prob": c4, "Heatmap Prob": frame_probability}, ignore_index=True)
+
             # print("c1_array",c1_prob)
 
             if num_classes == 4:
+                c3 = prob[0, 2]
                 c4 = prob[0, 3]
-                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c2.to("cpu").numpy()))
-                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_sacrum_prob = np.append(c_sacrum_prob, np.squeeze(c3.to("cpu").numpy()))
+                c_lumbar_prob = np.append(c_lumbar_prob, np.squeeze(c2.to("cpu").numpy()))
                 c_thoracic_prob = np.append(c_thoracic_prob, np.squeeze(c4.to("cpu").numpy()))
                 c_gap_prob = np.append(c_gap_prob, np.squeeze(c1.to("cpu").numpy()))
 
-            pd_frame = pd_frame.append(
-                {'GAP Prob': c1, "Sacrum Prob": c2, "Lumbar Prob": c3,
-                 "Thoracic Prob": c4, "Heatmap Prob": frame_probability}, ignore_index=True)
+                pd_frame = pd_frame.append(
+                    {'GAP Prob': c1.to("cpu").numpy(), "Sacrum Prob": c2.to("cpu").numpy(), "Lumbar Prob": c3.to("cpu").numpy(),
+                     "Thoracic Prob": c4.to("cpu").numpy(), "Heatmap Prob": frame_probability}, ignore_index=True)
 
             if conf.TEST.PLOT:
 
@@ -638,18 +661,18 @@ def run_test_multitask_without_labels(model,testdata,patient,device, logger,conf
 
                 save_video(out,inputs, pred, frame_probability, patient, config,target=None, labels=None)
 
-            if keyboard.is_pressed('c'):
-                print("time avg", time_inference.avg)
-                out.release()
-                file.close()
-                os._exit(0)
+            # if keyboard.is_pressed('c'):
+            #     print("time avg", time_inference.avg)
+            #     out.release()
+            #     file.close()
+            #     os._exit(0)
 
             time_inference.update(time.time()- time_start)
         print("time avg", time_inference.avg)
 
 
 
-        pd_frame.to_csv(os.path.join("D:\spine navigation Polyu 2021\DATASET_polyu\PWH_sweeps\Subjects dataset\HO_YIN_long_model_20.csv"))
+        pd_frame.to_csv(os.path.join("E:\spine navigation Polyu 2021\\robot_trials_output\human experiments\Ho YIN\\1\FCN\HO_YIN_long_model_20.csv"))
 
         print(len(c_thoracic_prob))
         print(len(probability))
@@ -738,7 +761,7 @@ def main():
 
             model.to(device)
 
-            for patient in ["","sweep9001","sweep18001","sweep20001"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
+            for patient in ["sweep3013","sweep5005","sweep9001","sweep18001","sweep20001"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
                 patient_dir = os.path.join(test_dir,patient)
                 test_dataloader = utils.load_test_data(patient_dir, '', config)
                 val_acc = run_val_multiclass(model, test_dataloader,patient_dir, device, criterion,logger,config,patient)
@@ -747,7 +770,7 @@ def main():
             test_dir = config.TEST.data_dir
             if config.TRAIN.SWEEP_TRJ_PLOT:
                 test_dir = config.TEST.sweep_data_dir
-            for patient in ["HO_YIN_long","sweep018"]: #Empty_frames
+            for patient in ["Ng Tsz Wing","Tsz Yui To","HO_YIN_long","sweep018"]: #Empty_frames
                 test_dir_patient = os.path.join(test_dir,patient)
                 logger.info("patient dir {}".format(test_dir_patient))
                 test_list = [os.path.join(test_dir_patient, "Images",item) for item in os.listdir(os.path.join(test_dir_patient,"Images"))]

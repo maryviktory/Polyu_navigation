@@ -28,7 +28,7 @@ def plot_traj(X,X_label,probability,name):
         x_lab = X_label[i]
         # ys = Y[i]
 
-        if probability[i] > 0.6 and X[i] != 0:  # Spinous
+        if probability[i] > 0.5 and X[i] != 0:  # Spinous
             # print("append")
             color = "r"
             marker = "o"

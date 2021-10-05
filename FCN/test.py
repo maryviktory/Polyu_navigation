@@ -15,7 +15,7 @@ import os
 import keyboard
 import time
 from FCN.sp_utils.run_test_without_labels import run_test_without_labels
-
+import matplotlib
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter(config.TEST.save_dir + 'output_original_.avi', fourcc, 3.0,
 #                               (1280, 480))  # for two images of size 480*640
@@ -80,6 +80,19 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
     Y = np.zeros(0)
     X_label = np.zeros(0)
     Y_label = np.zeros(0)
+
+    # NOTE: initialization of Kalman filter parameters
+
+    xhat = np.zeros(0)  # a posteri estimate of x
+    P = np.zeros(0)  # a posteri error estimate
+    xhatminus = np.zeros(0)  # a priori estimate of x
+    Pminus = np.zeros(0)  # a priori error estimate
+    K = np.zeros(0)
+    # config.IMAGE.Kalman_R = 500  # estimate of measurement variance, change to see effect
+    xhat = np.append(xhat, 112)
+    P = np.append(P, 0)
+    # config.IMAGE.Kalman_Q = 50  # process variance #1e-5
+    x_filt = np.zeros(0)
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     '''if the size of the frames doesn't match with the size in "out", the video will not play'''
@@ -152,6 +165,23 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
             probability = np.append(probability, np.amax(p_map))
             X = np.append(X, pred[0][0][0])
             Y = np.append(Y, config.TEST.input_im_size - pred[0][0][1])
+
+            if config.TEST.Kalman_postpocess==True:
+                xhatminus = np.append(xhatminus, xhat[-1])  # +B*0.01
+                Pminus = np.append(Pminus, P[-1] + config.TEST.Kalman_Q)
+
+                if np.amax(p_map) > 0.5:
+                    # num_continuos_absent_points = 0
+                    # NOTE: measurement fuse/update state only occurs when the point is valid (>threshold)
+                    K = np.append(K, Pminus[-1] / (Pminus[-1] + config.TEST.Kalman_R))
+                    # print("K[k]",K[k])
+                    xhat = np.append(xhat, (xhatminus[-1] + K[-1] * (pred[0][0][0] - xhatminus[-1])))
+                    P = np.append(P, (1 - K[-1]) * Pminus[-1])
+                else:
+                    xhat = np.append(xhat, xhatminus[-1])
+                    # num_continuos_absent_points = num_continuos_absent_points + 1
+                x_filt = np.append(x_filt,xhat[-1])
+
 
             label_np = labels.detach().cpu().numpy()
             if np.sum(label_np) == 0:
@@ -275,7 +305,7 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
                 image_predicted = cv2.putText(image_predicted, 'probability %s' % (round(probab_frame,2)), org, font,
                                               fontScale, color, thickness, cv2.LINE_AA)
                 #Only if the probability is larger than 0.7 it is counted as detected
-                if probab_frame>0.7:
+                if probab_frame>0.5:
                     x, y = pred[0][0][0], pred[0][0][1]
                     # x = int((pred[0][0][0]) * 640 / 244)
                     # y = int((pred[0][0][1]) * 480 / 244)
@@ -346,11 +376,30 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
         if config.TEST.PLOT_SMOOTH_LABEL_TRAJECTORY == True:
             logger.info("Distance mean calculated between line and predicted point {} pixels, {} mm".format(dist_error_calculated.avg,dist_error_calculated.avg/8)) #8 - 640 pix/80mm
 
+
+
+
+
+
+
+
         if config.TRAIN.SWEEP_TRJ_PLOT:
 
+            font = {'family': 'normal',
+                    # 'weight' : 'bold',
+                    'size': 16}
+
+            matplotlib.rc('font', **font)
+
+            if config.TEST.Kalman_postpocess == True:
+                X = x_filt
             fig = plt.figure()
             ax = fig.add_subplot(111)
+            ax4 = plt.gca()
+            ax4.set_aspect((112 / len(probability)) * 5)
             ax.set(xlim=(0, 224), ylim=(0, len(probability)))
+            # ax.set_xticks(np.round(np.linspace(0, 224, 4), 2))
+
 
             path = np.zeros(0)
             index = np.zeros(0)
@@ -361,7 +410,7 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
                 xs = X[i]
                 ys = Y[i]
 
-                if probability[i] > 0.7 and X[i] != 0:  # Spinous
+                if probability[i] > 0.5 and X[i] != 0:  # Spinous
                     color = "r"
                     marker = "o"
                     path = np.append(path, xs)
@@ -373,7 +422,7 @@ def run_val(model, valloader, device, criterion,logger,config,patient):
                 plt.title('red - spinous detected, x - Gap', y=1.02, fontsize=10)
                 ax.scatter(xs, zs, c=color, marker=marker)
 
-                if probability_label[i] > 0.7 and X_label[i] != 0:  # Spinous
+                if probability_label[i] > 0.5 and X_label[i] != 0:  # Spinous
                     color = "b"
                     marker = "o"
                     path_target = np.append(path_target, X_label[i])
@@ -457,17 +506,18 @@ def main():
 
             model.to(device)
 
-            for patient in ["sweep018_super_short"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
+            for patient in ["sweep018"]: #test, sweep018_super_short,"sweep20001",sweep18001,sweep018_short,"sweep3013","sweep5005", "sweep9001", Ardit, Farid_F15, Magda, Magda_F10, Maria_T, Maria_V, Javi_F10
                 patient_dir = os.path.join(test_dir,patient)
                 test_dataloader = utils.load_test_data(patient_dir, '', config)
                 val_acc = run_val(model, test_dataloader, device, criterion,logger,config,patient)
 
         else:
+            print("no labels")
             test_dir = config.TEST.data_dir_w_out_labels
             test_dir = config.TEST.Windows_data_dir
             if config.TRAIN.SWEEP_TRJ_PLOT:
                 test_dir = config.TEST.sweep_data_dir
-            for patient in ["HO_YIN_long"]: #Empty_frames
+            for patient in ["Tsz_Tui_To",""]: #Empty_frames
                 test_dir_patient = os.path.join(test_dir,patient,"Images")
                 test_list = [os.path.join(test_dir_patient, item) for item in os.listdir(test_dir_patient)]
 
