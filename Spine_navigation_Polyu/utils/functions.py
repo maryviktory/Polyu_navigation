@@ -370,7 +370,7 @@ def get_max_preds(batch_heatmaps):
 
 
 
-def run_FCN_streamed_image(data,model,device,probability,X,Y,logger,config):
+def run_FCN_streamed_image(data,model,device,probability,X,Y,logger,config,**kwargs):
 
     # logger.info("size of the input image {}".format(input_data.size))
 
@@ -392,8 +392,13 @@ def run_FCN_streamed_image(data,model,device,probability,X,Y,logger,config):
     start_time = time.time()
     if config.TRAIN.three_heads == True:
         logps,logps_2,classification = model.forward(inputs)
-    elif config.TRAIN.two_heads == True:
+    elif config.TRAIN.two_heads == True and config.TRAIN.two_heads_for_class_only == False:
         logps, classification = model.forward(inputs)
+
+    elif config.TRAIN.two_heads == True and config.TRAIN.two_heads_for_class_only == True:
+        _, classification = model.forward(inputs)
+        model_FCN = kwargs['model2']
+        logps = model_FCN.forward(inputs)
     else:
         logps = model.forward(inputs)
     # print("time:", time.time()-start_time)
@@ -438,3 +443,5 @@ def run_FCN_streamed_image(data,model,device,probability,X,Y,logger,config):
         return inputs, pred, probability, X, Y, frame_probability, classification
     else:
         return inputs,pred,probability, X, Y, frame_probability
+
+

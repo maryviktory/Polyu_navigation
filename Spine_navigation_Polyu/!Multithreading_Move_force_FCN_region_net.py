@@ -597,12 +597,8 @@ class Move_Thread(Process):
         logger_robot.info('config.IMAGE.Kalman_Q= {}'.format(config.IMAGE.Kalman_Q))
         logger_robot.info('config.FORCE.Fref_first_move {}'.format(config.FORCE.Fref_first_move))
         logger_robot.info('config.FORCE.Fref {}'.format(config.FORCE.Fref))
-        logger_robot.info('config.FORCE.Fref_thoracic{}'.format(config.FORCE.Fref_thoracic ))
 
         logger_robot.info('config.FORCE.K_torque {}'.format(config.FORCE.K_torque))
-        logger_robot.info('config.FORCE.K_torque thoracic {}'.format(config.FORCE.K_torque_thoracic))
-        logger_robot.info('config.FORCE.K_torque sides {}'.format(config.FORCE.K_torque_sides))
-
         logger_robot.info("config.MODE.PID_control {}".format(config.MODE.PID_control))
         logger_robot.info('config.FORCE.Kf {}'.format(config.FORCE.Kf))
         logger_robot.info('config.FORCE.Kd {}'.format(config.FORCE.Kd))
@@ -672,10 +668,15 @@ class Move_Thread(Process):
         F_curr_array = np.array(0)
 
         force_curr = self.q_Force.value
+        class_thoracic = np.zeros(0)
+        class_lumbar = np.zeros(0)
+        resulted_array = np.zeros(0)
+
+
 
         # if config.MODE.FCN == True:
         pd_frame = pd.DataFrame(columns=["timestamp","X_im","Y_im","Frame_Probability","X_tcp","Y_tcp","Z_tcp","X", "Y", "Z","Rx","Ry","Rz","Fx","Fy","Fz","Mx","My","Mz","x_filt","velocity_im","velocity_force","force_curr_filt",
-                                         "stiffness", "class_num","Frame_Probability_sacrum","X_sac","Y_sac"])
+                                         "stiffness", "class_num","Frame_Probability_sacrum","X_sac","Y_sac","torque"])
         # else:
         #     pd_frame = pd.DataFrame(
         #         columns=["timestamp", "X_tcp", "Y_tcp", "Z_tcp", "X", "Y", "Z", "Rx", "Ry", "Rz", "Fx", "Fy", "Fz",
@@ -721,10 +722,10 @@ class Move_Thread(Process):
         while bool(self.threads_stopper.value) == False:
 
 
-            if self.num ==2000:
-                config.FORCE.K_torque = config.FORCE.K_torque_thoracic
-                config.FORCE.Fref = config.FORCE.Fref_thoracic
-                print("REGION CHANGE")
+            # if self.num ==1800:
+            #     config.FORCE.K_torque = config.FORCE.K_torque_thoracic
+            #     config.FORCE.Fref = config.FORCE.Fref_thoracic
+            #     print("change")
             # N_transition = 30
             #
             # if self.num >= 400 and self.num < 400 + N_transition:
@@ -863,11 +864,36 @@ class Move_Thread(Process):
                 pred_sacrum = self.q_im_pred_sacrum[:]
                 pred_sacrum = [[pred_sacrum]]
                 frame_probability_sacrum = self.q_frame_probability_sacrum.value
-                class_num = self.q_frame_class[:]
+                class_num = self.q_frame_class[:] #Thoracic, Lumbar, Sacrum
                 # print("class_num",class_num) #Thoracic, Lumbar, Sacrum
                 # print("frame_probability_sacrum",frame_probability_sacrum)
                 # print(pred)
                 # print(inputs)
+
+
+
+                class_thoracic = np.append(class_thoracic,class_num[0])
+                class_lumbar = np.append(class_lumbar, class_num[1])
+
+                mult = class_lumbar-class_thoracic
+                N = 21
+                n=100
+                region_filtered = np.convolve(mult, np.ones(N) / N, mode='valid')
+
+                if self.num > n and self.num > 200 and np.mean(region_filtered[-n:]) < 0.3:
+
+                    config.FORCE.K_torque = config.FORCE.K_torque_thoracic
+                    config.FORCE.Fref = config.FORCE.Fref_thoracic
+                    # print("REGION CHANGED")
+                # else:
+                #     config.FORCE.K_torque = config.FORCE.K_torque_lumbar
+                #     config.FORCE.Fref = config.FORCE.Fref_lumbar
+                resulted_array = np.append(resulted_array, config.FORCE.K_torque)
+
+
+
+
+
                 pred = [[pred]] #size of 224*224
                 # print(pred)
                 X = pred[0][0][0]
@@ -953,7 +979,7 @@ class Move_Thread(Process):
                                         'Ry': pos_curr[4],'Rz': pos_curr[5], "Fx": force_curr_full[0],"Fy": force_curr_full[1],"Fz": force_curr_full[2],
                                         "Mx": force_curr_full[3],"My": force_curr_full[4],"Mz": force_curr_full[5],"x_filt":x_filt,"velocity_im":vel_im,"velocity_force":vel_force,
                                         "force_curr_filt":force_curr,"stiffness":stiffness,
-                                        "class_num":class_num, "Frame_Probability_sacrum":frame_probability_sacrum, "X_sac":pred_sacrum[0][0][0], "Y_sac":pred_sacrum[0][0][1]}, ignore_index=True)
+                                        "class_num":class_num, "Frame_Probability_sacrum":frame_probability_sacrum, "X_sac":pred_sacrum[0][0][0], "Y_sac":pred_sacrum[0][0][1], "torque":config.FORCE.K_torque}, ignore_index=True)
 
 
                 if config.IMAGE.VIDEO == True:
@@ -998,7 +1024,7 @@ class Move_Thread(Process):
                      "Mx": force_curr_full[3], "My": force_curr_full[4], "Mz": force_curr_full[5],"x_filt":0,"velocity_im":0,
                      "velocity_force":vel_force, "force_curr_filt":force_curr,"stiffness":stiffness,
                      "class_num": [0,0,0], "Frame_Probability_sacrum": 0,
-                     "X_sac": 0, "Y_sac": 0}, ignore_index=True)
+                     "X_sac": 0, "Y_sac": 0,"torque":config.FORCE.K_torque}, ignore_index=True)
 
                 if config.IMAGE.VIDEO == True:
                     arr = (np.frombuffer(self.q_im_raw.get_obj())).astype('uint8')

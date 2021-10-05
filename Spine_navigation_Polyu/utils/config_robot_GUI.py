@@ -14,7 +14,7 @@ config.Mode_Develop = True #Allows to launch code without robot
 config.IP_ADRESS = "192.168.0.100" # "158.132.172.194"
 config.FOV = 0.045 #Field of view of the robot
 config.alpha = 0.1
-config.robot_TCP = (0, 0, 0.38, 0, 0, 0) #306 for smaller holder#(0, 0, 0.315, 0, 0, 0)
+config.robot_TCP = (0, 0, 0.315 , 0, 0, 0) #306 for smaller holder#(0, 0, 0.315, 0, 0, 0)
 config.robot_payload = 1 #KG #1kg - for full mount
 
 config.w = 400
@@ -51,6 +51,7 @@ config.FORCE.v = 0.01 #move first point
 config.FORCE.a = 0.01 #move first point
 config.FORCE.thr = 0.004
 config.FORCE.K_torque = 0.07 #0.07 for 10 HZ
+config.FORCE.K_torque_sides = 0.01
 
 config.FORCE.Kalman_force = False
 config.FORCE.Kalman_R = 0.001
@@ -76,6 +77,8 @@ config.IMAGE.JSON_WS = {
 
 config.IMAGE.LOCAL_HOST = "ws://localhost:4100"
 config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\24subj_best_model_human_FCN_spinous.pt" #, human_best_model_exp40184.pt
+config.IMAGE.Windows_MODEL_FILE_best_FCN = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\24subj_best_model_human_FCN_spinous.pt" #, human_best_model_exp40184.pt
+
 config.IMAGE.Windows_MODEL_FILE_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\\best_model_exp49560_phantom_6scans.pt"
 config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM= "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_3class_3heads_model75.pt"
 config.IMAGE.PROBE_SIZE = 0.08 #old wifi probe 48mm, new probe 80 mm = 0.08m
@@ -152,7 +155,7 @@ config.MODE.median_filter = False
 config.Median_kernel_size = 31
 
 
-config.MODE.subject_mode = "phantom" #"human" #phantom
+config.MODE.subject_mode = "human" #"human" #phantom
 config.MODE.laboratory_setup = "GH" #S107
 
 
@@ -161,12 +164,18 @@ if config.MODE.subject_mode == "human":
     config.FORCE.Kf = 0.0003  # 0.002  Kunal - 0.0004
     config.FORCE.Kd = 0.00003
     config.FORCE.Ki = 0.00003
-    config.FORCE.K_torque = 0.1  # 0.07
+    config.FORCE.K_torque = 0.0 #for lumbar  # 0.07, human better 0.04, because of lordosis
+    # config.FORCE.K_torque_lumbar = 0.01
+    config.FORCE.K_torque_thoracic = 0.0
+    config.FORCE.K_torque_sides = 0.00
+
     config.FORCE.velocity_output_limits = 0.002
 
-    config.FORCE.Fref_first_move = 15  # Force [N]
+    config.FORCE.Fref_first_move = 8  # Force [N]
     config.FORCE.Fref = 15 #Force [N]
-    config.VELOCITY_up = 0.004 #0.003
+    # config.FORCE.Fref_lumbar = 7
+    config.FORCE.Fref_thoracic = 15
+    config.VELOCITY_up = 0.004 #0.004
 
     config.MODE.PID_control = True
     config.FORCE.Kp_on_measurement = True
@@ -178,16 +187,23 @@ if config.MODE.subject_mode == "human":
     config.FORCE.moving_average_filter = True
     config.FORCE.moving_average_filter_N = 15
 
+####IMAGE control
+    config.IMAGE.K_im_out = 0.5
+    config.IMAGE.K_im_near = 0.2
+    config.IMAGE.Kalman_R = 500  # estimate of measurement variance, change to see effect
+    config.IMAGE.Kalman_Q = 1  # process variance #1e-5 #50 #0.5
+
 else:
     config.FORCE.Kf = 0.0003  # 0.002  Kunal - 0.0004
     config.FORCE.Kd = 0.0000
     config.FORCE.Ki = 0.0000
-    config.FORCE.K_torque = 0.07  # 0.07
+    config.FORCE.K_torque = 0.01  # 0.07
+    config.FORCE.K_torque_sides = 0.01
     config.FORCE.velocity_output_limits = 0.002
 
-    config.FORCE.Fref_first_move = 10  # Force [N]
-    config.FORCE.Fref = 10  # Force [N]
-    config.VELOCITY_up = 0.004  # 0.003
+    config.FORCE.Fref_first_move = 3  # Force [N]
+    config.FORCE.Fref = 7  # Force [N]
+    config.VELOCITY_up = 0.003  # 0.003
 
     config.FORCE.Kp_on_measurement = True
     config.MODE.PID_control = True
@@ -204,21 +220,23 @@ config.TRAIN = edict()
 config.TRAIN.three_heads = False
 config.TRAIN.two_heads = False
 
+config.TRAIN.two_heads_for_class_only = False
+
 if config.TRAIN.two_heads == True and config.MODEL.num_classes == 3:
     config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\\20_epoch32_best_mean_3_class.pt"
     config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = ""
 
-if  config.TRAIN.two_heads == True and config.MODEL.num_classes ==4:
-    config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\8_best_acc_class_4_class.pt"
-    config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = ""
+# if  config.TRAIN.two_heads == True and config.MODEL.num_classes ==4:
+#     config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\8_best_acc_class_4_class.pt"
+#     config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = ""
 
-if config.TRAIN.three_heads == True and config.MODEL.num_classes == 3:
-    config.IMAGE.Windows_MODEL_FILE = ""
-    config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_3class_3heads_model75.pt"
-
-if config.TRAIN.three_heads == True and config.MODEL.num_classes == 4:
-    config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\\21_epoch30_4class_3heads_human.pt"
-    config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_4class_3heads_model5.pt"
+# if config.TRAIN.three_heads == True and config.MODEL.num_classes == 3:
+#     config.IMAGE.Windows_MODEL_FILE = ""
+#     config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_3class_3heads_model75.pt"
+#
+# if config.TRAIN.three_heads == True and config.MODEL.num_classes == 4:
+#     config.IMAGE.Windows_MODEL_FILE = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\\21_epoch30_4class_3heads_human.pt"
+#     config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM = "D:\spine navigation Polyu 2021\DATASET_polyu\models_FCN\multitask_models\phantom_4class_3heads_model5.pt"
 
 
 

@@ -21,7 +21,7 @@ import torch.multiprocessing as mp
 from torch.multiprocessing import Process
 import keyboard
 from PIL import Image
-
+import ctypes
 
 
 
@@ -67,7 +67,7 @@ class FCN_Thread(Process):
             if config.MODE.subject_mode == "phantom":
                 config.IMAGE.Windows_MODEL_FILE = config.IMAGE.Windows_MODEL_FILE_MULTITASK_PHANTOM
 
-            self.model = utils.model_pose_resnet_3heads.get_pose_net(config,config.IMAGE.Windows_MODEL_FILE, is_train=False)
+            self.model = utils.model_pose_resnet_two_heads.get_pose_net(config,config.IMAGE.Windows_MODEL_FILE, is_train=False)
             logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
             print('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
             self.model.load_state_dict(
@@ -80,6 +80,21 @@ class FCN_Thread(Process):
             print("Model on cuda: ", next(self.model.parameters()).is_cuda)
             # logger.info("Setting model to eval. It is important for testing")
 
+            if config.TRAIN.two_heads_for_class_only == True:
+                config.IMAGE.Windows_MODEL_FILE=config.IMAGE.Windows_MODEL_FILE_best_FCN
+                self.model_FCN = utils.model_pose_resnet.get_pose_net(config.IMAGE.Windows_MODEL_FILE, is_train=False)
+                logger.info('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
+                print('=> loading model from {}'.format(config.IMAGE.Windows_MODEL_FILE))
+                self.model_FCN.load_state_dict(
+                    torch.load(config.IMAGE.Windows_MODEL_FILE, map_location=self.device)[
+                        'model_state_dict'])  # map_location=torch.device('cpu')
+
+                self.model_FCN.eval()  # Super important for testing! Otherwise the result would be random
+
+                self.model_FCN.to(self.device)
+                print("Model on cuda: ", next(self.model_FCN.parameters()).is_cuda)
+
+                return self.device, self.model, self.model_FCN
         else:
             if config.MODE.subject_mode == "phantom":
                 config.IMAGE.Windows_MODEL_FILE = config.IMAGE.Windows_MODEL_FILE_PHANTOM
@@ -107,7 +122,10 @@ class FCN_Thread(Process):
 
     def run(self):
 
-        self.device, self.model = self.initialization()
+        if config.TRAIN.two_heads_for_class_only == True:
+            self.device, self.model, self.model_FCN = self.initialization()
+        else:
+            self.device, self.model = self.initialization()
 
           # to stop all threads at the same time
         probability = np.zeros(0)
@@ -138,11 +156,17 @@ class FCN_Thread(Process):
                                                                                                self.model, self.device,
                                                                                                probability, X, Y,
                                                                          logger, config)
-                elif config.TRAIN.two_heads == True:
+                elif config.TRAIN.two_heads == True and config.TRAIN.two_heads_for_class_only == False:
                     inputs, pred, pobability, X, Y, frame_probability, classification = run_FCN_streamed_image(
                         image_from_probe,
                         self.model, self.device,
                         probability, X, Y,logger, config)
+
+                elif config.TRAIN.two_heads == True and config.TRAIN.two_heads_for_class_only == True:
+                    inputs, pred, pobability, X, Y, frame_probability, classification = run_FCN_streamed_image(
+                        image_from_probe,
+                        self.model, self.device,
+                        probability, X, Y, logger, config,model2=self.model_FCN)
 
                 else:
                     inputs,pred,pobability,X,Y,frame_probability = run_FCN_streamed_image(image_from_probe,self.model,self.device,probability,X,Y,logger,config)
@@ -303,6 +327,9 @@ def get_image_fun(q_im_raw,threads_stopper):
     num_text = 0
     start_time = time.time()
     num = 0
+
+
+
     while True:  # self.num in range (100)
         # if self.stop_thread.threads_stopper ==False:
         # for test_im in test_list:
@@ -360,7 +387,7 @@ if __name__ == '__main__':
 
     # mp.set_start_method("spawn")
     q = mp.Queue()
-    q_im = mp.Queue()
+    q_im = mp.Array(ctypes.c_double, 640*480)
     thread_stopper_bool = mp.Value('i', 0) #False
     # device, model = initialization()
     stop_thread = Stop_Thread(thread_stopper_bool, q)
@@ -368,7 +395,7 @@ if __name__ == '__main__':
     # q_im = 0
     # device, model = initialization()
 
-    FCN = FCN_Thread(q_im,thread_stopper_bool)
+    # FCN = FCN_Thread(q_im,thread_stopper_bool)
     shadow = Shadow_Image(thread_stopper_bool,q_im)
 
 
@@ -376,9 +403,9 @@ if __name__ == '__main__':
     # shadow.daemon = True
 
     # get_image.daemon = True
-    FCN.daemon = True
+    # FCN.daemon = True
     stop_thread.daemon = True
-    FCN.start()
+    # FCN.start()
     stop_thread.start()
 
     # shadow.start()
@@ -399,7 +426,7 @@ if __name__ == '__main__':
 
                 thread_stopper_bool.value = 1
                 time.sleep(0.05)
-                FCN.terminate()
+                # FCN.terminate()
                 stop_thread.terminate()
 
                 p.terminate()
@@ -408,7 +435,7 @@ if __name__ == '__main__':
                 time.sleep(1)
                 if not stop_thread.is_alive():
                     print("[MAIN]: WORKER is a goner")
-                    FCN.join(timeout=0.1)
+                    # FCN.join(timeout=0.1)
                     stop_thread.join(timeout=0.1)
 
                     print("[MAIN]: Joined WORKER successfully!")
